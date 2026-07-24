@@ -2523,8 +2523,15 @@ function bkCollectData(){
     request_template: document.getElementById('bk_request_tmpl').value.trim(),
     note: document.getElementById('bk_note').value.trim(),
     solution_template: document.getElementById('bk_solution_tmpl').value.trim(),
-    old_sn: document.getElementById('bk_old_sn') ? document.getElementById('bk_old_sn').value.trim() : '',
-    new_sn: document.getElementById('bk_new_sn') ? document.getElementById('bk_new_sn').value.trim() : '',
+    old_sn: '',
+    new_sn: '',
+    snByDqn: (function(){
+      var out = {};
+      Object.keys(bkSnByDqn||{}).forEach(function(dqn){
+        out[dqn] = { oldSn: (bkSnByDqn[dqn].oldSn||[]).join(' | '), newSn: (bkSnByDqn[dqn].newSn||[]).join(' | ') };
+      });
+      return out;
+    })(),
     technician_1: document.getElementById('bk_tech1').value,
     technician_2: document.getElementById('bk_tech2').value,
     team_leader: document.getElementById('bk_leader').value
@@ -2541,6 +2548,7 @@ function bkValidate(data){
   if(!data.solution_template) return 'Həll (şablon) mətni boşdur';
   if(!data.team_leader) return 'Qrup rəhbəri seçilməyib';
   if(data.service_location && data.service_location.toLowerCase().indexOf('digər') !== -1 && !data.service_location_note) return 'Ünvan qeydi yazın';
+  if(typeof bkAnySnConflict==='function' && bkAnySnConflict()) return 'Bir və ya bir neçə DQN-də eyni SN həm Köhnə, həm Yeni xanada var — düzəldin';
   return null;
 }
 
@@ -2662,7 +2670,7 @@ function resetBulkForm(){
     var el = document.getElementById(id);
     if(el) el.value = '';
   });
-  ['bk_location_note','bk_request_tmpl','bk_note','bk_solution_tmpl','bk_start_time','bk_end_time','bk_old_sn','bk_new_sn'].forEach(function(id){
+  ['bk_location_note','bk_request_tmpl','bk_note','bk_solution_tmpl','bk_start_time','bk_end_time'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.value = '';
   });
@@ -2742,6 +2750,7 @@ function bkSelectDqn(match){
   bkRenderDqnChips();
   bkUpdateDqnNotice();
   bkUpdateImportCount();
+  bkRenderSnBlocks();
 }
 
 function bkRemoveDqn(dqn){
@@ -2749,6 +2758,7 @@ function bkRemoveDqn(dqn){
   bkRenderDqnChips();
   bkUpdateDqnNotice();
   bkUpdateImportCount();
+  bkRenderSnBlocks();
 }
 
 function bkRenderDqnChips(){
@@ -2858,19 +2868,174 @@ function bkOnCarrierChange(){
   bkUpdateImportCount();
 }
 
+// ── Toplu İdxal: hər seçilmiş DQN üçün ayrıca Köhnə/Yeni SN blokları ──
+// (Bus Service-dəki Validator SN + SAM Card SN çip məntiqinin eyni məntiqlə
+// təkrarıdır — amma ayrı funksiyalarda saxlanılıb ki, işlək Bus Service
+// kodu toxunulmasın.)
+var bkSnByDqn = {}; // { "77-JA-568": {oldSn:[], newSn:[]} }
+
+function bkDqnSafeId(dqn){ return String(dqn||'').replace(/[^a-zA-Z0-9]/g,'_'); }
+
 function bkUpdateSnFieldsState(){
-  var oldSn = document.getElementById('bk_old_sn');
-  var newSn = document.getElementById('bk_new_sn');
-  var active = (typeof bkAllMode !== 'undefined') && !bkAllMode;
-  [oldSn, newSn].forEach(function(el){
-    if(!el) return;
-    el.disabled = !active;
-    if(!active) el.value = '';
-    el.style.opacity = active ? '1' : '.5';
-    el.style.cursor = active ? 'text' : 'not-allowed';
-    el.placeholder = active ? 'SN daxil edin (istəyə bağlı)' : 'Yalnız DQN seçimi aktiv olduqda';
-  });
+  bkRenderSnBlocks();
 }
+
+function bkRenderSnBlocks(){
+  var container = document.getElementById('bkSnPerDqnContainer');
+  var emptyState = document.getElementById('bkSnEmptyState');
+  if(!container || !emptyState) return;
+
+  var active = (typeof bkAllMode !== 'undefined') && !bkAllMode && typeof bkSelectedDqns !== 'undefined' && bkSelectedDqns.length > 0;
+  if(!active){
+    emptyState.style.display = 'block';
+    container.innerHTML = '';
+    bkSnByDqn = {};
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  // Artıq seçili olmayan DQN-lərin datasını təmizlə
+  var validDqns = bkSelectedDqns.map(function(x){ return x.dqn; });
+  Object.keys(bkSnByDqn).forEach(function(d){ if(validDqns.indexOf(d)===-1) delete bkSnByDqn[d]; });
+
+  container.innerHTML = bkSelectedDqns.map(function(x){
+    var dqn = x.dqn;
+    var safeId = bkDqnSafeId(dqn);
+    if(!bkSnByDqn[dqn]) bkSnByDqn[dqn] = { oldSn: [], newSn: [] };
+    return '<div class="bk-dqn-sn-block">'
+      + '<div class="bk-dqn-sn-block-title">DQN: '+escapeHtml(dqn)+'</div>'
+      + '<div class="bk-dqn-sn-row">'
+      + '<div class="bk-field" style="position:relative;margin-bottom:0;">'
+      +   '<label class="bk-label" style="font-size:12px;">Köhnə SN</label>'
+      +   '<input type="text" class="bk-input" placeholder="SN axtar və seç..." autocomplete="off" '
+      +   'oninput="bkSnInputHandler(this,\''+safeId+'\',\'old\')" '
+      +   'onfocus="bkSnInputHandler(this,\''+safeId+'\',\'old\')" '
+      +   'onkeydown="bkSnInputKeydown(event,this,\''+safeId+'\',\'old\')">'
+      +   '<div class="bs-registry-dd" id="bkSnDD_'+safeId+'_old" style="display:none;"></div>'
+      +   '<div class="bs-chips" id="bkSnChips_'+safeId+'_old"></div>'
+      + '</div>'
+      + '<div class="bk-field" style="position:relative;margin-bottom:0;">'
+      +   '<label class="bk-label" style="font-size:12px;">Yeni SN</label>'
+      +   '<input type="text" class="bk-input" placeholder="SN axtar və seç..." autocomplete="off" '
+      +   'oninput="bkSnInputHandler(this,\''+safeId+'\',\'new\')" '
+      +   'onfocus="bkSnInputHandler(this,\''+safeId+'\',\'new\')" '
+      +   'onkeydown="bkSnInputKeydown(event,this,\''+safeId+'\',\'new\')">'
+      +   '<div class="bs-registry-dd" id="bkSnDD_'+safeId+'_new" style="display:none;"></div>'
+      +   '<div class="bs-chips" id="bkSnChips_'+safeId+'_new"></div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="bs-sn-conflict-err" id="bkSnConflict_'+safeId+'" style="display:none;margin-top:10px;">✕ Eyni SN həm Köhnə, həm Yeni xanada ola bilməz</div>'
+      + '</div>';
+  }).join('');
+
+  bkSelectedDqns.forEach(function(x){ bkSnRenderChipsFor(x.dqn, 'old'); bkSnRenderChipsFor(x.dqn, 'new'); });
+}
+
+function bkFindDqnBySafeId(safeId){
+  var found = bkSelectedDqns.find(function(x){ return bkDqnSafeId(x.dqn) === safeId; });
+  return found ? found.dqn : null;
+}
+
+function bkSnInputHandler(el, safeId, type){
+  var dqn = bkFindDqnBySafeId(safeId);
+  if(!dqn) return;
+  var dd = document.getElementById('bkSnDD_'+safeId+'_'+type);
+  var q = el.value.trim();
+  bkFormDirty = true;
+  if(!q){ if(dd) dd.style.display='none'; return; }
+  var matches = (typeof busSnSearchMatches==='function') ? busSnSearchMatches(q) : [];
+  if(dd){
+    if(matches.length===0){
+      dd.innerHTML = '<div class="bs-registry-empty">Uyğun SN tapılmadı — Enter ilə yenə də əlavə edə bilərsiniz</div>';
+    } else {
+      dd.innerHTML = matches.map(function(sn){
+        return '<div class="bs-registry-item" data-sn="'+escapeHtml(sn)+'"><span class="reg-id">'+escapeHtml(sn)+'</span></div>';
+      }).join('');
+      Array.from(dd.querySelectorAll('.bs-registry-item')).forEach(function(itemEl){
+        itemEl.addEventListener('click', function(e){
+          e.stopPropagation();
+          bkSnAddChip(dqn, type, itemEl.getAttribute('data-sn'));
+          el.value = '';
+          dd.style.display = 'none';
+        });
+      });
+    }
+    dd.style.display = 'block';
+  }
+}
+
+function bkSnInputKeydown(e, el, safeId, type){
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    var dqn = bkFindDqnBySafeId(safeId);
+    if(!dqn) return;
+    var v = el.value.trim();
+    if(v){
+      bkSnAddChip(dqn, type, v);
+      el.value = '';
+      var dd = document.getElementById('bkSnDD_'+safeId+'_'+type);
+      if(dd) dd.style.display = 'none';
+    }
+  }
+}
+
+function bkSnAddChip(dqn, type, sn){
+  sn = String(sn||'').trim();
+  if(!sn || !bkSnByDqn[dqn]) return;
+  var arr = type==='old' ? bkSnByDqn[dqn].oldSn : bkSnByDqn[dqn].newSn;
+  var already = arr.some(function(x){ return x.toUpperCase()===sn.toUpperCase(); });
+  if(!already) arr.push(sn);
+  bkFormDirty = true;
+  bkSnRenderChipsFor(dqn, type);
+  bkSnCheckConflict(dqn);
+}
+
+function bkSnRemoveChip(dqn, type, sn){
+  if(!bkSnByDqn[dqn]) return;
+  var arr = type==='old' ? bkSnByDqn[dqn].oldSn : bkSnByDqn[dqn].newSn;
+  var idx = arr.findIndex(function(x){ return x.toUpperCase()===sn.toUpperCase(); });
+  if(idx!==-1) arr.splice(idx,1);
+  bkFormDirty = true;
+  bkSnRenderChipsFor(dqn, type);
+  bkSnCheckConflict(dqn);
+}
+
+function bkSnRenderChipsFor(dqn, type){
+  if(!bkSnByDqn[dqn]) return;
+  var arr = type==='old' ? bkSnByDqn[dqn].oldSn : bkSnByDqn[dqn].newSn;
+  var safeId = bkDqnSafeId(dqn);
+  var box = document.getElementById('bkSnChips_'+safeId+'_'+type);
+  if(!box) return;
+  box.innerHTML = arr.map(function(sn){
+    var unknown = (typeof busSnExists==='function') && (typeof busValidatorSNLoaded!=='undefined') && busValidatorSNLoaded && !busSnExists(sn);
+    var safeSn = sn.replace(/'/g,'');
+    return '<span class="bs-chip'+(unknown?' bs-chip-warn':'')+'"'+(unknown?' title="Bu SN bazada tapılmadı — diqqətlə yoxlayın">⚠ ':'>')
+      + escapeHtml(sn)
+      + '<button type="button" class="bs-chip-x" onclick="bkSnRemoveChip(\''+dqn.replace(/'/g,'')+'\',\''+type+'\',\''+safeSn+'\')">✕</button></span>';
+  }).join('');
+}
+
+function bkSnCheckConflict(dqn){
+  var safeId = bkDqnSafeId(dqn);
+  var errEl = document.getElementById('bkSnConflict_'+safeId);
+  if(!errEl || !bkSnByDqn[dqn]) return false;
+  var oldSet = bkSnByDqn[dqn].oldSn.map(function(s){ return s.toUpperCase(); });
+  var newSet = bkSnByDqn[dqn].newSn.map(function(s){ return s.toUpperCase(); });
+  var conflict = newSet.some(function(s){ return oldSet.indexOf(s)!==-1; });
+  errEl.style.display = conflict ? 'block' : 'none';
+  return conflict;
+}
+
+function bkAnySnConflict(){
+  return Object.keys(bkSnByDqn).some(function(dqn){ return bkSnCheckConflict(dqn); });
+}
+
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.bk-dqn-sn-block .bk-input') && !e.target.closest('.bk-dqn-sn-block .bs-registry-dd')){
+    document.querySelectorAll('.bk-dqn-sn-block .bs-registry-dd').forEach(function(dd){ dd.style.display='none'; });
+  }
+});
+
 
 function bkToggleAllMode(){
   if(typeof bkAllMode === 'undefined') bkAllMode = true;
