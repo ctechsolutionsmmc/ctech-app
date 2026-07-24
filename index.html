@@ -1652,13 +1652,10 @@
             <label class="bk-label">Həll (şablon) *</label>
             <select class="bk-select" id="bk_solution_tmpl"><option value="">Seçin</option></select>
           </div>
-          <div class="bk-field">
-            <label class="bk-label">Köhnə SN</label>
-            <input type="text" class="bk-input" id="bk_old_sn" placeholder="Yalnız DQN seçimi aktiv olduqda" disabled>
-          </div>
-          <div class="bk-field">
-            <label class="bk-label">Yeni SN</label>
-            <input type="text" class="bk-input" id="bk_new_sn" placeholder="Yalnız DQN seçimi aktiv olduqda" disabled>
+          <div class="bk-field" style="grid-column:1/-1;">
+            <label class="bk-label">Köhnə SN / Yeni SN <span class="bs-label-hint">(hər seçilmiş DQN üçün ayrıca)</span></label>
+            <div class="bk-sn-empty" id="bkSnEmptyState">Yalnız spesifik DQN seçimi aktiv olduqda görünür</div>
+            <div id="bkSnPerDqnContainer"></div>
           </div>
         </div>
       </div>
