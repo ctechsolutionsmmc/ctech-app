@@ -1638,6 +1638,7 @@ function openBusReport(forceOpenOnly){
   document.querySelectorAll('#rptTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
   var allBtn=document.querySelector('#rptTypeFilter [data-type="all"]'); if(allBtn) allBtn.classList.add('rpt-type-btn-active');
   document.getElementById('rptExcelBtn').style.display=(getAccessLevel(currentUser.role)==='technician')?'none':'flex';
+  var thBusIdEarly=document.getElementById('rptThBusId'); if(thBusIdEarly) thBusIdEarly.textContent = rptIsTechnicianView() ? 'Status' : 'BUS ID';
   rptShownCount=rptPageSize;
   updateRptDate();
   if(rptDateInterval) clearInterval(rptDateInterval);
@@ -4300,7 +4301,9 @@ function techSearchHandler(el, fieldKey, excludeKey){
   bsSelected[fieldKey] = el.value; // sərbəst yazılan mətn də saxlanılsın (əvvəlki davranışla uyğun elastiklik)
   if(!q){ if(dd) dd.style.display='none'; return; }
 
-  var allTech = (bsFormData && bsFormData.technicians) || [];
+  var allTech = fieldKey === 'tvm_tech'
+    ? ((typeof tvmFormData !== 'undefined' && tvmFormData && tvmFormData.technicians) || [])
+    : ((bsFormData && bsFormData.technicians) || []);
   var excludeVal = excludeKey ? (bsSelected[excludeKey] || '').trim().toUpperCase() : null;
   var qUpper = q.toUpperCase();
   var matches = allTech.filter(function(name){
