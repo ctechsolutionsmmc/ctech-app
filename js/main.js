@@ -709,7 +709,15 @@ window.addEventListener('resize', updateCollectivesBtnVisibility);
 function toggleTheme(){ var isDark=!document.body.classList.contains('dark-mode'); applyTheme(isDark); try{localStorage.setItem('ctech_theme',isDark?'dark':'light');}catch(e){} }
 
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('service-worker.js'); }
-var savedUser=loadSession(); if(savedUser){currentUser=savedUser;showDashboard();}
+var savedUser=loadSession();
+if(savedUser && savedUser.email){
+  currentUser=savedUser;
+  showDashboard();
+} else if(savedUser){
+  // Köhnə/yarımçıq sessiya (email sahəsi yoxdur) — sakitcə davam etmək əvəzinə
+  // təmiz bir giriş məcburiləşdiririk ki, email kimi vacib sahələr yenidən düzgün dolsun
+  clearSession();
+}
 try{ var savedTheme=localStorage.getItem('ctech_theme'); if(savedTheme==='dark'){applyTheme(true);} }catch(e){}
 
 // ═══════════════════════════════════════════════════
