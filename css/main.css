@@ -3134,40 +3134,53 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
 
 @media(min-width:901px){
 
+  html, body{ height:100%; }
   #dashboardView[style*="display: block"]{
-    display:block !important;
-    height:auto; min-height:100vh; overflow:visible;
+    display:grid !important;
+    grid-template-columns:82px 1fr;
+    grid-template-rows:auto 1fr;
+    grid-template-areas:"header header" "sidebar main";
+    height:100vh; overflow:hidden;
   }
+  #dashboardView > .header{ grid-area:header; }
+  .dash-sidebar{ grid-area:sidebar; }
+  .dash-desktop-main{ grid-area:main; }
 
-  /* Köhnə mobil-yönümlü kart grid-i masaüstündə tam gizlədilir */
+  /* Köhnə mobil-yönümlü kart grid-i və hamburger-menyu masaüstündə tam gizlədilir */
   #dashboardView > .container{ display:none !important; }
   #dashboardView > .welcome{ display:none !important; }
-  #dashboardView > .profile-row{ display:none !important; }
   #dashboardView > .footer-note-dash{ display:none !important; }
+  #dashboardView .menu-wrap{ display:none !important; }
 
   #dashboardView > .header{
-    padding:14px clamp(24px,3vw,40px);
+    padding:clamp(8px,1.4vh,14px) clamp(20px,2.6vw,36px);
     position:relative; z-index:5;
   }
+  /* Profil çipini header-in sağ tərəfinə gətiririk (fotodakı kimi tək sıra) */
+  #dashboardView > .profile-row{ display:flex !important; position:absolute; top:0; right:clamp(20px,2.6vw,36px); height:100%; align-items:center; padding:0; grid-area:header; }
+  #dashboardView .profile-chip{ padding:5px 14px 5px 5px; gap:9px; }
+  #dashboardView .profile-avatar{ width:32px; height:32px; border-radius:10px; }
+  #dashboardView .profile-name{ font-size:12.5px; }
+  #dashboardView .profile-role{ font-size:10.5px; }
 
-  /* ── Sidebar ── */
+  /* ── Sidebar — dar, ikon+yazı altda ── */
   .dash-sidebar{
-    display:flex; flex-direction:column; gap:4px;
-    position:fixed; top:0; left:0; bottom:0; width:190px;
-    padding:96px 14px 20px;
+    display:flex; flex-direction:column; align-items:stretch; gap:4px;
+    width:82px; min-height:0;
+    padding:10px 8px 16px;
     background:#F7F9FE; border-right:1px solid #E1EAF6;
-    z-index:4; overflow-y:auto;
+    overflow-y:auto;
   }
   body.dark-mode .dash-sidebar{ background:#0F1826; border-color:#22314A; }
 
   .dash-sidebar-item{
-    display:flex; align-items:center; gap:11px;
-    padding:11px 14px; border-radius:12px; border:none; background:none;
-    color:#5C7089; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600;
-    cursor:pointer; text-align:left; width:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+    padding:10px 4px; border-radius:12px; border:none; background:none;
+    color:#5C7089; font-family:'Inter',sans-serif; font-size:10px; font-weight:600; line-height:1.15;
+    cursor:pointer; text-align:center; width:100%;
   }
   .dash-sidebar-item:hover{ background:#EEF3FC; color:#12233B; }
-  .dash-sidebar-item.active{ background:#2F6FED; color:#fff; box-shadow:0 8px 20px rgba(47,111,237,.28); }
+  .dash-sidebar-item.active{ background:#2F6FED; color:#fff; box-shadow:0 8px 18px rgba(47,111,237,.28); }
   .dash-sidebar-item svg{ flex-shrink:0; }
   .dash-sidebar-signout{ margin-top:auto; color:#C0392B; }
   .dash-sidebar-signout:hover{ background:#FEF2F2; color:#C0392B; }
@@ -3176,25 +3189,30 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   body.dark-mode .dash-sidebar-signout{ color:#F5A3A3; }
   body.dark-mode .dash-sidebar-signout:hover{ background:#2A1414; }
 
-  /* ── Əsas məzmun ── */
+  /* ── Əsas məzmun — qalan hündürlüyə tam sığır, sürüşmür ── */
   .dash-desktop-main{
-    display:block;
-    margin-left:190px;
-    padding:18px clamp(24px,3vw,40px) 0;
+    display:flex; flex-direction:column;
+    min-height:0; overflow:hidden;
+    padding:10px clamp(20px,2.6vw,36px) 0;
     max-width:1400px;
   }
 
-  .dash-welcome-d{ font-size:22px; font-weight:800; color:#12233B; margin-bottom:18px; }
+  .dash-welcome-d{ font-family:'Inter',Arial,sans-serif; font-size:18px; font-weight:700; color:#12233B; margin-bottom:10px; flex:0 0 auto; }
   body.dark-mode .dash-welcome-d{ color:#E8EEF5; }
 
   /* ── Stat kartları ── */
-  .dash-stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+  .dash-stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; flex:0 0 auto; }
   .dash-stat-card{
-    background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px; padding:16px 18px;
-    box-shadow:0 12px 28px rgba(30,68,130,.05);
+    background:#FFFFFF; border:2px solid #E1EAF6; border-radius:14px; padding:11px 14px;
+    box-shadow:0 10px 22px rgba(30,68,130,.05);
   }
   body.dark-mode .dash-stat-card{ background:#16212E; border-color:#2A3B52; }
-  .dash-stat-icon{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  .dash-stat-blue{ border-color:#2F6FED; }
+  .dash-stat-green{ border-color:#188A4B; }
+  .dash-stat-purple{ border-color:#7C4FE0; }
+  .dash-stat-orange{ border-color:#D97706; }
+  .dash-stat-icon{ width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
+  .dash-stat-icon svg{ width:16px; height:16px; }
   .dash-stat-blue .dash-stat-icon{ background:#E6F1FB; color:#2F6FED; }
   .dash-stat-green .dash-stat-icon{ background:#E6F8ED; color:#188A4B; }
   .dash-stat-purple .dash-stat-icon{ background:#F1ECFC; color:#7C4FE0; }
@@ -3203,30 +3221,35 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   body.dark-mode .dash-stat-green .dash-stat-icon{ background:#153322; }
   body.dark-mode .dash-stat-purple .dash-stat-icon{ background:#241C3D; }
   body.dark-mode .dash-stat-orange .dash-stat-icon{ background:#2A2214; }
-  .dash-stat-label{ font-size:12.5px; font-weight:700; color:#5C7089; margin-bottom:4px; }
+  .dash-stat-label{ font-size:11px; font-weight:700; color:#5C7089; margin-bottom:2px; }
   body.dark-mode .dash-stat-label{ color:#8CA0BC; }
-  .dash-stat-value{ font-size:26px; font-weight:800; color:#12233B; line-height:1.1; }
-  .dash-stat-value-sm{ font-size:18px; }
+  .dash-stat-value{ font-size:19px; font-weight:800; color:#12233B; line-height:1.1; }
+  .dash-stat-value-sm{ font-size:14px; }
   body.dark-mode .dash-stat-value{ color:#E8EEF5; }
-  .dash-stat-sub{ font-size:11.5px; color:#9AACC4; font-weight:600; margin-top:4px; }
+  .dash-stat-sub{ font-size:10.5px; color:#9AACC4; font-weight:600; margin-top:2px; }
 
-  .dash-grid-divider{ height:1px; background:linear-gradient(to right,#2F6FED,transparent); margin-bottom:20px; }
+  .dash-grid-divider{ height:1px; background:linear-gradient(to right,#2F6FED,transparent); margin-bottom:12px; flex:0 0 auto; }
 
   /* ── Kart grid (3 sütun) ── */
-  .dash-grid-row{ display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+  .dash-grid-row{ display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:12px; margin-bottom:12px; flex:0 0 auto; }
   .dash-menu-card{
-    background:#FFFFFF; border:1px solid #E1EAF6; border-radius:18px; padding:20px;
-    cursor:pointer; box-shadow:0 16px 34px rgba(30,68,130,.06); transition:transform .15s,box-shadow .15s;
+    background:#FFFFFF; border:2px solid #E1EAF6; border-radius:16px; padding:13px 16px;
+    cursor:pointer; box-shadow:0 12px 26px rgba(30,68,130,.06); transition:transform .15s,box-shadow .15s;
   }
-  .dash-menu-card:hover{ transform:translateY(-3px); box-shadow:0 22px 44px rgba(30,68,130,.12); }
+  .dash-menu-card:hover{ transform:translateY(-2px); box-shadow:0 18px 36px rgba(30,68,130,.12); }
   .dash-menu-card-wide{ cursor:default; }
-  .dash-menu-card-wide:hover{ transform:none; box-shadow:0 16px 34px rgba(30,68,130,.06); }
-  .dash-menu-card-accent{ background:#FFF8EF; border-color:#F3DDB0; }
-  body.dark-mode .dash-menu-card{ background:#16212E; border-color:#2A3B52; }
-  body.dark-mode .dash-menu-card-accent{ background:#241D0F; border-color:#4A3A1E; }
+  .dash-menu-card-wide:hover{ transform:none; box-shadow:0 12px 26px rgba(30,68,130,.06); }
+  .dash-menu-card-accent{ background:#FFF8EF; }
+  .dash-card-blue{ border-color:#2F6FED; }
+  .dash-card-orange{ border-color:#D97706; }
+  .dash-card-green{ border-color:#188A4B; }
+  .dash-card-purple{ border-color:#7C4FE0; }
+  body.dark-mode .dash-menu-card{ background:#16212E; }
+  body.dark-mode .dash-menu-card-accent{ background:#241D0F; }
 
-  .dash-menu-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
-  .dash-menu-card-icon{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dash-menu-card-head{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .dash-menu-card-icon{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dash-menu-card-icon svg{ width:18px; height:18px; }
   .dash-menu-card-icon.icon-bus{ background:#E6F1FB; color:#2F6FED; }
   .dash-menu-card-icon.icon-tvm{ background:#FDF1E3; color:#D97706; }
   .dash-menu-card-icon.icon-bus-dash{ background:#E6F8ED; color:#188A4B; }
@@ -3235,28 +3258,35 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   body.dark-mode .dash-menu-card-icon.icon-tvm{ background:#2A2214; }
   body.dark-mode .dash-menu-card-icon.icon-bus-dash{ background:#153322; }
   body.dark-mode .dash-menu-card-icon.icon-tvm-dash{ background:#241C3D; }
-  .dash-menu-card-title{ font-size:14.5px; font-weight:800; color:#12233B; letter-spacing:.3px; }
+  .dash-menu-card-title{ font-size:12.5px; font-weight:800; color:#12233B; letter-spacing:.2px; }
   body.dark-mode .dash-menu-card-title{ color:#E8EEF5; }
-  .dash-menu-card-sub{ font-size:12.5px; color:#8CA0BC; font-weight:600; }
+  .dash-menu-card-sub{ font-size:11px; color:#8CA0BC; font-weight:600; }
 
-  .dash-bus-subgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px; }
+  .dash-bus-subgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:9px; }
   .dash-bus-subbtn{
-    display:flex; flex-direction:column; align-items:center; gap:7px;
-    background:#F7F9FE; border:1px solid #E1EAF6; border-radius:13px; padding:13px 8px;
-    cursor:pointer; color:#2F6FED; font-family:'Inter',sans-serif; font-size:11.5px; font-weight:700; line-height:1.25;
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    background:#F7F9FE; border:1px solid #E1EAF6; border-radius:11px; padding:9px 6px;
+    cursor:pointer; color:#2F6FED; font-family:'Inter',sans-serif; font-size:10px; font-weight:700; line-height:1.2;
     text-align:center;
   }
+  .dash-bus-subbtn svg{ width:16px; height:16px; }
   .dash-bus-subbtn:hover{ background:#EAF2FE; border-color:#C9D8F2; }
   body.dark-mode .dash-bus-subbtn{ background:#1C2A3D; border-color:#2A3B52; color:#8FB4EA; }
   body.dark-mode .dash-bus-subbtn:hover{ background:#22314A; }
 
   /* ── Aşağı banner ── */
-  .dash-desktop-banner{
-    display:block; width:100%; max-width:100%; height:auto; max-height:220px; object-fit:cover; object-position:center bottom;
-    border-radius:20px 20px 0 0; margin-top:8px;
-    -webkit-mask-image:linear-gradient(to bottom, black 55%, transparent);
-    mask-image:linear-gradient(to bottom, black 55%, transparent);
-    opacity:.55;
+  .dash-desktop-banner-wrap{
+    flex:1 1 auto; min-height:24px; overflow:hidden; position:relative;
+    background:#F4F8FD; border-radius:18px 18px 0 0; margin-top:6px;
   }
-  .dash-desktop-footer{ text-align:center; padding:10px 0 26px; font-size:12px; color:#9AACC4; }
+  body.dark-mode .dash-desktop-banner-wrap{ background:#0F1826; }
+  .dash-desktop-banner{
+    position:absolute; left:0; right:0; bottom:0; width:100%; height:100%;
+    object-fit:cover; object-position:center bottom;
+    -webkit-mask-image:linear-gradient(to bottom, transparent, black 45%, black 80%, transparent);
+    mask-image:linear-gradient(to bottom, transparent, black 45%, black 80%, transparent);
+    opacity:.35;
+  }
+  .dash-desktop-footer{ flex:0 0 auto; text-align:center; padding:6px 0 10px; font-size:11px; color:#9AACC4; }
 }
+
