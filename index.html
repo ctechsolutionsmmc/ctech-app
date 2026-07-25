@@ -137,6 +137,137 @@
     </div>
   </div>
 
+  <!-- ═══ DESKTOP-ONLY: yeni sidebar naviqasiya ═══ -->
+  <nav class="dash-sidebar" id="dashSidebar">
+    <button class="dash-sidebar-item active" onclick="goHome()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span>Ana səhifə</span>
+    </button>
+    <button class="dash-sidebar-item" onclick="showAbout()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg>
+      <span>Tətbiq haqqında</span>
+    </button>
+    <button class="dash-sidebar-item" id="sidebarCollectivesBtn" onclick="openCollectives()" style="display:none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Heyət haqqında</span>
+    </button>
+    <button class="dash-sidebar-item" id="sidebarAdminBtn" onclick="openAdminPanel()" style="display:none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Admin Panel</span>
+    </button>
+    <button class="dash-sidebar-item dash-sidebar-signout" onclick="signOut()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      <span>Çıxış</span>
+    </button>
+  </nav>
+
+  <!-- ═══ DESKTOP-ONLY: yeni məzmun (stat kartlar + kart grid + banner) ═══ -->
+  <div class="dash-desktop-main" id="dashDesktopMain">
+
+    <div class="dash-welcome-d" id="dashWelcomeD">Xoş gəlmisiniz, <span id="dashWelcomeNameD">-</span>!</div>
+
+    <div class="dash-stats-row">
+      <div class="dash-stat-card dash-stat-blue">
+        <div class="dash-stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+        <div class="dash-stat-label">Açıq servislər</div>
+        <div class="dash-stat-value" id="dashStatOpen">—</div>
+        <div class="dash-stat-sub">Bus Service</div>
+      </div>
+      <div class="dash-stat-card dash-stat-green">
+        <div class="dash-stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="dash-stat-label">Bugünkü servislər</div>
+        <div class="dash-stat-value" id="dashStatToday">—</div>
+        <div class="dash-stat-sub">Bus Service</div>
+      </div>
+      <div class="dash-stat-card dash-stat-purple">
+        <div class="dash-stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg></div>
+        <div class="dash-stat-label">Aktiv texnik</div>
+        <div class="dash-stat-value" id="dashStatTech">—</div>
+        <div class="dash-stat-sub">Bugün</div>
+      </div>
+      <div class="dash-stat-card dash-stat-orange">
+        <div class="dash-stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+        <div class="dash-stat-label">Son daxil olan servis</div>
+        <div class="dash-stat-value dash-stat-value-sm" id="dashStatLatestTime">—</div>
+        <div class="dash-stat-sub" id="dashStatLatestInfo">—</div>
+      </div>
+    </div>
+
+    <div class="dash-grid-divider"></div>
+
+    <div class="dash-grid-row">
+      <div class="dash-menu-card dash-menu-card-wide">
+        <div class="dash-menu-card-head">
+          <div class="dash-menu-card-icon icon-bus"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9"/><path d="M3 16h18"/><path d="M3 16v1.5a1 1 0 0 0 1 1h1"/><path d="M21 16v1.5a1 1 0 0 1-1 1h-1"/><path d="M6 5v6M12 5v6M18 5v6"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg></div>
+          <div class="dash-menu-card-title">BUS SERVICE</div>
+        </div>
+        <div class="dash-bus-subgrid">
+          <button class="dash-bus-subbtn" id="dashBrBtn" onclick="openBusRequest()" style="display:none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15h6"/></svg>
+            <span>Yeni<br>Müraciət</span>
+          </button>
+          <button class="dash-bus-subbtn" onclick="startBusService()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Yeni<br>Servis</span>
+          </button>
+          <button class="dash-bus-subbtn" onclick="openBusOngoing()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            <span>Davam edən<br>Servis</span>
+          </button>
+          <button class="dash-bus-subbtn" id="dashBulkBtn" onclick="openBusBulk()" style="display:none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Toplu<br>idxal</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="dash-menu-card" onclick="openTvmService()">
+        <div class="dash-menu-card-head">
+          <div class="dash-menu-card-icon icon-tvm"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="16.5" rx="1.5"/><rect x="8" y="4.5" width="8" height="6" rx=".5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="15.3" x2="13" y2="15.3"/><path d="M9 21.5h6l-1-2.8h-4z"/></svg></div>
+          <div class="dash-menu-card-title">TVM SERVICE</div>
+        </div>
+        <div class="dash-menu-card-sub">Bilet satış aparatları texniki servis</div>
+      </div>
+
+      <div class="dash-menu-card dash-menu-card-accent" onclick="openTvmReport()">
+        <div class="dash-menu-card-head">
+          <div class="dash-menu-card-icon icon-tvm"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg></div>
+          <div class="dash-menu-card-title">TVM REAL-TIME REPORT</div>
+        </div>
+        <div class="dash-menu-card-sub">Canlı siyahı və Excel ixracı</div>
+      </div>
+    </div>
+
+    <div class="dash-grid-row">
+      <div class="dash-menu-card" onclick="openBusDashboard()">
+        <div class="dash-menu-card-head">
+          <div class="dash-menu-card-icon icon-bus-dash"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+          <div class="dash-menu-card-title">BUS DASHBOARD</div>
+        </div>
+        <div class="dash-menu-card-sub">Statistika və hesabatlar</div>
+      </div>
+
+      <div class="dash-menu-card dash-menu-card-accent" onclick="openBusReport()">
+        <div class="dash-menu-card-head">
+          <div class="dash-menu-card-icon icon-bus-dash"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg></div>
+          <div class="dash-menu-card-title">BUS REAL-TIME REPORT</div>
+        </div>
+        <div class="dash-menu-card-sub">Canlı siyahı və Excel ixracı</div>
+      </div>
+
+      <div class="dash-menu-card" onclick="moduleAlert('Dashboard-TVM')">
+        <div class="dash-menu-card-head">
+          <div class="dash-menu-card-icon icon-tvm-dash"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+          <div class="dash-menu-card-title">TVM DASHBOARD</div>
+        </div>
+        <div class="dash-menu-card-sub">Statistika və hesabatlar</div>
+      </div>
+    </div>
+
+    <img class="dash-desktop-banner" src="banner.webp" alt="İctimai nəqliyyat">
+    <div class="dash-desktop-footer">© 2026 CTECH SOLUTIONS MMC. Bütün hüquqlar qorunur.</div>
+  </div>
+
   <div class="container">
     <div class="primary-row">
       <div class="card-big" onclick="startBusService()">
