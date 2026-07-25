@@ -277,6 +277,11 @@ input[type="date"].bs-input {
   box-sizing:border-box;
 }
 .bs-input:focus { border-color:#4E93FA; background:#fff; }
+.bs-field-locked{
+  background:#F0F3F8 !important; color:#5C7089 !important; cursor:not-allowed !important;
+  opacity:.85; border-color:#E1EAF6 !important;
+}
+body.dark-mode .bs-field-locked{ background:#141C29 !important; color:#8CA0BC !important; }
 
 .bs-select {
   width:100%;
