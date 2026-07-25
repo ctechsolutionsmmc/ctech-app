@@ -123,6 +123,10 @@
         <div class="profile-name" id="profileName">-</div>
         <div class="profile-role" id="profileRole">-</div>
       </div>
+      <button class="profile-notif-btn" id="notifBtn" onclick="openNotifications()" aria-label="Bildirişlər">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+      </button>
     </div>
   </div>
 
@@ -244,6 +248,35 @@
   <div class="cl-footer-note">© 2026 CTECH SOLUTIONS MMC. Bütün hüquqlar qorunur.</div>
 </div>
 
+<!-- ===== BİLDİRİŞLƏR (yalnız mobil) ===== -->
+<div id="notifView" style="display:none;">
+  <div class="notif-header">
+    <button class="notif-home-btn" onclick="closeNotifications()" aria-label="Ana səhifəyə qayıt">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="notif-header-title">Bildirişlər</div>
+    <div style="width:38px;"></div>
+  </div>
+
+  <!-- Siyahı görünüşü -->
+  <div id="notifListView">
+    <div class="notif-list" id="notifList">
+      <div class="adm-empty">Yüklənir...</div>
+    </div>
+  </div>
+
+  <!-- Mesaj görünüşü -->
+  <div id="notifDetailView" style="display:none;">
+    <div class="notif-detail-meta">
+      <span id="notifDetailDate">--.--.----</span>
+      <span class="clock-sep">|</span>
+      <span id="notifDetailTime">--:--</span>
+    </div>
+    <div class="notif-detail-text" id="notifDetailText"></div>
+    <button class="notif-read-btn" onclick="markNotificationReadAndClose()">Oxudum</button>
+  </div>
+</div>
+
 <!-- ===== ADMIN PANEL (yalnız veb versiya) ===== -->
 <div id="adminPanelView">
 
@@ -288,6 +321,10 @@
         <button class="adm-nav-item" data-section="collectives" onclick="switchAdminSection('collectives',this)">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>Collectives</span>
+      </button>
+      <button class="adm-nav-item" data-section="messages" onclick="switchAdminSection('messages',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Messages</span>
       </button>
     </div>
 
@@ -690,6 +727,40 @@
           <div class="adm-page-info" id="admClPageInfo">—</div>
           <div class="adm-page-btns" id="admClPageBtns"></div>
         </div>
+      </div>
+
+      <!-- ═══ MESSAGES ═══ -->
+      <div class="adm-section" id="admSection-messages" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> Messages</div>
+            <div class="adm-title">Messages</div>
+          </div>
+        </div>
+
+        <div class="adm-msg-compose">
+          <div class="adm-msg-compose-title">Yeni bildiriş göndər</div>
+          <div class="adm-msg-row">
+            <div class="adm-form-field" style="flex:1;">
+              <label>Tarix</label>
+              <input type="date" id="admMsgDate">
+            </div>
+            <div class="adm-form-field" style="flex:1;">
+              <label>Saat</label>
+              <input type="time" id="admMsgTime">
+            </div>
+          </div>
+          <div class="adm-form-field">
+            <label>Mesaj mətni *</label>
+            <textarea id="admMsgText" rows="4" placeholder="Bütün istifadəçilərə göndəriləcək bildiriş mətnini yazın..."></textarea>
+          </div>
+          <div class="adm-form-error" id="admMsgFormError" style="display:none;"></div>
+          <div class="adm-msg-hint">Bildiriş mobil tətbiqdə 48 saat ərzində aktiv olacaq.</div>
+          <button class="adm-modal-save" id="admMsgSendBtn" onclick="submitAdminNotification()">Göndər</button>
+        </div>
+
+        <div class="adm-msg-history-title">Son göndərilən bildirişlər (48 saat)</div>
+        <div class="adm-reorder-list" id="admMsgHistoryList"><div class="adm-empty">Yüklənir...</div></div>
       </div>
 
     </div>
@@ -1384,25 +1455,17 @@
     <!-- Texnik heyət -->
     <div class="bs-section">
       <div class="bs-section-title">Texnik heyət</div>
-      <div class="bs-field">
+      <div class="bs-field" style="position:relative;">
         <label class="bs-label">1. Texnik</label>
-        <div class="bs-inline-dd" id="dd_tech1">
-          <button type="button" class="bs-picker-btn" id="bs_tech1_btn" onclick="toggleDD('tech1')">
-            <span id="bs_tech1_lbl" style="color:#9AACC4;">Seçin (könüllü)</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_tech1_arrow"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="bs-dd-list" id="dd_tech1_list"></div>
-        </div>
+        <input type="text" class="bs-input" id="bs_tech1_lbl" placeholder="Texnik axtar (könüllü)..." autocomplete="off"
+          oninput="techSearchHandler(this,'tech1','tech2')" onfocus="techSearchHandler(this,'tech1','tech2')">
+        <div class="bs-registry-dd" id="bs_tech1_dd" style="display:none;"></div>
       </div>
-      <div class="bs-field">
+      <div class="bs-field" style="position:relative;">
         <label class="bs-label">2. Texnik</label>
-        <div class="bs-inline-dd" id="dd_tech2">
-          <button type="button" class="bs-picker-btn" id="bs_tech2_btn" onclick="toggleDD('tech2')">
-            <span id="bs_tech2_lbl" style="color:#9AACC4;">Seçin (könüllü)</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_tech2_arrow"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="bs-dd-list" id="dd_tech2_list"></div>
-        </div>
+        <input type="text" class="bs-input" id="bs_tech2_lbl" placeholder="Texnik axtar (könüllü)..." autocomplete="off"
+          oninput="techSearchHandler(this,'tech2','tech1')" onfocus="techSearchHandler(this,'tech2','tech1')">
+        <div class="bs-registry-dd" id="bs_tech2_dd" style="display:none;"></div>
       </div>
       <div class="bs-field">
         <label class="bs-label">Qrup rəhbəri *</label>
@@ -1845,15 +1908,11 @@
     <div class="bs-section">
       <div class="bs-section-title">Personal</div>
       <div class="bs-row">
-        <div class="bs-field">
+        <div class="bs-field" style="position:relative;">
           <label class="bs-label">Texnik *</label>
-          <div class="bs-inline-dd" id="dd_tvm_tech">
-            <button type="button" class="bs-picker-btn" id="bs_tvm_tech_btn" onclick="toggleDD('tvm_tech')">
-              <span id="bs_tvm_tech_lbl" style="color:#9AACC4;">Seçin</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_tvm_tech_arrow"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="bs-dd-list" id="dd_tvm_tech_list"></div>
-          </div>
+          <input type="text" class="bs-input" id="bs_tvm_tech_lbl" placeholder="Texnik axtar..." autocomplete="off"
+            oninput="techSearchHandler(this,'tvm_tech',null)" onfocus="techSearchHandler(this,'tvm_tech',null)">
+          <div class="bs-registry-dd" id="bs_tvm_tech_dd" style="display:none;"></div>
         </div>
         <div class="bs-field">
           <label class="bs-label">Qrup rəhbəri *</label>
