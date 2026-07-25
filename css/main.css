@@ -3157,11 +3157,14 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
     position:relative; z-index:5;
   }
   /* Profil çipini header-in sağ tərəfinə gətiririk (fotodakı kimi tək sıra) */
-  #dashboardView > .profile-row{ display:flex !important; position:absolute; top:0; right:clamp(20px,2.6vw,36px); height:100%; align-items:center; padding:0; grid-area:header; }
+  #dashboardView > .profile-row{ display:flex !important; position:absolute; top:0; right:clamp(20px,2.6vw,36px); height:100%; align-items:center; padding:0; grid-area:header; z-index:6; }
   #dashboardView .profile-chip{ padding:5px 14px 5px 5px; gap:9px; }
   #dashboardView .profile-avatar{ width:32px; height:32px; border-radius:10px; }
   #dashboardView .profile-name{ font-size:12.5px; }
   #dashboardView .profile-role{ font-size:10.5px; }
+  /* Tarix/saat + gecə-rejim düymələrini sola sürüşdürürük, profil çipi üçün yer açılır */
+  #dashboardView .header-right{ margin-right:154px; gap:10px; }
+  #dashboardView .brand-mini{ font-size:22px; letter-spacing:2px; }
 
   /* ── Sidebar — dar, ikon+yazı altda ── */
   .dash-sidebar{
@@ -3192,27 +3195,26 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   /* ── Əsas məzmun — qalan hündürlüyə tam sığır, sürüşmür ── */
   .dash-desktop-main{
     display:flex; flex-direction:column;
-    min-height:0; overflow:hidden;
-    padding:10px clamp(20px,2.6vw,36px) 0;
-    max-width:1400px;
+    min-height:0; overflow:hidden; width:100%;
+    padding:12px clamp(24px,3vw,44px) 0;
   }
 
   .dash-welcome-d{ font-family:'Inter',Arial,sans-serif; font-size:18px; font-weight:700; color:#12233B; margin-bottom:10px; flex:0 0 auto; }
   body.dark-mode .dash-welcome-d{ color:#E8EEF5; }
 
   /* ── Stat kartları ── */
-  .dash-stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; flex:0 0 auto; }
+  .dash-stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:18px; flex:0 0 auto; }
   .dash-stat-card{
-    background:#FFFFFF; border:2px solid #E1EAF6; border-radius:14px; padding:11px 14px;
-    box-shadow:0 10px 22px rgba(30,68,130,.05);
+    background:#FFFFFF; border:2px solid #E1EAF6; border-radius:16px; padding:16px 20px;
+    box-shadow:0 12px 26px rgba(30,68,130,.05);
   }
   body.dark-mode .dash-stat-card{ background:#16212E; border-color:#2A3B52; }
   .dash-stat-blue{ border-color:#2F6FED; }
   .dash-stat-green{ border-color:#188A4B; }
   .dash-stat-purple{ border-color:#7C4FE0; }
   .dash-stat-orange{ border-color:#D97706; }
-  .dash-stat-icon{ width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
-  .dash-stat-icon svg{ width:16px; height:16px; }
+  .dash-stat-icon{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:9px; }
+  .dash-stat-icon svg{ width:19px; height:19px; }
   .dash-stat-blue .dash-stat-icon{ background:#E6F1FB; color:#2F6FED; }
   .dash-stat-green .dash-stat-icon{ background:#E6F8ED; color:#188A4B; }
   .dash-stat-purple .dash-stat-icon{ background:#F1ECFC; color:#7C4FE0; }
@@ -3221,24 +3223,24 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   body.dark-mode .dash-stat-green .dash-stat-icon{ background:#153322; }
   body.dark-mode .dash-stat-purple .dash-stat-icon{ background:#241C3D; }
   body.dark-mode .dash-stat-orange .dash-stat-icon{ background:#2A2214; }
-  .dash-stat-label{ font-size:11px; font-weight:700; color:#5C7089; margin-bottom:2px; }
+  .dash-stat-label{ font-size:12.5px; font-weight:700; color:#5C7089; margin-bottom:3px; }
   body.dark-mode .dash-stat-label{ color:#8CA0BC; }
-  .dash-stat-value{ font-size:19px; font-weight:800; color:#12233B; line-height:1.1; }
-  .dash-stat-value-sm{ font-size:14px; }
+  .dash-stat-value{ font-size:25px; font-weight:800; color:#12233B; line-height:1.1; }
+  .dash-stat-value-sm{ font-size:17px; }
   body.dark-mode .dash-stat-value{ color:#E8EEF5; }
-  .dash-stat-sub{ font-size:10.5px; color:#9AACC4; font-weight:600; margin-top:2px; }
+  .dash-stat-sub{ font-size:11.5px; color:#9AACC4; font-weight:600; margin-top:3px; }
 
-  .dash-grid-divider{ height:1px; background:linear-gradient(to right,#2F6FED,transparent); margin-bottom:12px; flex:0 0 auto; }
+  .dash-grid-divider{ height:1px; background:linear-gradient(to right,#2F6FED,transparent); margin-bottom:16px; flex:0 0 auto; }
 
   /* ── Kart grid (3 sütun) ── */
-  .dash-grid-row{ display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:12px; margin-bottom:12px; flex:0 0 auto; }
+  .dash-grid-row{ display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:16px; margin-bottom:16px; flex:0 0 auto; }
   .dash-menu-card{
-    background:#FFFFFF; border:2px solid #E1EAF6; border-radius:16px; padding:13px 16px;
-    cursor:pointer; box-shadow:0 12px 26px rgba(30,68,130,.06); transition:transform .15s,box-shadow .15s;
+    background:#FFFFFF; border:2px solid #E1EAF6; border-radius:18px; padding:18px 22px;
+    cursor:pointer; box-shadow:0 14px 30px rgba(30,68,130,.06); transition:transform .15s,box-shadow .15s;
   }
-  .dash-menu-card:hover{ transform:translateY(-2px); box-shadow:0 18px 36px rgba(30,68,130,.12); }
+  .dash-menu-card:hover{ transform:translateY(-2px); box-shadow:0 20px 40px rgba(30,68,130,.12); }
   .dash-menu-card-wide{ cursor:default; }
-  .dash-menu-card-wide:hover{ transform:none; box-shadow:0 12px 26px rgba(30,68,130,.06); }
+  .dash-menu-card-wide:hover{ transform:none; box-shadow:0 14px 30px rgba(30,68,130,.06); }
   .dash-menu-card-accent{ background:#FFF8EF; }
   .dash-card-blue{ border-color:#2F6FED; }
   .dash-card-orange{ border-color:#D97706; }
@@ -3247,9 +3249,9 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   body.dark-mode .dash-menu-card{ background:#16212E; }
   body.dark-mode .dash-menu-card-accent{ background:#241D0F; }
 
-  .dash-menu-card-head{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
-  .dash-menu-card-icon{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .dash-menu-card-icon svg{ width:18px; height:18px; }
+  .dash-menu-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .dash-menu-card-icon{ width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dash-menu-card-icon svg{ width:22px; height:22px; }
   .dash-menu-card-icon.icon-bus{ background:#E6F1FB; color:#2F6FED; }
   .dash-menu-card-icon.icon-tvm{ background:#FDF1E3; color:#D97706; }
   .dash-menu-card-icon.icon-bus-dash{ background:#E6F8ED; color:#188A4B; }
@@ -3258,18 +3260,18 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   body.dark-mode .dash-menu-card-icon.icon-tvm{ background:#2A2214; }
   body.dark-mode .dash-menu-card-icon.icon-bus-dash{ background:#153322; }
   body.dark-mode .dash-menu-card-icon.icon-tvm-dash{ background:#241C3D; }
-  .dash-menu-card-title{ font-size:12.5px; font-weight:800; color:#12233B; letter-spacing:.2px; }
+  .dash-menu-card-title{ font-size:14.5px; font-weight:800; color:#12233B; letter-spacing:.2px; }
   body.dark-mode .dash-menu-card-title{ color:#E8EEF5; }
-  .dash-menu-card-sub{ font-size:11px; color:#8CA0BC; font-weight:600; }
+  .dash-menu-card-sub{ font-size:12.5px; color:#8CA0BC; font-weight:600; }
 
-  .dash-bus-subgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:9px; }
+  .dash-bus-subgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:11px; margin-top:13px; }
   .dash-bus-subbtn{
-    display:flex; flex-direction:column; align-items:center; gap:5px;
-    background:#F7F9FE; border:1px solid #E1EAF6; border-radius:11px; padding:9px 6px;
-    cursor:pointer; color:#2F6FED; font-family:'Inter',sans-serif; font-size:10px; font-weight:700; line-height:1.2;
+    display:flex; flex-direction:column; align-items:center; gap:7px;
+    background:#F7F9FE; border:1px solid #E1EAF6; border-radius:13px; padding:13px 8px;
+    cursor:pointer; color:#2F6FED; font-family:'Inter',sans-serif; font-size:11.5px; font-weight:700; line-height:1.25;
     text-align:center;
   }
-  .dash-bus-subbtn svg{ width:16px; height:16px; }
+  .dash-bus-subbtn svg{ width:19px; height:19px; }
   .dash-bus-subbtn:hover{ background:#EAF2FE; border-color:#C9D8F2; }
   body.dark-mode .dash-bus-subbtn{ background:#1C2A3D; border-color:#2A3B52; color:#8FB4EA; }
   body.dark-mode .dash-bus-subbtn:hover{ background:#22314A; }
@@ -3277,16 +3279,17 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   /* ── Aşağı banner ── */
   .dash-desktop-banner-wrap{
     flex:1 1 auto; min-height:24px; overflow:hidden; position:relative;
-    background:#F4F8FD; border-radius:18px 18px 0 0; margin-top:6px;
+    background:#EAF1FC; border-radius:18px 18px 0 0; margin-top:6px;
   }
   body.dark-mode .dash-desktop-banner-wrap{ background:#0F1826; }
   .dash-desktop-banner{
     position:absolute; left:0; right:0; bottom:0; width:100%; height:100%;
     object-fit:cover; object-position:center bottom;
-    -webkit-mask-image:linear-gradient(to bottom, transparent, black 45%, black 80%, transparent);
-    mask-image:linear-gradient(to bottom, transparent, black 45%, black 80%, transparent);
-    opacity:.35;
+    -webkit-mask-image:linear-gradient(to bottom, transparent, black 30%);
+    mask-image:linear-gradient(to bottom, transparent, black 30%);
+    opacity:.85;
   }
+  body.dark-mode .dash-desktop-banner{ opacity:.5; }
   .dash-desktop-footer{ flex:0 0 auto; text-align:center; padding:6px 0 10px; font-size:11px; color:#9AACC4; }
 }
 
