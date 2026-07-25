@@ -70,11 +70,21 @@ function applyAccessLevel(){
   document.getElementById('reportsSection').style.display='block';
   document.getElementById('adminMenuItem').style.display=(level==='admin')?'flex':'none';
   var brBtn=document.getElementById('busRequestQuickBtn');
+  var isLeaderOrAdmin=(level==='leader'||level==='admin');
   if(brBtn){
-    var showBr=(level==='leader'||level==='admin') && window.innerWidth>=901;
+    var showBr=isLeaderOrAdmin && window.innerWidth>=901;
     brBtn.style.display = showBr ? 'inline-flex' : 'none';
     if(showBr && typeof brLoadAssignableTechnicians==='function') brLoadAssignableTechnicians();
   }
+  // Yeni desktop sidebar/kart elementləri
+  var sidebarAdminBtn=document.getElementById('sidebarAdminBtn');
+  if(sidebarAdminBtn) sidebarAdminBtn.style.display=(level==='admin')?'flex':'none';
+  var dashBrBtn=document.getElementById('dashBrBtn');
+  if(dashBrBtn) dashBrBtn.style.display=isLeaderOrAdmin?'flex':'none';
+  var dashBulkBtn=document.getElementById('dashBulkBtn');
+  if(dashBulkBtn) dashBulkBtn.style.display=isLeaderOrAdmin?'flex':'none';
+  var welcomeNameD=document.getElementById('dashWelcomeNameD');
+  if(welcomeNameD) welcomeNameD.textContent=(currentUser.name||'').split(' ')[0]||currentUser.name||'';
 }
 
 function updateClock(){
@@ -689,7 +699,9 @@ function applyTheme(isDark){
 }
 function updateCollectivesBtnVisibility(){
   var collBtn = document.getElementById('collectivesBtn');
-  if(collBtn) collBtn.style.display = (window.innerWidth >= 901) ? 'flex' : 'none';
+  if(collBtn) collBtn.style.display = 'none'; // köhnə header düyməsi — sidebar-a köçürülüb, artıq göstərilmir
+  var sidebarBtn = document.getElementById('sidebarCollectivesBtn');
+  if(sidebarBtn) sidebarBtn.style.display = (window.innerWidth >= 901) ? 'flex' : 'none';
 }
 window.addEventListener('resize', updateCollectivesBtnVisibility);
 function toggleTheme(){ var isDark=!document.body.classList.contains('dark-mode'); applyTheme(isDark); try{localStorage.setItem('ctech_theme',isDark?'dark':'light');}catch(e){} }
@@ -1551,12 +1563,13 @@ function updateRptDate(){
 }
 var rptDateInterval=null;
 
-function openBusReport(){
+function openBusReport(forceOpenOnly){
   document.getElementById('dashboardView').style.display='none';
   var view=document.getElementById('busReportView');
   view.style.display='flex';
   document.getElementById('rptGlobalSearch').value='';
   rptServiceTypeFilter='all';
+  rptForceOpenOnly=!!forceOpenOnly;
   rptDaysBack=90;
   var daysSel=document.getElementById('rptDaysBackSelect'); if(daysSel) daysSel.value='90';
   document.querySelectorAll('#rptTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
@@ -1570,6 +1583,7 @@ function openBusReport(){
   if(rptAutoRefresh) clearInterval(rptAutoRefresh);
   rptAutoRefresh=setInterval(loadReportData,120000);
 }
+function openBusOngoing(){ openBusReport(true); }
 function closeBusReport(){
   if(rptAutoRefresh){ clearInterval(rptAutoRefresh); rptAutoRefresh=null; }
   if(rptDateInterval){ clearInterval(rptDateInterval); rptDateInterval=null; }
@@ -1624,6 +1638,7 @@ function rptShowAllHistory(){
 var rptSearchDebounceTimer=null;
 function applyFiltersDebounced(){ clearTimeout(rptSearchDebounceTimer); rptSearchDebounceTimer=setTimeout(applyFilters,180); }
 function rptIsTechnicianView(){ return getAccessLevel(currentUser.role)==='technician'; }
+var rptForceOpenOnly=false;
 function rptIsAssignedToMe(row){
   var myName=(currentUser.name||'').trim().toLowerCase();
   if(!myName) return false;
@@ -1640,6 +1655,9 @@ function applyFilters(){
       // Texnik yalnız ÖZÜNƏ təhkim olunmuş və hələ AÇIQ olan (davam edən) ticketləri görür
       if((row['Status']||'').trim()!=='Açıq') return false;
       if(!rptIsAssignedToMe(row)) return false;
+    } else if(rptForceOpenOnly){
+      // Qrup rəhbəri/admin "Davam edən Servis" ilə açılıbsa — yalnız Status=Açıq
+      if((row['Status']||'').trim()!=='Açıq') return false;
     }
     if(!rptMatchesServiceType(row)) return false;
     if(!q) return true;
