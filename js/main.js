@@ -1483,6 +1483,8 @@ function openBusReport(){
   view.style.display='flex';
   document.getElementById('rptGlobalSearch').value='';
   rptServiceTypeFilter='all';
+  rptDaysBack=90;
+  var daysSel=document.getElementById('rptDaysBackSelect'); if(daysSel) daysSel.value='90';
   document.querySelectorAll('#rptTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
   var allBtn=document.querySelector('#rptTypeFilter [data-type="all"]'); if(allBtn) allBtn.classList.add('rpt-type-btn-active');
   document.getElementById('rptExcelBtn').style.display=(getAccessLevel(currentUser.role)==='technician')?'none':'flex';
@@ -1509,9 +1511,10 @@ function rptSortKey(row){
   var ts=new Date(iso).getTime();
   return isNaN(ts)?0:ts;
 }
+var rptDaysBack = 90;
 function loadReportData(){
   document.getElementById('rptTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData'})})
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack: rptDaysBack})})
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.status!=='OK'){
@@ -1520,10 +1523,29 @@ function loadReportData(){
     }
     rptAllRows=(d.rows||[]).slice().sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
     rptColumns=d.columns||[];
+    var hiddenCount = (d.totalCount||0) - rptAllRows.length;
+    var hintEl = document.getElementById('rptOldHint');
+    if(hintEl){
+      if(rptDaysBack > 0 && hiddenCount > 0){
+        hintEl.innerHTML = hiddenCount+' köhnə ticket (seçilmiş dövrdən əvvəl) gizlədilib, sürəti artırmaq üçün. <a onclick="rptShowAllHistory()">Hamısını göstər</a>';
+        hintEl.style.display='flex';
+      } else {
+        hintEl.style.display='none';
+      }
+    }
     applyFilters();
   }).catch(function(e){
     document.getElementById('rptTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-empty">Şəbəkə xətası: '+e.message+'</div></td></tr>';
   });
+}
+function rptChangeDaysBack(){
+  rptDaysBack = Number(document.getElementById('rptDaysBackSelect').value) || 0;
+  loadReportData();
+}
+function rptShowAllHistory(){
+  rptDaysBack = 0;
+  var sel = document.getElementById('rptDaysBackSelect'); if(sel) sel.value='0';
+  loadReportData();
 }
 var rptSearchDebounceTimer=null;
 function applyFiltersDebounced(){ clearTimeout(rptSearchDebounceTimer); rptSearchDebounceTimer=setTimeout(applyFilters,180); }
@@ -1639,6 +1661,8 @@ function openTvmReport(){
   var view=document.getElementById('tvmReportView');
   view.style.display='flex';
   document.getElementById('tvmRptGlobalSearch').value='';
+  tvmRptDaysBack=90;
+  var tvmDaysSel=document.getElementById('tvmRptDaysBackSelect'); if(tvmDaysSel) tvmDaysSel.value='90';
   document.getElementById('tvmRptExcelBtn').style.display=(getAccessLevel(currentUser.role)==='technician')?'none':'flex';
   tvmRptShownCount=tvmRptPageSize;
   updateTvmRptDate();
@@ -1663,9 +1687,10 @@ function tvmRptSortKey(row){
   var ts=new Date(iso).getTime();
   return isNaN(ts)?0:ts;
 }
+var tvmRptDaysBack = 90;
 function loadTvmReportData(){
   document.getElementById('tvmRptTableBody').innerHTML='<tr><td colspan="5"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData'})})
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData', daysBack: tvmRptDaysBack})})
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.status!=='OK'){
@@ -1674,10 +1699,29 @@ function loadTvmReportData(){
     }
     tvmRptAllRows=(d.rows||[]).slice().sort(function(a,b){ return tvmRptSortKey(b)-tvmRptSortKey(a); });
     tvmRptColumns=d.columns||[];
+    var hiddenCount = (d.totalCount||0) - tvmRptAllRows.length;
+    var hintEl = document.getElementById('tvmRptOldHint');
+    if(hintEl){
+      if(tvmRptDaysBack > 0 && hiddenCount > 0){
+        hintEl.innerHTML = hiddenCount+' köhnə ticket (seçilmiş dövrdən əvvəl) gizlədilib, sürəti artırmaq üçün. <a onclick="tvmRptShowAllHistory()">Hamısını göstər</a>';
+        hintEl.style.display='flex';
+      } else {
+        hintEl.style.display='none';
+      }
+    }
     applyTvmFilters();
   }).catch(function(e){
     document.getElementById('tvmRptTableBody').innerHTML='<tr><td colspan="5"><div class="rpt-empty">Şəbəkə xətası: '+e.message+'</div></td></tr>';
   });
+}
+function tvmRptChangeDaysBack(){
+  tvmRptDaysBack = Number(document.getElementById('tvmRptDaysBackSelect').value) || 0;
+  loadTvmReportData();
+}
+function tvmRptShowAllHistory(){
+  tvmRptDaysBack = 0;
+  var sel = document.getElementById('tvmRptDaysBackSelect'); if(sel) sel.value='0';
+  loadTvmReportData();
 }
 var tvmRptSearchDebounceTimer=null;
 function applyTvmFiltersDebounced(){ clearTimeout(tvmRptSearchDebounceTimer); tvmRptSearchDebounceTimer=setTimeout(applyTvmFilters,180); }
@@ -2987,15 +3031,33 @@ function bkSnInputKeydown(e, el, safeId, type){
   }
 }
 
+function bkSnFindCrossDqnDuplicate(currentDqn, type, sn){
+  var snUpper = sn.toUpperCase();
+  var foundDqn = null;
+  Object.keys(bkSnByDqn).forEach(function(otherDqn){
+    if(otherDqn === currentDqn || foundDqn) return;
+    var arr = type==='old' ? bkSnByDqn[otherDqn].oldSn : bkSnByDqn[otherDqn].newSn;
+    if(arr.some(function(x){ return x.toUpperCase()===snUpper; })) foundDqn = otherDqn;
+  });
+  return foundDqn;
+}
+
 function bkSnAddChip(dqn, type, sn){
   sn = String(sn||'').trim();
   if(!sn || !bkSnByDqn[dqn]) return;
   var arr = type==='old' ? bkSnByDqn[dqn].oldSn : bkSnByDqn[dqn].newSn;
   var already = arr.some(function(x){ return x.toUpperCase()===sn.toUpperCase(); });
-  if(!already) arr.push(sn);
+  if(!already){
+    arr.push(sn);
+    var dupDqn = bkSnFindCrossDqnDuplicate(dqn, type, sn);
+    if(dupDqn){
+      alert('Diqqət: "'+sn+'" SN artıq '+dupDqn+' DQN-nin '+(type==='old'?'Köhnə':'Yeni')+' SN xanasında istifadə olunub. Səhv yazma ehtimalını yoxlayın.');
+    }
+  }
   bkFormDirty = true;
   bkSnRenderChipsFor(dqn, type);
   bkSnCheckConflict(dqn);
+  bkSnRenderAllChipsOfType(type); // digər DQN-lərdəki eyni SN-in vizual işarəsi də yenilənsin
 }
 
 function bkSnRemoveChip(dqn, type, sn){
@@ -3006,6 +3068,11 @@ function bkSnRemoveChip(dqn, type, sn){
   bkFormDirty = true;
   bkSnRenderChipsFor(dqn, type);
   bkSnCheckConflict(dqn);
+  bkSnRenderAllChipsOfType(type);
+}
+
+function bkSnRenderAllChipsOfType(type){
+  Object.keys(bkSnByDqn).forEach(function(dqn){ bkSnRenderChipsFor(dqn, type); });
 }
 
 function bkSnRenderChipsFor(dqn, type){
@@ -3015,9 +3082,12 @@ function bkSnRenderChipsFor(dqn, type){
   var box = document.getElementById('bkSnChips_'+safeId+'_'+type);
   if(!box) return;
   box.innerHTML = arr.map(function(sn){
-    var unknown = (typeof busSnExists==='function') && (typeof busValidatorSNLoaded!=='undefined') && busValidatorSNLoaded && !busSnExists(sn);
+    var notInDb = (typeof busSnExists==='function') && (typeof busValidatorSNLoaded!=='undefined') && busValidatorSNLoaded && !busSnExists(sn);
+    var dupDqn = bkSnFindCrossDqnDuplicate(dqn, type, sn);
+    var warn = notInDb || dupDqn;
+    var title = dupDqn ? ('Diqqət: bu SN '+dupDqn+' DQN-də də istifadə olunub') : (notInDb ? 'Bu SN bazada tapılmadı — diqqətlə yoxlayın' : '');
     var safeSn = sn.replace(/'/g,'');
-    return '<span class="bs-chip'+(unknown?' bs-chip-warn':'')+'"'+(unknown?' title="Bu SN bazada tapılmadı — diqqətlə yoxlayın">⚠ ':'>')
+    return '<span class="bs-chip'+(warn?' bs-chip-warn':'')+'"'+(warn?' title="'+escapeHtml(title)+'">⚠ ':'>')
       + escapeHtml(sn)
       + '<button type="button" class="bs-chip-x" onclick="bkSnRemoveChip(\''+dqn.replace(/'/g,'')+'\',\''+type+'\',\''+safeSn+'\')">✕</button></span>';
   }).join('');
@@ -3366,7 +3436,7 @@ function notifRenderList(){
     return '<div class="notif-item'+(unread?' unread':'')+'" onclick="notifOpenDetail(\''+n.id+'\')">'
       + '<div class="notif-item-top">'
       + (unread ? '<span class="notif-item-dot"></span><span class="notif-item-label">Yeni mesaj var</span>' : '<span class="notif-item-label" style="color:#9AACC4;">Mesaj</span>')
-      + '<span class="notif-item-time">'+escapeHtml(n.date)+' · '+escapeHtml(n.time)+'</span>'
+      + '<span class="notif-item-time">'+escapeHtml(n.date)+' '+escapeHtml(n.time)+'</span>'
       + '</div>'
       + '<div class="notif-item-preview">'+escapeHtml(preview)+'</div>'
       + '</div>';
@@ -3379,8 +3449,7 @@ function notifOpenDetail(id){
   notifCurrentOpenId = id;
   document.getElementById('notifListView').style.display='none';
   document.getElementById('notifDetailView').style.display='block';
-  document.getElementById('notifDetailDate').textContent = n.date;
-  document.getElementById('notifDetailTime').textContent = n.time;
+  document.getElementById('notifDetailDateTime').textContent = n.date + ' ' + n.time;
   document.getElementById('notifDetailText').textContent = n.message;
 }
 
@@ -3410,11 +3479,25 @@ function admRenderMessageHistory(){
     var list = d.notifications || [];
     if(list.length===0){ box.innerHTML='<div class="adm-empty">Son 48 saatda göndərilmiş bildiriş yoxdur</div>'; return; }
     box.innerHTML = list.map(function(n){
-      var preview = n.message.length>80 ? n.message.slice(0,80)+'…' : n.message;
-      return '<div class="adm-reorder-row"><span class="adm-reorder-text">'+escapeHtml(n.date)+' '+escapeHtml(n.time)+' — '+escapeHtml(preview)+'</span></div>';
+      var preview = n.message.length>70 ? n.message.slice(0,70)+'…' : n.message;
+      return '<div class="adm-reorder-row">'
+        + '<span class="adm-reorder-text">'+escapeHtml(n.date)+' '+escapeHtml(n.time)+' — '+escapeHtml(preview)+'</span>'
+        + '<button class="adm-icon-btn adm-icon-btn-danger" onclick="admDeleteNotification(\''+n.id+'\')" aria-label="Sil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>'
+        + '</div>';
     }).join('');
   })
   .catch(function(){ box.innerHTML='<div class="adm-empty">Şəbəkə xətası</div>'; });
+}
+
+function admDeleteNotification(id){
+  admOpenDeleteConfirm('Bu bildirişi silmək istədiyinizə əminsiniz? Mobil tətbiqdəki bildiriş bölməsindən də silinəcək.', function(){
+    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'deleteNotification', id:id, requesterEmail: currentUser?currentUser.email:''})})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
+      admRenderMessageHistory();
+    });
+  });
 }
 
 function submitAdminNotification(){
@@ -3426,6 +3509,8 @@ function submitAdminNotification(){
 
   var message = textEl.value.trim();
   if(!message){ errEl.textContent='Mesaj mətni boş ola bilməz.'; errEl.style.display='block'; return; }
+  var timeVal = getTimeInputValue('admMsgTime');
+  if(!timeVal){ errEl.textContent='Saat düzgün deyil (HH:MM formatında olmalıdır).'; errEl.style.display='block'; return; }
 
   // ISO tarixi (yyyy-mm-dd) DD.MM.YYYY formatına çeviririk (sistemin qalan hissəsi ilə uyğun)
   var dateVal = dateEl.value;
@@ -3436,7 +3521,7 @@ function submitAdminNotification(){
 
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({
     action:'sendNotification',
-    data:{ date: dateFormatted, time: timeEl.value, message: message },
+    data:{ date: dateFormatted, time: timeVal, message: message },
     requesterEmail: currentUser?currentUser.email:''
   })})
   .then(function(r){ return r.json(); })
