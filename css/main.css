@@ -3278,15 +3278,16 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
 
   /* ── Aşağı banner ── */
   .dash-desktop-banner-wrap{
-    flex:1 1 auto; min-height:24px; overflow:hidden; position:relative;
+    flex:1 1 auto; min-height:70px; overflow:hidden; position:relative;
     background:#EAF1FC; border-radius:18px 18px 0 0; margin-top:6px;
+    display:flex; align-items:flex-end; justify-content:center;
   }
   body.dark-mode .dash-desktop-banner-wrap{ background:#0F1826; }
   .dash-desktop-banner{
-    position:absolute; left:0; right:0; bottom:0; width:100%; height:100%;
-    object-fit:cover; object-position:center bottom;
-    -webkit-mask-image:linear-gradient(to bottom, transparent, black 30%);
-    mask-image:linear-gradient(to bottom, transparent, black 30%);
+    width:100%; max-height:100%;
+    object-fit:contain; object-position:center bottom;
+    -webkit-mask-image:linear-gradient(to bottom, transparent, black 25%);
+    mask-image:linear-gradient(to bottom, transparent, black 25%);
     opacity:.85;
   }
   body.dark-mode .dash-desktop-banner{ opacity:.5; }
