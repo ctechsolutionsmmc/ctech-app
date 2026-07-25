@@ -1176,10 +1176,16 @@ function bsLockStage1Fields(lock){
   if(resetBtn) resetBtn.style.display = lock ? 'none' : resetBtn.style.display;
 }
 
-function attemptBusHome(){ if(bsFormDirty){var co=document.getElementById('bsConfirmOverlay'); co.style.display='flex'; co.classList.add('open');}else{bsGoBack();} }
+var bsConfirmMode = 'busService';
+function attemptBusHome(){ bsConfirmMode='busService'; if(bsFormDirty){var co=document.getElementById('bsConfirmOverlay'); co.style.display='flex'; co.classList.add('open');}else{bsGoBack();} }
 function closeConfirm(){ var co=document.getElementById('bsConfirmOverlay'); co.classList.remove('open'); co.style.display='none'; }
 function confirmExit(){
   var co=document.getElementById('bsConfirmOverlay'); co.classList.remove('open'); co.style.display='none';
+  if(bsConfirmMode==='busRequest'){
+    brFormDirty=false;
+    closeBusRequest();
+    return;
+  }
   if(!bsEditMode)clearBsDraft();
   var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
   var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');
@@ -2702,6 +2708,7 @@ var BK_DOWS=['B','E','Ç','A','C','Ş','B'];
 var BK_MONTHS=['Yanvar','Fevral','Mart','Aprel','May','İyun','İyul','Avqust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
 var bkPreviewData=null, bkFormDataLoaded=false;
 
+var bkReturnTarget = 'busService';
 function openBusBulk(){
   if(currentUser){
     var level = getAccessLevel(currentUser.role);
@@ -2710,7 +2717,11 @@ function openBusBulk(){
       return;
     }
   }
-  
+
+  // Haradan açıldığını yadda saxla ki, Home düyməsi düz yerə qaytarsın
+  var dashVisible = getComputedStyle(document.getElementById('dashboardView')).display !== 'none';
+  bkReturnTarget = dashVisible ? 'dashboard' : 'busService';
+
   var now = bakuNowDate();
   document.getElementById('dashboardView').style.display = 'none';
   document.getElementById('busServiceView').style.display = 'none';
@@ -2728,7 +2739,11 @@ function openBusBulk(){
 
 function closeBusBulk(){
   document.getElementById('busBulkView').style.display = 'none';
-  document.getElementById('busServiceView').style.display = 'block';
+  if(bkReturnTarget === 'dashboard'){
+    document.getElementById('dashboardView').style.display = 'block';
+  } else {
+    document.getElementById('busServiceView').style.display = 'block';
+  }
   resetBulkForm();
 }
 
@@ -3985,7 +4000,12 @@ function brRenderTicketBadge(){
 }
 
 function attemptBusRequestHome(){
-  if(brFormDirty && !confirm('Yadda saxlanılmamış məlumatlar var. Çıxmaq istədiyinizə əminsiniz?')) return;
+  bsConfirmMode='busRequest';
+  if(brFormDirty){
+    var co=document.getElementById('bsConfirmOverlay');
+    co.style.display='flex'; co.classList.add('open');
+    return;
+  }
   closeBusRequest();
 }
 function closeBusRequest(){
