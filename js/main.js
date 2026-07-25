@@ -39,6 +39,7 @@ function login(){
 
 document.getElementById('password').addEventListener('keydown',function(e){ if(e.key==='Enter'){login();} });
 
+var notifPollingStarted = false;
 function showDashboard(){
   document.getElementById('loginView').style.display='none';
   document.getElementById('busServiceView').style.display='none';
@@ -50,6 +51,14 @@ function showDashboard(){
   if(typeof updateCollectivesBtnVisibility==='function') updateCollectivesBtnVisibility();
   if(typeof preloadValidatorSNList==='function') preloadValidatorSNList();
   if(typeof preloadNotifications==='function') preloadNotifications();
+  if(!notifPollingStarted){
+    notifPollingStarted = true;
+    // Arxa planda sakit yenilənmə — istifadəçiyə heç bir görünən reload/flicker olmadan,
+    // database-dəki dəyişiklikləri (yeni/silinmiş bildirişlər) tutur.
+    setInterval(function(){
+      if(typeof preloadNotifications==='function') preloadNotifications();
+    }, 120000);
+  }
   if(!clockStarted){ clockStarted=true; updateClock(); setInterval(updateClock,1000); }
 }
 
@@ -656,7 +665,7 @@ function loadAdminLeaders(){
   .catch(function(e){ if(listEl) listEl.innerHTML='<div class="adm-empty">Şəbəkə xətası: '+escapeHtml(e.message)+'</div>'; });
 }
 function hideAbout(){ document.getElementById('aboutModal').classList.remove('open'); }
-function signOut(){ closeMenu(); clearSession(); currentUser=null; document.getElementById('email').value=''; document.getElementById('password').value=''; var btn=document.getElementById('loginBtn'); btn.disabled=false; btn.innerHTML='Daxil ol'; document.getElementById('dashboardView').style.display='none'; document.getElementById('busServiceView').style.display='none'; document.getElementById('loginView').style.display='flex'; }
+function signOut(){ closeMenu(); clearSession(); currentUser=null; document.getElementById('email').value=''; document.getElementById('password').value=''; var btn=document.getElementById('loginBtn'); btn.disabled=false; btn.innerHTML='Daxil ol'; document.getElementById('dashboardView').style.display='none'; document.getElementById('busServiceView').style.display='none'; document.getElementById('loginView').style.display=''; }
 function moduleAlert(n){ alert(n+' modulu tezliklə hazır olacaq'); }
 
 var MOON_PATH='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
@@ -3395,6 +3404,12 @@ function preloadNotifications(){
     if(d.status!=='OK') return;
     notifList = d.notifications || [];
     notifUpdateBadge();
+    // Bildiriş siyahısı görünüşü açıqdırsa (istifadəçi hazırda ora baxırsa), onu da sakitcə yenilə
+    var notifView = document.getElementById('notifView');
+    var listView = document.getElementById('notifListView');
+    if(notifView && notifView.style.display==='block' && listView && listView.style.display!=='none'){
+      notifRenderList();
+    }
   })
   .catch(function(){});
 }
