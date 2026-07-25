@@ -268,9 +268,7 @@
   <!-- Mesaj görünüşü -->
   <div id="notifDetailView" style="display:none;">
     <div class="notif-detail-meta">
-      <span id="notifDetailDate">--.--.----</span>
-      <span class="clock-sep">|</span>
-      <span id="notifDetailTime">--:--</span>
+      <span id="notifDetailDateTime">--.--.---- --:--</span>
     </div>
     <div class="notif-detail-text" id="notifDetailText"></div>
     <button class="notif-read-btn" onclick="markNotificationReadAndClose()">Oxudum</button>
@@ -747,7 +745,7 @@
             </div>
             <div class="adm-form-field" style="flex:1;">
               <label>Saat</label>
-              <input type="time" id="admMsgTime">
+              <input type="text" inputmode="numeric" pattern="[0-9:]*" maxlength="5" id="admMsgTime" placeholder="--:--" autocomplete="off" oninput="formatTimeInput(this)">
             </div>
           </div>
           <div class="adm-form-field">
@@ -971,6 +969,12 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input type="text" class="rpt-search" id="rptGlobalSearch" placeholder="Ticket ID, Tarix, D.Q.N., BUS ID və ya Daşıyıcı üzrə axtar..." oninput="applyFiltersDebounced()">
     </div>
+    <select class="adm-filter-select" id="rptDaysBackSelect" onchange="rptChangeDaysBack()">
+      <option value="90">Son 90 gün</option>
+      <option value="180">Son 6 ay</option>
+      <option value="365">Son 1 il</option>
+      <option value="0">Hamısı</option>
+    </select>
     <div class="rpt-type-filter" id="rptTypeFilter">
       <button class="rpt-type-btn rpt-type-btn-active" data-type="all" onclick="setRptServiceTypeFilter('all',this)">Hamısı</button>
       <button class="rpt-type-btn" data-type="individual" onclick="setRptServiceTypeFilter('individual',this)">Fərdi Servis</button>
@@ -984,6 +988,8 @@
     </div>
     <span class="rpt-info" id="rptCount">— nəticə</span>
   </div>
+
+  <div class="rpt-oldhint" id="rptOldHint" style="display:none;"></div>
 
   <div class="rpt-body-scroll">
     <div class="rpt-table-wrap">
@@ -1058,6 +1064,12 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input type="text" class="rpt-search" id="tvmRptGlobalSearch" placeholder="Ticket ID, Tarix, TVM SN və ya Lokasiya üzrə axtar..." oninput="applyTvmFiltersDebounced()">
     </div>
+    <select class="adm-filter-select" id="tvmRptDaysBackSelect" onchange="tvmRptChangeDaysBack()">
+      <option value="90">Son 90 gün</option>
+      <option value="180">Son 6 ay</option>
+      <option value="365">Son 1 il</option>
+      <option value="0">Hamısı</option>
+    </select>
     <div class="rpt-date-box">
       <div class="status-dot"></div>
       <span id="tvmRptDateBox">--.--.----</span>
@@ -1066,6 +1078,8 @@
     </div>
     <span class="rpt-info" id="tvmRptCount">— nəticə</span>
   </div>
+
+  <div class="rpt-oldhint" id="tvmRptOldHint" style="display:none;"></div>
 
   <div class="rpt-body-scroll">
     <div class="rpt-table-wrap">
