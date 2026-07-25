@@ -3158,12 +3158,12 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
   }
   /* Profil çipini header-in sağ tərəfinə gətiririk (fotodakı kimi tək sıra) */
   #dashboardView > .profile-row{ display:flex !important; position:absolute; top:0; right:clamp(20px,2.6vw,36px); height:100%; align-items:center; padding:0; grid-area:header; z-index:6; }
-  #dashboardView .profile-chip{ padding:5px 14px 5px 5px; gap:9px; }
+  #dashboardView .profile-chip{ padding:5px 14px 5px 5px; gap:9px; max-width:170px; }
   #dashboardView .profile-avatar{ width:32px; height:32px; border-radius:10px; }
-  #dashboardView .profile-name{ font-size:12.5px; }
+  #dashboardView .profile-name{ font-size:12.5px; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #dashboardView .profile-role{ font-size:10.5px; }
-  /* Tarix/saat + gecə-rejim düymələrini sola sürüşdürürük, profil çipi üçün yer açılır */
-  #dashboardView .header-right{ margin-right:154px; gap:10px; }
+  /* Tarix/saat + gecə-rejim düymələrini sola sürüşdürürük, profil çipi üçün yer açılır (uzun adlar üçün genişləndirilmiş boşluq) */
+  #dashboardView .header-right{ margin-right:190px; gap:8px; }
   #dashboardView .brand-mini{ font-size:22px; letter-spacing:2px; }
 
   /* ── Sidebar — dar, ikon+yazı altda ── */
@@ -3278,19 +3278,19 @@ body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; col
 
   /* ── Aşağı banner ── */
   .dash-desktop-banner-wrap{
-    flex:1 1 auto; min-height:70px; overflow:hidden; position:relative;
+    flex:1 1 auto; min-height:150px; overflow:hidden; position:relative;
     background:#EAF1FC; border-radius:18px 18px 0 0; margin-top:6px;
     display:flex; align-items:flex-end; justify-content:center;
   }
   body.dark-mode .dash-desktop-banner-wrap{ background:#0F1826; }
   .dash-desktop-banner{
-    width:100%; max-height:100%;
+    width:100%; height:100%; max-height:100%;
     object-fit:contain; object-position:center bottom;
-    -webkit-mask-image:linear-gradient(to bottom, transparent, black 25%);
-    mask-image:linear-gradient(to bottom, transparent, black 25%);
-    opacity:.85;
+    -webkit-mask-image:linear-gradient(to bottom, transparent, black 20%);
+    mask-image:linear-gradient(to bottom, transparent, black 20%);
+    opacity:.9;
   }
-  body.dark-mode .dash-desktop-banner{ opacity:.5; }
+  body.dark-mode .dash-desktop-banner{ opacity:.55; }
   .dash-desktop-footer{ flex:0 0 auto; text-align:center; padding:6px 0 10px; font-size:11px; color:#9AACC4; }
 }
 
