@@ -4212,7 +4212,11 @@ function submitBusRequest(){
   if(brSelected.technicians.length===0){ alert('Ən azı bir texnik təhkim edin'); return; }
 
   var btn=document.getElementById('brSubmitBtn');
-  btn.disabled=true; var origText=btn.textContent; btn.textContent='Göndərilir...';
+  btn.disabled=true; var origText=btn.textContent;
+
+  var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
+  var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');
+  ov.style.display='flex'; ov.classList.add('open'); sp.style.display='block'; ic.style.display='none'; tx.textContent='Göndərilir...';
 
   var payload={
     action:'createBusRequest',
@@ -4237,13 +4241,19 @@ function submitBusRequest(){
   .then(function(r){return r.json();})
   .then(function(d){
     btn.disabled=false; btn.textContent=origText;
-    if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
-    brFormDirty=false;
-    closeBusRequest();
+    sp.style.display='none'; ic.style.display='flex';
+    if(d.status==='OK'){
+      tx.textContent='Göndərildi! '+d.ticketId;
+      setTimeout(function(){ ov.classList.remove('open'); ov.style.display='none'; brFormDirty=false; closeBusRequest(); }, 1800);
+    } else {
+      tx.textContent='Xəta baş verdi';
+      setTimeout(function(){ ov.classList.remove('open'); ov.style.display='none'; alert(d.message||'Xəta baş verdi'); }, 1200);
+    }
   })
   .catch(function(e){
     btn.disabled=false; btn.textContent=origText;
-    alert('Şəbəkə xətası: '+e.message);
+    sp.style.display='none'; tx.textContent='Şəbəkə xətası';
+    setTimeout(function(){ ov.classList.remove('open'); ov.style.display='none'; alert('Şəbəkə xətası: '+e.message); }, 1200);
   });
 }
 
