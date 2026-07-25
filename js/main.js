@@ -708,7 +708,19 @@ function updateCollectivesBtnVisibility(){
 window.addEventListener('resize', updateCollectivesBtnVisibility);
 function toggleTheme(){ var isDark=!document.body.classList.contains('dark-mode'); applyTheme(isDark); try{localStorage.setItem('ctech_theme',isDark?'dark':'light');}catch(e){} }
 
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('service-worker.js'); }
+// Service Worker artıq istifadə olunmur (faydasız, xəta-idarəetməsiz idi) —
+// əvvəllər quraşdırılmış ola biləcək versiyaları təmizləyirik ki, heç kimdə
+// köhnə/"boş" SW arxa planda qalıb qarışıqlıq yaratmasın.
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(reg){ reg.unregister(); });
+  }).catch(function(){});
+}
+if('caches' in window){
+  caches.keys().then(function(names){
+    names.forEach(function(name){ caches.delete(name); });
+  }).catch(function(){});
+}
 var savedUser=loadSession();
 if(savedUser && savedUser.email){
   currentUser=savedUser;
@@ -1192,6 +1204,11 @@ function confirmExit(){
   if(bsConfirmMode==='busRequest'){
     brFormDirty=false;
     closeBusRequest();
+    return;
+  }
+  if(bsConfirmMode==='busBulk'){
+    bkFormDirty=false;
+    closeBusBulk();
     return;
   }
   if(!bsEditMode)clearBsDraft();
@@ -2735,7 +2752,19 @@ function openBusBulk(){
   document.getElementById('dashboardView').style.display = 'none';
   document.getElementById('busServiceView').style.display = 'none';
   document.getElementById('busBulkView').style.display = 'flex';
-  ensureBulkFormData();
+
+  var needsFetch = !(bsFormData && bsFormData.carriers);
+  if(needsFetch){
+    var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
+    var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');
+    ov.style.display='flex'; ov.classList.add('open'); sp.style.display='block'; ic.style.display='none'; tx.textContent='Yüklənir...';
+  }
+  ensureBulkFormData(function(){
+    if(needsFetch){
+      var ov2=document.getElementById('bsLoadingOverlay');
+      ov2.classList.remove('open'); ov2.style.display='none';
+    }
+  });
   if(!bkSelectedDate){
     bkCalYear = now.getFullYear();
     bkCalMonth = now.getMonth();
@@ -2744,6 +2773,16 @@ function openBusBulk(){
   renderBkCal();
   bkUpdateSnFieldsState();
   bkUpdateImportCount();
+}
+
+function attemptBusBulkHome(){
+  bsConfirmMode='busBulk';
+  if(typeof bkFormDirty!=='undefined' && bkFormDirty){
+    var co=document.getElementById('bsConfirmOverlay');
+    co.style.display='flex'; co.classList.add('open');
+    return;
+  }
+  closeBusBulk();
 }
 
 function closeBusBulk(){
@@ -2756,8 +2795,8 @@ function closeBusBulk(){
   resetBulkForm();
 }
 
-function ensureBulkFormData(){
-  if(bsFormData && bsFormData.carriers){ bkFillSelects(); bkFormDataLoaded=true; return; }
+function ensureBulkFormData(callback){
+  if(bsFormData && bsFormData.carriers){ bkFillSelects(); bkFormDataLoaded=true; if(callback) callback(); return; }
   fetch(API_URL,{
     method:'POST',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -2770,7 +2809,9 @@ function ensureBulkFormData(){
     }
     bkFillSelects();
     bkFormDataLoaded = true;
-  });
+    if(callback) callback();
+  })
+  .catch(function(){ if(callback) callback(); });
 }
 
 function bkFillSelects(){
@@ -2778,8 +2819,6 @@ function bkFillSelects(){
   bkFillSel('bk_carrier', d.carriers, 'Seçin');
   bkFillSel('bk_category', d.busEquipment, 'Seçin');
   bkFillSel('bk_location', d.locations, 'Seçin (könüllü)');
-  bkFillSel('bk_tech1', d.technicians, 'Seçin');
-  bkFillSel('bk_tech2', d.technicians, 'Seçin');
   bkFillSel('bk_leader', d.leaders, 'Seçin');
   
   bkFillSel('bk_request_tmpl', d.busProblems, 'Seçin');
@@ -3032,7 +3071,9 @@ function bkRunImport(data, count){
   });
 }
 
+var bkFormDirty = false;
 function resetBulkForm(){
+  bkFormDirty = false;
   bkClosePreview();
   bkPreviewData = null;
   ['bk_carrier','bk_category','bk_location','bk_tech1','bk_tech2','bk_leader'].forEach(function(id){
@@ -3050,8 +3091,11 @@ function resetBulkForm(){
   if(carrierLbl) carrierLbl.textContent = 'Seçin';
   var carrierDD = document.getElementById('bkCarrierDDList');
   if(carrierDD) carrierDD.style.display = 'none';
-  document.getElementById('bkCarrierCountWrap').innerHTML = '';
   document.getElementById('bkCarrierCountWrap').style.display = 'none';
+  var countNumEl = document.getElementById('bkCountNum');
+  if(countNumEl) countNumEl.textContent = '0';
+  var countBadgeEl = document.getElementById('bkCountBadge');
+  if(countBadgeEl) countBadgeEl.classList.remove('active','empty');
 
   bkSelectedDqns = [];
   bkAllMode = true;
@@ -3175,8 +3219,50 @@ function bkToggleCarrierDD(){
   }
 }
 
+// ── Bulk: Texnik 1/2 axtarışı (tək dəyər, köhnə select-in davranışını təqlid edir) ──
+function bkTechSearchHandler(el, fieldId, excludeId){
+  var ddId = fieldId + '_dd';
+  var dd = document.getElementById(ddId);
+  var q = el.value.trim();
+  bkFormDirty = true;
+  if(!q){ if(dd) dd.style.display='none'; return; }
+
+  var allTech = (bsFormData && bsFormData.technicians) || [];
+  var excludeVal = (document.getElementById(excludeId)?document.getElementById(excludeId).value:'').trim().toUpperCase();
+  var qUpper = q.toUpperCase();
+  var matches = allTech.filter(function(name){
+    if(excludeVal && name.trim().toUpperCase() === excludeVal) return false;
+    return name.toUpperCase().indexOf(qUpper) !== -1;
+  }).slice(0,8);
+
+  if(!dd) return;
+  if(matches.length===0){
+    dd.innerHTML = '<div class="bs-registry-empty">Uyğun texnik tapılmadı</div>';
+  } else {
+    dd.innerHTML = matches.map(function(name){
+      return '<div class="bs-registry-item" data-name="'+escapeHtml(name)+'"><span class="reg-id">'+escapeHtml(name)+'</span></div>';
+    }).join('');
+    Array.from(dd.querySelectorAll('.bs-registry-item')).forEach(function(itemEl){
+      itemEl.addEventListener('click', function(e){
+        e.stopPropagation();
+        el.value = itemEl.getAttribute('data-name');
+        dd.style.display = 'none';
+      });
+    });
+  }
+  dd.style.display = 'block';
+}
+document.addEventListener('click', function(e){
+  ['bk_tech1','bk_tech2'].forEach(function(id){
+    if(!e.target.closest('#'+id) && !e.target.closest('#'+id+'_dd')){
+      var dd = document.getElementById(id+'_dd'); if(dd) dd.style.display='none';
+    }
+  });
+});
+
 function bkSelectCarrier(carrier){
   bkSelectedCarrier = carrier;
+  bkFormDirty = true;
   var lbl = document.getElementById('bk_carrier_lbl');
   if(lbl) lbl.textContent = carrier;
   var dd = document.getElementById('bkCarrierDDList');
@@ -3359,6 +3445,28 @@ function bkSnFindCrossDqnDuplicate(currentDqn, type, sn){
   return foundDqn;
 }
 
+function showWarnToast(message){
+  var ov=document.getElementById('warnToastOverlay');
+  var tx=document.getElementById('warnToastText');
+  if(tx) tx.textContent=message;
+  if(ov){ ov.style.display='flex'; ov.classList.add('open'); }
+}
+function closeWarnToast(){
+  var ov=document.getElementById('warnToastOverlay');
+  if(ov){ ov.classList.remove('open'); ov.style.display='none'; }
+}
+
+function showWarnToast(message){
+  var tx = document.getElementById('warnToastText');
+  var ov = document.getElementById('warnToastOverlay');
+  if(tx) tx.textContent = message;
+  if(ov) ov.classList.add('open');
+}
+function closeWarnToast(){
+  var ov = document.getElementById('warnToastOverlay');
+  if(ov) ov.classList.remove('open');
+}
+
 function bkSnAddChip(dqn, type, sn){
   sn = String(sn||'').trim();
   if(!sn || !bkSnByDqn[dqn]) return;
@@ -3368,7 +3476,7 @@ function bkSnAddChip(dqn, type, sn){
     arr.push(sn);
     var dupDqn = bkSnFindCrossDqnDuplicate(dqn, type, sn);
     if(dupDqn){
-      alert('Diqqət: "'+sn+'" SN artıq '+dupDqn+' DQN-nin '+(type==='old'?'Köhnə':'Yeni')+' SN xanasında istifadə olunub. Səhv yazma ehtimalını yoxlayın.');
+      showWarnToast('Diqqət: "'+sn+'" SN artıq '+dupDqn+' DQN-nin '+(type==='old'?'Köhnə':'Yeni')+' SN xanasında istifadə olunub. Səhv yazma ehtimalını yoxlayın.');
     }
   }
   bkFormDirty = true;
