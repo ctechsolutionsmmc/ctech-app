@@ -3094,6 +3094,8 @@ body.dark-mode .notif-item.unread{ background:#16223A; border-color:#4E7FE0; }
 .notif-item-label{ font-size:11.5px; font-weight:800; color:#2F6FED; letter-spacing:.2px; }
 .notif-item-time{ font-size:11px; color:#9AACC4; margin-left:auto; }
 .notif-item-preview{ font-size:13.5px; color:#33445E; line-height:1.4; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.notif-item.unread .notif-item-preview{ font-weight:700; color:#12233B; }
+body.dark-mode .notif-item.unread .notif-item-preview{ color:#F0F5FC; }
 body.dark-mode .notif-item-preview{ color:#C7D5E8; }
 
 .notif-detail-meta{
