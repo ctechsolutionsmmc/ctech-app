@@ -4117,10 +4117,23 @@ document.addEventListener('click', function(e){
 // ── Texnik seçimi (USERS sheet-dən, maksimum 2, çip formada) ──
 var brAssignableTechnicians = [];
 function brLoadAssignableTechnicians(){
+  var statusEl = document.getElementById('br_tech_status');
+  if(statusEl) statusEl.textContent = 'Texnik siyahısı yüklənir...';
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getAssignableTechnicianNames', requesterEmail: currentUser?currentUser.email:''})})
   .then(function(r){return r.json();})
-  .then(function(d){ if(d.status==='OK') brAssignableTechnicians = d.names || []; })
-  .catch(function(){});
+  .then(function(d){
+    if(d.status==='OK'){
+      brAssignableTechnicians = d.names || [];
+      if(statusEl) statusEl.textContent = brAssignableTechnicians.length + ' texnik yükləndi';
+    } else {
+      brAssignableTechnicians = [];
+      if(statusEl) statusEl.textContent = '⚠ Xəta: ' + (d.message || 'texnik siyahısı gətirilə bilmədi');
+    }
+  })
+  .catch(function(e){
+    brAssignableTechnicians = [];
+    if(statusEl) statusEl.textContent = '⚠ Şəbəkə xətası: ' + e.message;
+  });
 }
 function brTechSearchHandler(el){
   var dd=document.getElementById('br_tech_dd');
