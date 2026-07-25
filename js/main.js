@@ -4126,8 +4126,10 @@ document.addEventListener('click', function(e){
 var brAssignableTechnicians = [];
 function brLoadAssignableTechnicians(){
   var statusEl = document.getElementById('br_tech_status');
-  if(statusEl) statusEl.textContent = 'Texnik siyahısı yüklənir...';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getAssignableTechnicianNames', requesterEmail: currentUser?currentUser.email:''})})
+  var userDiag = 'currentUser: ' + JSON.stringify(currentUser);
+  if(statusEl) statusEl.textContent = 'Texnik siyahısı yüklənir... [' + userDiag + ']';
+  var emailToSend = currentUser?currentUser.email:'';
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getAssignableTechnicianNames', requesterEmail: emailToSend})})
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.status==='OK'){
@@ -4135,12 +4137,12 @@ function brLoadAssignableTechnicians(){
       if(statusEl) statusEl.textContent = brAssignableTechnicians.length + ' texnik yükləndi';
     } else {
       brAssignableTechnicians = [];
-      if(statusEl) statusEl.textContent = '⚠ Xəta: ' + (d.message || 'texnik siyahısı gətirilə bilmədi');
+      if(statusEl) statusEl.textContent = '⚠ Xəta: ' + (d.message || 'texnik siyahısı gətirilə bilmədi') + ' [Göndərilən email: \'' + emailToSend + '\' | ' + userDiag + ']';
     }
   })
   .catch(function(e){
     brAssignableTechnicians = [];
-    if(statusEl) statusEl.textContent = '⚠ Şəbəkə xətası: ' + e.message;
+    if(statusEl) statusEl.textContent = '⚠ Şəbəkə xətası: ' + e.message + ' [' + userDiag + ']';
   });
 }
 function brTechSearchHandler(el){
