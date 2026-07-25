@@ -942,11 +942,11 @@ body.dark-mode .rpt-type-btn-active{ background:#1C2A3D; color:#8FB4EA; }
   .rpt-table col.col-carrier,
   .rpt-table th.col-carrier,
   .rpt-table td.col-carrier { display:none; }
-  .rpt-table col.col-id     { width:21%; }
-  .rpt-table col.col-date   { width:20%; }
-  .rpt-table col.col-plate  { width:18%; }
-  .rpt-table col.col-bus    { width:17%; }
-  .rpt-table col.col-act    { width:24%; }
+  .rpt-table col.col-id     { width:19%; }
+  .rpt-table col.col-date   { width:17%; }
+  .rpt-table col.col-plate  { width:15%; }
+  .rpt-table col.col-bus    { width:22%; }
+  .rpt-table col.col-act    { width:27%; }
 }
 
 @media(max-width:480px){
