@@ -51,6 +51,7 @@ function showDashboard(){
   if(typeof updateCollectivesBtnVisibility==='function') updateCollectivesBtnVisibility();
   if(typeof preloadValidatorSNList==='function') preloadValidatorSNList();
   if(typeof preloadNotifications==='function') preloadNotifications();
+  if(typeof loadHomeDashStats==='function') loadHomeDashStats();
   if(!notifPollingStarted){
     notifPollingStarted = true;
     // Arxa planda sakit yenilənmə — istifadəçiyə heç bir görünən reload/flicker olmadan,
@@ -137,6 +138,7 @@ function switchAdminSection(key, btn){
   if(key==='leaders' && typeof loadAdminLeaders==='function') loadAdminLeaders();
   if(key==='collectives' && typeof loadAdminCollectives==='function') loadAdminCollectives();
   if(key==='messages' && typeof loadAdminMessages==='function') loadAdminMessages();
+  if(key==='homedash' && typeof loadAdminHomeDashboard==='function') loadAdminHomeDashboard();
 
   // BUS Management
   if(key==='bus' && typeof loadBusManagementData==='function') loadBusManagementData();
@@ -1376,6 +1378,53 @@ document.addEventListener('click', function(e){
 });
 
 document.addEventListener('DOMContentLoaded', function(){
+  var brPlateEl = document.getElementById('br_plate');
+  if(!brPlateEl) return;
+
+  brPlateEl.addEventListener('input', function(e){
+    var raw = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '');
+    if(raw.length > 8) raw = raw.slice(0, 8);
+    var res = '';
+    if(raw.length <= 2){
+      res = raw.replace(/[^0-9]/g, '').slice(0, 2);
+    } else if(raw.length <= 4){
+      var d1 = raw.slice(0, 2).replace(/[^0-9]/g, '');
+      var l = raw.slice(2).replace(/[^A-Z]/g, '').slice(0, 2);
+      res = d1 + (d1.length === 2 ? '-' : '') + l;
+    } else {
+      var d1b = raw.slice(0, 2).replace(/[^0-9]/g, '');
+      var l2 = raw.slice(2, 4).replace(/[^A-Z]/g, '').slice(0, 2);
+      var d2 = raw.slice(4).replace(/[^0-9]/g, '').slice(0, 3);
+      res = d1b;
+      if(d1b.length === 2) res += '-';
+      res += l2;
+      if(l2.length === 2) res += '-';
+      res += d2;
+    }
+    e.target.value = res;
+    e.target.setSelectionRange(res.length, res.length);
+    brFormDirty = true;
+
+    if(res.replace(/[^0-9A-Z]/g, '').length >= 2){
+      brRenderRegistryDropdown(brFilterRegistry(res));
+    } else {
+      brCloseRegistryDD();
+    }
+  });
+
+  brPlateEl.addEventListener('focus', function(){
+    var v = this.value;
+    if(v.replace(/[^0-9A-Z]/g, '').length >= 2){
+      brRenderRegistryDropdown(brFilterRegistry(v));
+    }
+  });
+
+  brPlateEl.addEventListener('paste', function(){
+    setTimeout(function(){ brPlateEl.dispatchEvent(new Event('input')); }, 0);
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function(){
   var plateEl = document.getElementById('bs_plate');
   if(!plateEl) return;
 
@@ -1583,7 +1632,136 @@ function openBusReport(forceOpenOnly){
   if(rptAutoRefresh) clearInterval(rptAutoRefresh);
   rptAutoRefresh=setInterval(loadReportData,120000);
 }
-function openBusOngoing(){ openBusReport(true); }
+// ═══════════════════════════════════════════════════════════════
+// DAVAM EDƏN SERVİS — ayrıca, müstəqil pəncərə (yalnız veb).
+// Bus Real-Time Report ilə eyni struktur/düymələr, AMMA HƏMİŞƏ
+// yalnız Status="Açıq" olan ticketləri göstərir.
+// ═══════════════════════════════════════════════════════════════
+var ongAllRows=[], ongColumns=[], ongFiltered=[], ongShownCount=20, ongPageSize=20, ongAutoRefresh=null, ongDateInterval=null;
+var ongServiceTypeFilter='all';
+
+function openBusOngoing(){
+  closeMenu();
+  document.getElementById('dashboardView').style.display='none';
+  var view=document.getElementById('busOngoingView');
+  view.style.display='flex';
+  document.getElementById('ongGlobalSearch').value='';
+  ongServiceTypeFilter='all';
+  document.querySelectorAll('#ongTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
+  var allBtn=document.querySelector('#ongTypeFilter [data-type="all"]'); if(allBtn) allBtn.classList.add('rpt-type-btn-active');
+  document.getElementById('ongExcelBtn').style.display=(getAccessLevel(currentUser.role)==='technician')?'none':'flex';
+  ongShownCount=ongPageSize;
+  updateOngDate();
+  if(ongDateInterval) clearInterval(ongDateInterval);
+  ongDateInterval=setInterval(updateOngDate,1000);
+  loadOngoingData();
+  if(ongAutoRefresh) clearInterval(ongAutoRefresh);
+  ongAutoRefresh=setInterval(loadOngoingData,120000);
+}
+function closeBusOngoing(){
+  if(ongAutoRefresh){ clearInterval(ongAutoRefresh); ongAutoRefresh=null; }
+  if(ongDateInterval){ clearInterval(ongDateInterval); ongDateInterval=null; }
+  document.getElementById('busOngoingView').style.display='none';
+  document.getElementById('dashboardView').style.display='block';
+}
+function updateOngDate(){
+  var now=new Date();
+  var parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baku',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(now);
+  var map={}; parts.forEach(function(p){map[p.type]=p.value;});
+  var d=document.getElementById('ongDateBox'); if(d) d.textContent=map.day+'.'+map.month+'.'+map.year;
+  var c=document.getElementById('ongClockBox'); if(c) c.textContent=map.hour+':'+map.minute+':'+map.second;
+}
+
+function loadOngoingData(){
+  document.getElementById('ongTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:0})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status!=='OK'){
+      document.getElementById('ongTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-empty">Xəta: '+(d.message||'məlumat gəlmədi')+'</div></td></tr>';
+      return;
+    }
+    ongAllRows=(d.rows||[]).filter(function(row){ return (row['Status']||'').trim()==='Açıq'; }).sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
+    ongColumns=d.columns||[];
+    applyOngoingFilters();
+  }).catch(function(e){
+    document.getElementById('ongTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-empty">Şəbəkə xətası: '+e.message+'</div></td></tr>';
+  });
+}
+var ongSearchDebounceTimer=null;
+function applyOngoingFiltersDebounced(){ clearTimeout(ongSearchDebounceTimer); ongSearchDebounceTimer=setTimeout(applyOngoingFilters,180); }
+function applyOngoingFilters(){
+  var q=(document.getElementById('ongGlobalSearch').value||'').toLowerCase().trim();
+  ongShownCount=ongPageSize;
+  ongFiltered=ongAllRows.filter(function(row){
+    if(ongServiceTypeFilter!=='all'){
+      var t=(row['Xidmət Növü']||'').toLowerCase();
+      if(ongServiceTypeFilter==='individual' && t.indexOf('fərdi')===-1) return false;
+      if(ongServiceTypeFilter==='bulk' && t.indexOf('toplu')===-1) return false;
+    }
+    if(!q) return true;
+    for(var i=0;i<RPT_SEARCH_FIELDS.length;i++){
+      var f=RPT_SEARCH_FIELDS[i];
+      if((row[f]||'').toLowerCase().indexOf(q)!==-1) return true;
+    }
+    return false;
+  });
+  renderOngoingTable();
+}
+function setOngServiceTypeFilter(type, btn){
+  ongServiceTypeFilter=type;
+  document.querySelectorAll('#ongTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
+  if(btn) btn.classList.add('rpt-type-btn-active');
+  applyOngoingFilters();
+}
+function renderOngoingTable(){
+  var body=document.getElementById('ongTableBody');
+  document.getElementById('ongCount').textContent=ongFiltered.length+' nəticə';
+  if(ongFiltered.length===0){
+    body.innerHTML='<tr><td colspan="6"><div class="rpt-empty">Davam edən servis yoxdur</div></td></tr>';
+    document.getElementById('ongLoadMoreWrap').style.display='none';
+    return;
+  }
+  var visible=ongFiltered.slice(0,ongShownCount);
+  var html='';
+  visible.forEach(function(row){
+    var ticketId=escapeHtml(row['Ticket ID']||'');
+    var safeId=(row['Ticket ID']||'').replace(/'/g,'');
+    var editable=canEditTicket(row);
+    html+='<tr>'
+      +'<td class="rpt-td-id">'+ticketId+'</td>'
+      +'<td>'+escapeHtml(row['Tarix']||'')+'</td>'
+      +'<td class="rpt-td-plate">'+escapeHtml(row['D.Q.N.']||'')+'</td>'
+      +'<td>'+escapeHtml(row['BUS ID']||'')+'</td>'
+      +'<td class="col-carrier" title="'+escapeHtml(row['Daşıyıcı']||'')+'">'+escapeHtml(row['Daşıyıcı']||'')+'</td>'
+      +'<td class="col-act"><div class="rpt-row-actions">'
+      +'<button class="rpt-icon-btn" onclick="openBusDetail(\''+safeId+'\')" aria-label="Baxış" title="Baxış"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>'
+      +(editable?'<button class="rpt-icon-btn rpt-edit-btn" onclick="openBusServiceForEdit(\''+safeId+'\')" aria-label="Redaktə et" title="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>':'')
+      +'</div></td></tr>';
+  });
+  body.innerHTML=html;
+  var loadMoreWrap=document.getElementById('ongLoadMoreWrap');
+  if(ongFiltered.length>ongShownCount){
+    document.getElementById('ongLoadMoreBtn').textContent='Daha çox göstər ('+(ongFiltered.length-ongShownCount)+')';
+    loadMoreWrap.style.display='flex';
+  } else {
+    loadMoreWrap.style.display='none';
+  }
+}
+function ongShowMore(){ ongShownCount+=ongPageSize; renderOngoingTable(); }
+function exportOngoingToExcel(){
+  if(ongFiltered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
+  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  var wsData=[ongColumns];
+  ongFiltered.forEach(function(row){ wsData.push(ongColumns.map(function(c){ return row[c]||''; })); });
+  var ws=XLSX.utils.aoa_to_sheet(wsData);
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Davam Edən Servis');
+  var today=new Date();
+  XLSX.writeFile(wb, 'Davam_Eden_Servis_'+String(today.getDate()).padStart(2,'0')+'.'+String(today.getMonth()+1).padStart(2,'0')+'.'+today.getFullYear()+'.xlsx');
+}
+
+
 function closeBusReport(){
   if(rptAutoRefresh){ clearInterval(rptAutoRefresh); rptAutoRefresh=null; }
   if(rptDateInterval){ clearInterval(rptDateInterval); rptDateInterval=null; }
@@ -2534,6 +2712,7 @@ function openBusBulk(){
   }
   
   var now = bakuNowDate();
+  document.getElementById('dashboardView').style.display = 'none';
   document.getElementById('busServiceView').style.display = 'none';
   document.getElementById('busBulkView').style.display = 'flex';
   ensureBulkFormData();
@@ -3657,6 +3836,110 @@ function submitAdminNotification(){
   });
 }
 
+// ── ADMIN PANEL: HOME DASHBOARDS (stat kartların konfiqurasiyası) ──
+var HOME_DASH_METRICS = [
+  { value:'bus_open', label:'Açıq Servislər (Bus)' },
+  { value:'bus_today', label:'Bugünkü Servislər (Bus)' },
+  { value:'bus_active_tech', label:'Aktiv Texniklər (Bus)' },
+  { value:'bus_latest', label:'Son Servis (Bus)' },
+  { value:'none', label:'Heç biri (boş)' }
+];
+var admHomeDashConfig = [];
+
+function loadAdminHomeDashboard(){
+  var box=document.getElementById('admHomeDashSlots');
+  box.innerHTML='<div class="adm-empty">Yüklənir...</div>';
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.status!=='OK'){ box.innerHTML='<div class="adm-empty">Xəta baş verdi</div>'; return; }
+    admHomeDashConfig = d.config || [];
+    renderHomeDashSlots();
+  })
+  .catch(function(){ box.innerHTML='<div class="adm-empty">Şəbəkə xətası</div>'; });
+}
+function renderHomeDashSlots(){
+  var box=document.getElementById('admHomeDashSlots');
+  box.innerHTML = admHomeDashConfig.map(function(c, idx){
+    var options = HOME_DASH_METRICS.map(function(m){
+      return '<option value="'+m.value+'"'+(m.value===c.metric?' selected':'')+'>'+m.label+'</option>';
+    }).join('');
+    return '<div class="adm-msg-compose" style="margin-bottom:0;">'
+      + '<div class="adm-msg-compose-title">Qutucuq '+(idx+1)+'</div>'
+      + '<div class="adm-form-field"><label>Başlıq</label><input type="text" data-slot-title="'+idx+'" value="'+escapeHtml(c.title)+'"></div>'
+      + '<div class="adm-form-field" style="margin-bottom:0;"><label>Göstərilən Məlumat</label><select data-slot-metric="'+idx+'">'+options+'</select></div>'
+      + '</div>';
+  }).join('');
+}
+function submitDashboardConfig(){
+  var errEl=document.getElementById('admHomeDashError');
+  errEl.style.display='none';
+  admHomeDashConfig.forEach(function(c, idx){
+    var titleEl=document.querySelector('[data-slot-title="'+idx+'"]');
+    var metricEl=document.querySelector('[data-slot-metric="'+idx+'"]');
+    if(titleEl) c.title=titleEl.value.trim()||c.title;
+    if(metricEl) c.metric=metricEl.value;
+  });
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveDashboardConfig', config:admHomeDashConfig, requesterEmail: currentUser?currentUser.email:''})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
+    alert('Yadda saxlanıldı. Əsas menyuda görmək üçün səhifəni yeniləyin.');
+  })
+  .catch(function(e){ errEl.textContent='Şəbəkə xətası: '+e.message; errEl.style.display='block'; });
+}
+
+// ── DASHBOARD: stat kartlarının real datası ──
+function loadHomeDashStats(){
+  if(window.innerWidth < 901) return; // yalnız desktop görünüşdə lazımdır
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.status!=='OK') return;
+    var config=d.config||[];
+    var titleEls=[document.querySelector('.dash-stat-blue .dash-stat-label'),document.querySelector('.dash-stat-green .dash-stat-label'),document.querySelector('.dash-stat-purple .dash-stat-label'),document.querySelector('.dash-stat-orange .dash-stat-label')];
+    config.forEach(function(c, idx){ if(titleEls[idx]) titleEls[idx].textContent=c.title; });
+
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:1})})
+    .then(function(r){return r.json();})
+    .then(function(rd){
+      if(rd.status!=='OK') return;
+      var rows=rd.rows||[];
+      var todayStr=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baku',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date()).split('/').join('.');
+      var valueEls=[document.getElementById('dashStatOpen'),document.getElementById('dashStatToday'),document.getElementById('dashStatTech')];
+      config.forEach(function(c, idx){
+        if(c.metric==='bus_open'){
+          var v=rows.filter(function(r){return (r['Status']||'').trim()==='Açıq';}).length;
+          setHomeDashSlotValue(idx, v);
+        } else if(c.metric==='bus_today'){
+          var v2=rows.filter(function(r){return (r['Tarix']||'').trim()===todayStr;}).length;
+          setHomeDashSlotValue(idx, v2);
+        } else if(c.metric==='bus_active_tech'){
+          var names={};
+          rows.forEach(function(r){
+            if((r['Tarix']||'').trim()!==todayStr) return;
+            if(r['1. Texnik']) names[r['1. Texnik'].trim()]=true;
+            if(r['2. Texnik']) names[r['2. Texnik'].trim()]=true;
+          });
+          setHomeDashSlotValue(idx, Object.keys(names).length);
+        } else if(c.metric==='bus_latest'){
+          if(rows.length>0){
+            var latest=rows[0];
+            var timeEl=document.getElementById('dashStatLatestTime');
+            var infoEl=document.getElementById('dashStatLatestInfo');
+            if(timeEl) timeEl.textContent=latest['Tarix']||'—';
+            if(infoEl) infoEl.textContent=(latest['Daşıyıcı']||'')+' · '+(latest['D.Q.N.']||'');
+          }
+        }
+      });
+    }).catch(function(){});
+  }).catch(function(){});
+}
+function setHomeDashSlotValue(idx, val){
+  var ids=['dashStatOpen','dashStatToday','dashStatTech'];
+  if(idx<3 && document.getElementById(ids[idx])) document.getElementById(ids[idx]).textContent=val;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // YENİ MÜRACİƏT — iki-mərhələli servis axınının 1-ci addımı.
 // Qəsdən Bus Service-in bsSelected/draft sistemindən TAM AYRIDIR
@@ -3675,6 +3958,7 @@ function openBusRequest(){
   document.getElementById('dashboardView').style.display='none';
   document.getElementById('busRequestView').style.display='block';
   brResetForm();
+  brLoadAssignableTechnicians();
 
   var now=new Date();
   var bParts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Baku',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
