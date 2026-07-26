@@ -47,6 +47,19 @@ function showDashboard(){
   document.getElementById('welcomeName').innerHTML='Xoş gəlmisiniz';
   document.getElementById('profileName').textContent=currentUser.name;
   document.getElementById('profileRole').textContent=currentUser.role;
+  // Yeni masaüstü dizaynının (ctd-) elementləri
+  var ctdWelcomeName=document.getElementById('ctdWelcomeName');
+  if(ctdWelcomeName) ctdWelcomeName.textContent=(currentUser.name||'').split(' ')[0]||currentUser.name||'';
+  var ctdUserName=document.getElementById('ctdUserName');
+  if(ctdUserName) ctdUserName.textContent=currentUser.name||'';
+  var ctdUserRole=document.getElementById('ctdUserRole');
+  if(ctdUserRole) ctdUserRole.textContent=currentUser.role||'';
+  var ctdAvatarInitials=document.getElementById('ctdAvatarInitials');
+  if(ctdAvatarInitials){
+    var nameParts=(currentUser.name||'').trim().split(/\s+/);
+    var initials=(nameParts[0]?nameParts[0][0]:'')+(nameParts[1]?nameParts[1][0]:'');
+    ctdAvatarInitials.textContent=(initials||'--').toUpperCase();
+  }
   applyAccessLevel();
   if(typeof updateCollectivesBtnVisibility==='function') updateCollectivesBtnVisibility();
   if(typeof preloadValidatorSNList==='function') preloadValidatorSNList();
@@ -77,15 +90,17 @@ function applyAccessLevel(){
     brBtn.style.display = showBr ? 'inline-flex' : 'none';
     if(showBr && typeof brLoadAssignableTechnicians==='function') brLoadAssignableTechnicians();
   }
-  // Yeni desktop sidebar/kart elementləri
-  var sidebarAdminBtn=document.getElementById('sidebarAdminBtn');
-  if(sidebarAdminBtn) sidebarAdminBtn.style.display=(level==='admin')?'flex':'none';
-  var dashBrBtn=document.getElementById('dashBrBtn');
-  if(dashBrBtn) dashBrBtn.style.display=isLeaderOrAdmin?'flex':'none';
-  var dashBulkBtn=document.getElementById('dashBulkBtn');
-  if(dashBulkBtn) dashBulkBtn.style.display=isLeaderOrAdmin?'flex':'none';
-  var welcomeNameD=document.getElementById('dashWelcomeNameD');
-  if(welcomeNameD) welcomeNameD.textContent=(currentUser.name||'').split(' ')[0]||currentUser.name||'';
+  // Yeni desktop dizaynının (ctd-) admin/rəhbər görünürlük düymələri
+  var ctdCollectivesBtn=document.getElementById('ctdCollectivesBtn');
+  var ctdAdminBtn=document.getElementById('ctdAdminBtn');
+  if(ctdAdminBtn) ctdAdminBtn.style.display=(level==='admin')?'flex':'none';
+  var ctdBrBtn=document.getElementById('ctdBrBtn');
+  if(ctdBrBtn){
+    ctdBrBtn.style.display=isLeaderOrAdmin?'flex':'none';
+    if(isLeaderOrAdmin && window.innerWidth>=901 && typeof brLoadAssignableTechnicians==='function') brLoadAssignableTechnicians();
+  }
+  var ctdBulkBtn=document.getElementById('ctdBulkBtn');
+  if(ctdBulkBtn) ctdBulkBtn.style.display=isLeaderOrAdmin?'flex':'none';
 }
 
 function updateClock(){
@@ -94,6 +109,8 @@ function updateClock(){
   var map={}; parts.forEach(function(p){map[p.type]=p.value;});
   document.getElementById('clockDate').innerHTML=map.day+'.'+map.month+'.'+map.year;
   document.getElementById('clock').innerHTML=map.hour+':'+map.minute;
+  var ctdClockText=document.getElementById('ctdClockText');
+  if(ctdClockText) ctdClockText.textContent=map.day+'.'+map.month+'.'+map.year+' · '+map.hour+':'+map.minute;
 }
 
 function goHome(){ document.getElementById('loginView').style.display='none'; document.getElementById('busServiceView').style.display='none'; document.getElementById('dashboardView').style.display='block'; closeMenu(); }
@@ -689,7 +706,7 @@ function moduleAlert(n){ alert(n+' modulu tezliklə hazır olacaq'); }
 var MOON_PATH='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
 var SUN_PATH='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
 function applyTheme(isDark){
-  var icons=[document.getElementById('themeIcon'),document.getElementById('rptThemeIcon'),document.getElementById('dashThemeIcon'),document.getElementById('bkThemeIcon'),document.getElementById('tvmRptThemeIcon')];
+  var icons=[document.getElementById('themeIcon'),document.getElementById('rptThemeIcon'),document.getElementById('dashThemeIcon'),document.getElementById('bkThemeIcon'),document.getElementById('tvmRptThemeIcon'),document.getElementById('ctdThemeIcon')];
   icons.forEach(function(icon){ if(!icon)return; icon.innerHTML=isDark?SUN_PATH:MOON_PATH; });
   if(isDark){document.body.classList.add('dark-mode');}else{document.body.classList.remove('dark-mode');}
 
@@ -4029,7 +4046,7 @@ function loadHomeDashStats(){
   .then(function(d){
     if(d.status!=='OK') return;
     var config=d.config||[];
-    var titleEls=[document.querySelector('.dash-stat-blue .dash-stat-label'),document.querySelector('.dash-stat-green .dash-stat-label'),document.querySelector('.dash-stat-purple .dash-stat-label'),document.querySelector('.dash-stat-orange .dash-stat-label')];
+    var titleEls=Array.from(document.querySelectorAll('.ctd-stat-card .ctd-stat-label'));
     config.forEach(function(c, idx){ if(titleEls[idx]) titleEls[idx].textContent=c.title; });
 
     fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:1})})
