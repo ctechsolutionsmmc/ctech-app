@@ -122,6 +122,32 @@ body.dark-mode .notif-badge{ border-color:#0F1826; }
 .modal-step-num { width:24px; height:24px; border-radius:8px; background:#E6F1FB; color:#1B4A8A; font-family:'Inter',sans-serif; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
 .modal-step-text { font-size:14px; color:#3A4A5E; line-height:1.55; padding-top:2px; text-align:justify; text-justify:inter-word; }
 .modal-close { margin-top:8px; width:100%; background:#F0F5FC; border:1px solid #E1EAF6; border-radius:12px; padding:13px; font-size:15px; font-weight:600; color:#12233B; cursor:pointer; }
+
+/* ===== ABOUT MODAL — yeni dizayn (yalnız desktop) ===== */
+.about-modal-box { position:relative; width:780px; max-width:92vw; min-height:480px; border-radius:24px; overflow:hidden; box-shadow:0 40px 90px rgba(18,35,59,.30); display:flex; flex-direction:column; }
+.about-modal-bg { position:absolute; inset:0; background-image:url('../about-bg.webp'); background-size:cover; background-position:center center; z-index:0; }
+.about-modal-bg::after { content:''; position:absolute; inset:0; background:rgba(240,247,255,0.72); }
+.about-modal-close-x { position:absolute; top:16px; right:16px; z-index:10; width:36px; height:36px; border-radius:10px; border:none; background:rgba(255,255,255,0.85); color:#3A4A5E; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 10px rgba(18,35,59,.12); transition:background .15s,transform .1s; }
+.about-modal-close-x:hover { background:#fff; }
+.about-modal-close-x:active { transform:scale(.93); }
+.about-modal-content { position:relative; z-index:2; display:flex; flex-direction:column; height:100%; padding:44px 60px; }
+.about-modal-header { text-align:center; margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid rgba(225,234,246,0.8); }
+.about-modal-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; color:#12233B; margin-top:10px; letter-spacing:.3px; }
+.about-modal-body { flex:1; }
+.about-modal-text { font-size:14px; color:#2F4C6E; line-height:1.7; margin-bottom:14px; text-align:justify; text-justify:inter-word; }
+.about-modal-text strong { color:#12233B; }
+.about-modal-subtitle { font-size:13px; font-weight:700; color:#12233B; letter-spacing:.5px; text-transform:uppercase; margin:20px 0 14px; }
+.about-modal-steps { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+.about-modal-step { display:flex; align-items:flex-start; gap:10px; background:rgba(255,255,255,0.75); border:1px solid rgba(207,224,247,0.7); border-radius:12px; padding:12px 14px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.about-modal-step-num { width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,#4E93FA,#2F6FED); color:#fff; font-family:'Inter',sans-serif; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.about-modal-step-text { font-size:13px; color:#2F4C6E; line-height:1.5; padding-top:3px; }
+@media(max-width:768px) {
+  .about-modal-box { width:100%; max-width:440px; min-height:unset; border-radius:20px; }
+  .about-modal-bg { display:none; }
+  .about-modal-content { padding:28px 22px; background:#fff; }
+  .about-modal-steps { grid-template-columns:1fr; }
+  .about-modal-step { background:#F0F5FC; border-color:#E1EAF6; backdrop-filter:none; }
+}
 .brand-mini { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; letter-spacing:1.5px; color:#12233B; text-transform:uppercase; white-space:nowrap; justify-self:center; }
 .brand-mini span { color:#2F6FED; }
 .clock-box { display:flex; align-items:center; gap:8px; font-family:IBM Plex Mono,monospace; font-weight:600; font-size:15px; color:#12233B; background:#F0F5FC; border:1.5px solid #DCE6F5; padding:0 16px; height:46px; box-sizing:border-box; border-radius:12px; flex-shrink:0; }
