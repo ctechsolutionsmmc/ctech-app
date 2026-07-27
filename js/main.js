@@ -5284,10 +5284,14 @@ function openCollectives() {
       return;
     }
     setTimeout(function() {
-      loader.style.display = 'none';
-      content.style.display = 'block';
-      renderCollectives(d.employees, d.groupOrder, d.groupIcons);
-    }, 2000);
+  loader.style.display = 'none';
+  content.style.display = 'block';
+  var grid = document.getElementById('collectivesGrid');
+  var director = document.getElementById('collectivesDirector');
+  if(grid) grid.innerHTML = '';
+  if(director) director.innerHTML = '';
+  renderCollectives(d.employees, d.groupOrder, d.groupIcons);
+}, 2000);
   })
   .catch(function(e) {
     alert('Şəbəkə xətası: ' + e.message);
