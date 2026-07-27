@@ -103,6 +103,7 @@ function applyAccessLevel(){
   if(ctdBulkBtn) ctdBulkBtn.style.display=isLeaderOrAdmin?'flex':'none';
 }
 
+var _dotVisible=true;
 function updateClock(){
   var now=new Date();
   var parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baku',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(now);
@@ -111,6 +112,9 @@ function updateClock(){
   document.getElementById('clock').innerHTML=map.hour+':'+map.minute;
   var ctdClockText=document.getElementById('ctdClockText');
   if(ctdClockText) ctdClockText.textContent=map.day+'.'+map.month+'.'+map.year+' · '+map.hour+':'+map.minute;
+  _dotVisible=!_dotVisible;
+  var dot=document.querySelector('.status-dot'); if(dot) dot.style.opacity=_dotVisible?'1':'0';
+  var ctdDot=document.querySelector('.ctd-clock-pill .dot'); if(ctdDot) ctdDot.style.opacity=_dotVisible?'1':'0';
 }
 
 function goHome(){ document.getElementById('loginView').style.display='none'; document.getElementById('busServiceView').style.display='none'; document.getElementById('dashboardView').style.display='block'; closeMenu(); }
@@ -673,6 +677,8 @@ function admDeleteTvmListItem(sheetName, value){
   });
 }
 function showAbout(){ closeMenu(); document.getElementById('aboutModal').classList.add('open'); }
+function toggleUserMenu(){ var dd=document.getElementById('ctdUserDropdown'); if(!dd)return; dd.classList.toggle('open'); }
+document.addEventListener('click',function(e){ var chip=document.getElementById('ctdUserChip'); var dd=document.getElementById('ctdUserDropdown'); if(!dd||!chip)return; if(!chip.contains(e.target))dd.classList.remove('open'); });
 
 // ── TECHNICIANS / GROUP LEADERS (əsas admin bölmələri) ──
 function loadAdminTechnicians(){
@@ -723,7 +729,7 @@ function updateCollectivesBtnVisibility(){
   if(sidebarBtn) sidebarBtn.style.display = (window.innerWidth >= 901) ? 'flex' : 'none';
 }
 window.addEventListener('resize', updateCollectivesBtnVisibility);
-function toggleTheme(){ var isDark=!document.body.classList.contains('dark-mode'); applyTheme(isDark); try{localStorage.setItem('ctech_theme',isDark?'dark':'light');}catch(e){} }
+function toggleTheme(){ if(window.innerWidth>=901)return; var isDark=!document.body.classList.contains('dark-mode'); applyTheme(isDark); try{localStorage.setItem('ctech_theme',isDark?'dark':'light');}catch(e){} }
 
 // Service Worker artıq istifadə olunmur (faydasız, xəta-idarəetməsiz idi) —
 // əvvəllər quraşdırılmış ola biləcək versiyaları təmizləyirik ki, heç kimdə
@@ -747,7 +753,7 @@ if(savedUser && savedUser.email){
   // təmiz bir giriş məcburiləşdiririk ki, email kimi vacib sahələr yenidən düzgün dolsun
   clearSession();
 }
-try{ var savedTheme=localStorage.getItem('ctech_theme'); if(savedTheme==='dark'){applyTheme(true);} }catch(e){}
+try{ var savedTheme=localStorage.getItem('ctech_theme'); if(savedTheme==='dark'&&window.innerWidth<901){applyTheme(true);} }catch(e){}
 
 // ═══════════════════════════════════════════════════
 // BUS SERVICE — İNLİNE DROPDOWN SİSTEMİ
@@ -1957,6 +1963,7 @@ var DV_FIELD_MAP=[
 ];
 function openBusDetail(ticketId){
   var row=rptAllRows.find(function(r){ return r['Ticket ID']===ticketId; });
+  if(!row&&typeof ongAllRows!=='undefined') row=ongAllRows.find(function(r){ return r['Ticket ID']===ticketId; });
   if(!row){ alert('Ticket tapılmadı'); return; }
   document.getElementById('dvTicketTitle').textContent=ticketId;
   var html='';
