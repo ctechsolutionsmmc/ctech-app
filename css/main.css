@@ -148,29 +148,16 @@ body.dark-mode .notif-badge{ border-color:#0F1826; }
 @media(max-width:768px) {
   .about-modal-box {
     width:100%;
-    max-width:100%;
+    max-width:440px;
     min-height:unset;
-    max-height:70vh;
-    border-radius:20px 20px 0 0;
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
+    max-height:80vh;
+    border-radius:20px;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
   }
   .about-modal-bg { display:none; }
-  .about-modal-content { padding:20px 18px 36px; background:#fff; height:auto; }
-  .about-modal-close-x {
-    position:fixed;
-    bottom:calc(70vh - 52px);
-    right:16px;
-    left:auto;
-    float:none;
-    margin:0;
-    background:#fff;
-    box-shadow:0 2px 8px rgba(0,0,0,.15);
-  }
+  .about-modal-close-x { display:none; }
+  .about-modal-content { padding:28px 22px 28px; background:#fff; height:auto; }
   .about-modal-steps { grid-template-columns:1fr; }
   .about-modal-step { background:#F0F5FC; border-color:#E1EAF6; backdrop-filter:none; }
   .about-modal-header { border-bottom-color:#E1EAF6; }
