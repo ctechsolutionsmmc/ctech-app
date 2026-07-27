@@ -2869,11 +2869,13 @@ body.dark-mode .cl-director-name{ color:#E8EEF5; }
 
 /* İşçi kartı */
 .cl-card {
-  background:#FFFFFF;
-  border:1px solid #E1EAF6;
+  background:rgba(255,255,255,0.82);
+  border:1px solid rgba(225,234,246,0.7);
   border-radius:16px;
   overflow:hidden;
-  box-shadow:0 12px 28px rgba(30,68,130,0.06);
+  box-shadow:0 12px 28px rgba(30,68,130,0.08);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
 
 body.dark-mode .cl-card {
@@ -2887,7 +2889,7 @@ body.dark-mode .cl-card {
   gap:10px;
   padding:14px 16px;
   border-bottom:3px solid #2F6FED;
-  background:#F8FAFD;
+  background:rgba(248,250,253,0.7);
 }
 
 body.dark-mode .cl-header {
