@@ -147,8 +147,9 @@ body.dark-mode .notif-badge{ border-color:#0F1826; }
 /* ── About Modal — mobil ── */
 @media(max-width:768px) {
   .about-modal-box {
-    width:100%;
+    width:calc(100% - 32px);
     max-width:440px;
+    margin:0 16px;
     min-height:unset;
     max-height:80vh;
     border-radius:20px;
