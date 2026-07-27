@@ -5302,6 +5302,70 @@ function openCollectives() {
 function closeCollectives() {
   document.getElementById('collectivesView').style.display = 'none';
 }
+function renderCollectives(employees, groupOrder, groupIcons) {
+  var director = document.getElementById('collectivesDirector');
+  var grid = document.getElementById('collectivesGrid');
+  if (!director || !grid) return;
+  director.innerHTML = '';
+  grid.innerHTML = '';
+
+  // Direktor kartı
+  var directorEmployee = (employees || []).find(function(e) { return e.group === 'Direktor'; });
+  if (directorEmployee) {
+    var dc = document.createElement('div');
+    dc.className = 'cl-director-card';
+    dc.innerHTML = '<div class="cl-director-row"><div class="cl-director-avatar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="cl-director-label">Direktor</div><div class="cl-director-name">' + escapeHtml(directorEmployee.name || '') + '</div></div></div>';
+    director.appendChild(dc);
+  }
+
+  // Qruplar
+  var groups = {};
+  (employees || []).forEach(function(emp) {
+    if (emp.group === 'Direktor') return;
+    if (!groups[emp.group]) groups[emp.group] = [];
+    groups[emp.group].push(emp);
+  });
+
+  var order = groupOrder || Object.keys(groups);
+  order.forEach(function(groupName) {
+    if (!groups[groupName] || groups[groupName].length === 0) return;
+    var card = document.createElement('div');
+    card.className = 'cl-group-card';
+    var icon = (groupIcons && groupIcons[groupName]) || '';
+    var header = document.createElement('div');
+    header.className = 'cl-group-header';
+    header.innerHTML = '<div class="cl-group-icon-wrap">' + (icon ? '<img src="' + icon + '" width="20" height="20">' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>') + '</div><div class="cl-group-name">' + escapeHtml(groupName) + '</div><div class="cl-group-count">' + groups[groupName].length + ' nəfər</div>';
+    card.appendChild(header);
+    var divider = document.createElement('div');
+    divider.className = 'cl-group-divider';
+    card.appendChild(divider);
+    var list = document.createElement('div');
+    list.className = 'cl-group-list';
+    groups[groupName].forEach(function(emp) {
+      var row = document.createElement('div');
+      row.className = 'cl-member-row';
+      var initial = (emp.name || '?')[0].toUpperCase();
+      var avatar = document.createElement('div');
+      avatar.className = 'cl-member-avatar';
+      avatar.textContent = initial;
+      var info = document.createElement('div');
+      info.className = 'cl-member-info';
+      var nameEl = document.createElement('div');
+      nameEl.className = 'cl-member-name';
+      nameEl.textContent = emp.name || '';
+      var titleEl = document.createElement('div');
+      titleEl.className = 'cl-member-title';
+      titleEl.textContent = emp.title || emp.group || '';
+      info.appendChild(nameEl);
+      info.appendChild(titleEl);
+      row.appendChild(avatar);
+      row.appendChild(info);
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    grid.appendChild(card);
+  });
+}
 
 // ═══════════════════════════════════════════════════════════════
 // ADMIN PANEL: COLLECTIVES MANAGEMENT
