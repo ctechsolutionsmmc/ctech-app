@@ -5330,6 +5330,72 @@ function renderCollectives(employees, groupOrder, groupIcons) {
   order.forEach(function(groupName) {
     if (!groups[groupName] || groups[groupName].length === 0) return;
     var card = document.createElement('div');
+    card.className = 'cl-card';
+
+    var header = document.createElement('div');
+    header.className = 'cl-header';
+    var iconWrap = document.createElement('div');
+    iconWrap.className = 'cl-icon';
+    iconWrap.style.background = '#EAF1FE';
+    iconWrap.style.color = '#2F6FED';
+    iconWrap.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>';
+    var titleEl = document.createElement('div');
+    titleEl.className = 'cl-title';
+    titleEl.textContent = groupName;
+    var badge = document.createElement('div');
+    badge.className = 'cl-badge';
+    badge.textContent = groups[groupName].length + ' nəfər';
+    header.appendChild(iconWrap);
+    header.appendChild(titleEl);
+    header.appendChild(badge);
+    card.appendChild(header);
+
+    var list = document.createElement('div');
+    list.className = 'cl-list';
+    groups[groupName].forEach(function(emp) {
+      var row = document.createElement('div');
+      row.className = 'cl-row';
+      var initial = (emp.name || '?')[0].toUpperCase();
+      var avatar = document.createElement('div');
+      avatar.className = 'cl-avatar';
+      avatar.textContent = initial;
+      // Avatar rəngi
+      var colors = ['#E6F1FB','#E8F5F0','#FEF3E2','#F3E8FE','#FFE8E8'];
+      var ci = (emp.name||'').charCodeAt(0) % colors.length;
+      avatar.style.background = colors[ci];
+      avatar.style.color = '#1B4A8A';
+
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0;';
+      var nameEl = document.createElement('div');
+      nameEl.style.cssText = 'font-size:13.5px;font-weight:600;color:#12233B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      nameEl.textContent = emp.name || '';
+      var subtitleEl = document.createElement('div');
+      subtitleEl.style.cssText = 'font-size:11.5px;color:#5C7089;margin-top:1px;';
+      subtitleEl.textContent = emp.title || emp.group || '';
+      info.appendChild(nameEl);
+      info.appendChild(subtitleEl);
+      row.appendChild(avatar);
+      row.appendChild(info);
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    grid.appendChild(card);
+  });
+}
+
+  // Qruplar
+  var groups = {};
+  (employees || []).forEach(function(emp) {
+    if (emp.group === 'Direktor') return;
+    if (!groups[emp.group]) groups[emp.group] = [];
+    groups[emp.group].push(emp);
+  });
+
+  var order = groupOrder || Object.keys(groups);
+  order.forEach(function(groupName) {
+    if (!groups[groupName] || groups[groupName].length === 0) return;
+    var card = document.createElement('div');
     card.className = 'cl-group-card';
     var icon = (groupIcons && groupIcons[groupName]) || '';
     var header = document.createElement('div');
