@@ -3230,17 +3230,19 @@ body.dark-mode .warn-toast-text{ color:#C7D5E8; }
   .ctd-action-btn .a-label{ font-size:11.5px; font-weight:500; color:#EAF0F9; }
 
   .ctd-mini-widget{
-    background:#FFFFFF; border:1px solid #E3E8EE; border-radius:14px; padding:14px 16px;
+    background:rgba(12,25,42,0.85); border:1px solid rgba(255,255,255,0.16); backdrop-filter:blur(10px);
+    border-radius:14px; padding:14px 16px;
     display:flex; align-items:center; gap:12px; flex:1;
     box-shadow:0 1px 2px rgba(20,35,55,0.04), 0 12px 28px -18px rgba(20,35,55,0.18);
     cursor:pointer; transition:transform .15s ease, border-color .15s ease;
   }
+  .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:rgba(255,255,255,0.3); }
   .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:#c9d2dd; }
   .ctd-mini-icon{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .ctd-mini-icon.teal{ background:#E4F5F2; color:#0E8C7A; }
   .ctd-mini-icon.blue{ background:#EAF1FE; color:#2F6FED; }
-  .ctd-mini-title{ font-size:13px; font-weight:600; color:#1B2A3A; margin-bottom:1px; }
-  .ctd-mini-desc{ font-size:11px; color:#5B6B7F; }
+  .ctd-mini-title{ font-size:13px; font-weight:600; color:#fff; margin-bottom:1px; }
+  .ctd-mini-desc{ font-size:11px; color:#AEBED3; }
 
   /* ── 2-ci banner bölməsi (TVM) ── */
   .ctd-banner2-section{ position:relative; margin-top:0; padding:56px 40px 210px; overflow:hidden; }
