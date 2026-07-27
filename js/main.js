@@ -5258,10 +5258,42 @@ function admDeleteBusListItem(sheetName, value){
 // ═══════════════════════════════════════════════════════════════
 
 function openCollectives() {
-  // Yalnız web (masaüstü) versiyada
-  if (window.innerWidth < 901) {
-    return;
+  if (window.innerWidth < 901) return;
+  var overlay = document.getElementById('collectivesView');
+  overlay.style.display = 'flex';
+  if (currentUser) {
+    var nameEl = document.getElementById('clProfileName');
+    var roleEl = document.getElementById('clProfileRole');
+    if (nameEl) nameEl.textContent = currentUser.name || '—';
+    if (roleEl) roleEl.textContent = currentUser.role || '—';
   }
+  var loader = document.getElementById('collectivesLoader');
+  var content = document.getElementById('collectivesContent');
+  loader.style.display = 'flex';
+  content.style.display = 'none';
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'getCollectivesData' })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.status !== 'OK') {
+      alert('Xəta: ' + (d.message || 'Məlumat yüklənə bilmədi'));
+      closeCollectives();
+      return;
+    }
+    setTimeout(function() {
+      loader.style.display = 'none';
+      content.style.display = 'block';
+      renderCollectives(d.employees, d.groupOrder, d.groupIcons);
+    }, 2000);
+  })
+  .catch(function(e) {
+    alert('Şəbəkə xətası: ' + e.message);
+    closeCollectives();
+  });
+}
 
   document.getElementById('dashboardView').style.display = 'none';
   document.getElementById('collectivesView').style.display = 'block';
@@ -5431,7 +5463,6 @@ function renderCollectives(employees, groupOrder, groupIcons) {
 
 function closeCollectives() {
   document.getElementById('collectivesView').style.display = 'none';
-  document.getElementById('dashboardView').style.display = 'block';
 }
 
 // ═══════════════════════════════════════════════════════════════
