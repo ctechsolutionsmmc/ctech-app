@@ -150,7 +150,7 @@ body.dark-mode .notif-badge{ border-color:#0F1826; }
     width:100%;
     max-width:100%;
     min-height:unset;
-    max-height:85vh;
+    max-height:70vh;
     border-radius:20px 20px 0 0;
     position:fixed;
     bottom:0;
@@ -160,17 +160,16 @@ body.dark-mode .notif-badge{ border-color:#0F1826; }
     -webkit-overflow-scrolling:touch;
   }
   .about-modal-bg { display:none; }
-  .about-modal-content {
-    padding:28px 20px 40px;
-    background:#fff;
-    height:auto;
-  }
+  .about-modal-content { padding:20px 18px 36px; background:#fff; height:auto; }
   .about-modal-close-x {
-    background:#F0F5FC;
-    position:sticky;
-    top:12px;
-    float:right;
-    margin-bottom:-36px;
+    position:fixed;
+    bottom:calc(70vh - 52px);
+    right:16px;
+    left:auto;
+    float:none;
+    margin:0;
+    background:#fff;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
   }
   .about-modal-steps { grid-template-columns:1fr; }
   .about-modal-step { background:#F0F5FC; border-color:#E1EAF6; backdrop-filter:none; }
