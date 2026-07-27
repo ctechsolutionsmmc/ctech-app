@@ -3124,13 +3124,24 @@ body.dark-mode .warn-toast-text{ color:#C7D5E8; }
   .ctd-brand .accent{ color:#9FC2FF; font-weight:500; }
   .ctd-topbar-right{ display:flex; align-items:center; gap:10px; }
   .ctd-nav-btn{
-    display:flex; align-items:center; gap:7px;
-    background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.4);
-    padding:8px 15px; border-radius:999px; color:#fff; font-size:12.5px; font-weight:600;
-    cursor:pointer; white-space:nowrap; font-family:'Inter',sans-serif;
-    box-shadow:0 2px 10px rgba(8,18,32,0.2);
-    transition:background .15s ease;
-  }
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 14px;
+    background:rgba(255,255,255,0.22);
+    border:1px solid rgba(255,255,255,0.38);
+    border-radius:999px;
+    font-size:13px;
+    font-weight:600;
+    color:#2F6FED;
+    cursor:pointer;
+    transition:background .15s;
+    white-space:nowrap;
+}
+
+.ctd-nav-btn svg{
+    stroke:#2F6FED;
+}
   .ctd-nav-btn:hover{ background:rgba(255,255,255,0.32); }
   .ctd-nav-btn.ctd-signout{ background:rgba(220,80,80,0.28); border-color:rgba(255,150,150,0.45); }
   .ctd-nav-btn.ctd-signout:hover{ background:rgba(220,80,80,0.4); }
