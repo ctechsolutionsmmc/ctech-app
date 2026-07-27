@@ -3144,14 +3144,14 @@ body.dark-mode .warn-toast-text{ color:#C7D5E8; }
     justify-content:center;
     gap:10px;
 
-    min-height:52px;
-    padding:0 24px;
+    padding:6px 20px 6px 20px;
+    min-width:210px;
 
-    background:rgba(255,255,255,.22);
-    border:1px solid rgba(255,255,255,.38);
+    background:rgba(255,255,255,0.22);
+    border:1px solid rgba(255,255,255,0.38);
     border-radius:999px;
 
-    font-size:16px;
+    font-size:15px;
     font-weight:600;
     color:#2F6FED;
 
@@ -3161,7 +3161,10 @@ body.dark-mode .warn-toast-text{ color:#C7D5E8; }
 }
 
 .ctd-nav-btn svg{
+    width:18px;
+    height:18px;
     stroke:#2F6FED;
+    flex-shrink:0;
 }
   .ctd-nav-btn:hover{ background:rgba(255,255,255,0.32); }
   .ctd-nav-btn.ctd-signout{ background:rgba(220,80,80,0.28); border-color:rgba(255,150,150,0.45); }
