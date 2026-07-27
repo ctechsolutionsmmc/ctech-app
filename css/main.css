@@ -3169,8 +3169,16 @@ body.dark-mode .warn-toast-text{ color:#C7D5E8; }
   .ctd-user-chip:hover{ background:rgba(255,255,255,0.32); }
   .ctd-avatar{ width:30px; height:30px; border-radius:50%; background:#fff; color:#0F2A47; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
   .ctd-who{ line-height:1.15; }
-  .ctd-uname{ font-size:13px; font-weight:700; color:#fff; }
-  .ctd-urole{ font-size:11px; color:#DCE7F7; }
+  .ctd-uname{
+    font-size:13px;
+    font-weight:700;
+    color:#2F6FED;
+}
+
+.ctd-urole{
+    font-size:11px;
+    color:#2F6FED;
+}
   .ctd-chip-caret{ display:flex; align-items:center; color:#fff; opacity:.85; margin-left:2px; transition:transform .2s ease; flex-shrink:0; }
   .ctd-user-chip.open .ctd-chip-caret{ transform:rotate(180deg); }
 
