@@ -150,36 +150,105 @@
         <div class="ctd-brand">CTECH <span class="accent">SOLUTIONS</span> MMC</div>
         <div class="ctd-clock-pill"><span class="dot"></span><span id="ctdClockText">--.--.---- · --:--</span></div>
       </div>
-      <div class="ctd-topbar-right">
-        <div class="ctd-icon-btn" onclick="toggleTheme()" role="button" aria-label="Gecə rejimi">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="ctdThemeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+     <div class="ctd-topbar-right">
+
+        <!-- Saat/tarix pili -->
+        <div class="ctd-clock-pill">
+          <span class="dot"></span>
+          <span id="ctdClockText">--.--.---- · --:--</span>
         </div>
-        <div class="ctd-nav-btn" onclick="showAbout()" role="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg>
-          Tətbiq haqqında
-        </div>
+
+        <!-- Heyət haqqında (maddə 2 — geri qaytarıldı) -->
         <div class="ctd-nav-btn" id="ctdCollectivesBtn" onclick="openCollectives()" role="button" style="display:none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Heyət haqqında
         </div>
+
+        <!-- Admin panel -->
         <div class="ctd-nav-btn" id="ctdAdminBtn" onclick="openAdminPanel()" role="button" style="display:none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Admin panel
         </div>
-        <div class="ctd-nav-btn ctd-signout" onclick="signOut()" role="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-          Çıxış
-        </div>
-        <div class="ctd-user-chip">
+
+        <!-- İstifadəçi çipi (maddə 1 — Tətbiq haqqında + Çıxış buraya keçir) -->
+        <div class="ctd-user-chip" id="ctdUserChip" onclick="toggleUserMenu()" role="button" style="cursor:pointer; position:relative;">
           <div class="ctd-avatar" id="ctdAvatarInitials">--</div>
           <div class="ctd-who">
             <div class="ctd-uname" id="ctdUserName">-</div>
             <div class="ctd-urole" id="ctdUserRole">-</div>
           </div>
-        </div>
-      </div>
-    </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px;opacity:.7;"><path d="M6 9l6 6 6-6"/></svg>
 
+          <!-- Açılan dropdown menyu -->
+          <div class="ctd-user-dropdown" id="ctdUserDropdown">
+            <div class="ctd-user-dd-item" onclick="event.stopPropagation(); showAbout();">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg>
+              Tətbiq haqqında
+            </div>
+            <div class="ctd-user-dd-divider"></div>
+            <div class="ctd-user-dd-item ctd-dd-signout" onclick="event.stopPropagation(); signOut();">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+              Çıxış
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+<!-- ────────────────────────────────────────────────────────────────
+     MADDƏ 5 — "Bus əməliyyatları" başlığı
+     
+     index.html-də bu sətiri tap:
+       <div class="ctd-section-label"><div class="rule"></div><span>Bus əməliyyatları</span></div>
+     
+     SİL, bu ilə ƏVƏZ ET:
+     ──────────────────────────────────────────────────────────────── -->
+
+        <div class="ctd-section-label"><span>BUS VƏ ƏMƏLİYYATLAR</span></div>
+
+
+<!-- ────────────────────────────────────────────────────────────────
+     MADDƏ 6 — Bus action düymələrinin ikonları
+     
+     index.html-də BU BLOKU tap (ctd-module-actions div-i):
+       <div class="ctd-module-actions">
+         ...4 ədəd ctd-action-btn...
+       </div>
+     
+     BLOKU SİL, bu ilə ƏVƏZ ET:
+     ──────────────────────────────────────────────────────────────── -->
+
+          <div class="ctd-module-actions">
+            <div class="ctd-action-btn" id="ctdBrBtn" onclick="openBusRequest()" style="display:none;">
+              <span class="a-icon">
+                <!-- Yeni müraciət: telefon + sənəd -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>
+              </span>
+              <span class="a-label">Yeni müraciət</span>
+            </div>
+            <div class="ctd-action-btn" onclick="startBusService()">
+              <span class="a-icon">
+                <!-- Yeni servis: alət çantası -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M12 12v4M10 14h4"/></svg>
+              </span>
+              <span class="a-label">Yeni servis</span>
+            </div>
+            <div class="ctd-action-btn" onclick="openBusOngoing()">
+              <span class="a-icon">
+                <!-- Davam edən: saat + proses -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              </span>
+              <span class="a-label">Davam edən servis</span>
+            </div>
+            <div class="ctd-action-btn" id="ctdBulkBtn" onclick="openBusBulk()" style="display:none;">
+              <span class="a-icon">
+                <!-- Toplu idxal: cədvəl + ox -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/><path d="M15 12l2 2-2 2"/></svg>
+              </span>
+              <span class="a-label">Toplu idxal</span>
+            </div>
+          </div>
     <div class="ctd-hero-inner">
       <div class="ctd-welcome">Xoş gəlmisiniz, <span id="ctdWelcomeName">-</span></div>
       <div class="ctd-subwelcome">Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.</div>
