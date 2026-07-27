@@ -3120,7 +3120,19 @@ body.dark-mode .warn-toast-text{ color:#C7D5E8; }
   /* ── Topbar ── */
   .ctd-topbar{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:22px 40px; flex-wrap:wrap; gap:10px; }
   .ctd-topbar-left{ display:flex; align-items:center; gap:16px; }
-  .ctd-brand{ display:flex; align-items:center; gap:10px; font-family:'Space Grotesk','Inter',sans-serif; font-weight:600; font-size:18px; color:#fff; }
+  .ctd-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-left:18px;
+    font-family:'Rajdhani','Inter',sans-serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:1px;
+    color:#FFFFFF;
+    text-transform:uppercase;
+    white-space:nowrap;
+}
   .ctd-brand .accent{ color:#9FC2FF; font-weight:500; }
   .ctd-topbar-right{ display:flex; align-items:center; gap:10px; }
   .ctd-nav-btn{
