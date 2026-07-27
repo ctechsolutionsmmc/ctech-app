@@ -5309,7 +5309,6 @@ function renderCollectives(employees, groupOrder, groupIcons) {
   director.innerHTML = '';
   grid.innerHTML = '';
 
-  // Direktor kartı
   var directorEmployee = (employees || []).find(function(e) { return e.group === 'Direktor'; });
   if (directorEmployee) {
     var dc = document.createElement('div');
@@ -5318,7 +5317,6 @@ function renderCollectives(employees, groupOrder, groupIcons) {
     director.appendChild(dc);
   }
 
-  // Qruplar
   var groups = {};
   (employees || []).forEach(function(emp) {
     if (emp.group === 'Direktor') return;
@@ -5331,7 +5329,6 @@ function renderCollectives(employees, groupOrder, groupIcons) {
     if (!groups[groupName] || groups[groupName].length === 0) return;
     var card = document.createElement('div');
     card.className = 'cl-card';
-
     var header = document.createElement('div');
     header.className = 'cl-header';
     var iconWrap = document.createElement('div');
@@ -5349,26 +5346,22 @@ function renderCollectives(employees, groupOrder, groupIcons) {
     header.appendChild(titleEl);
     header.appendChild(badge);
     card.appendChild(header);
-
     var list = document.createElement('div');
     list.className = 'cl-list';
     groups[groupName].forEach(function(emp) {
       var row = document.createElement('div');
       row.className = 'cl-row';
-      var initial = (emp.name || '?')[0].toUpperCase();
-      var avatar = document.createElement('div');
-      avatar.className = 'cl-avatar';
-      avatar.textContent = initial;
-      // Avatar rəngi
       var colors = ['#E6F1FB','#E8F5F0','#FEF3E2','#F3E8FE','#FFE8E8'];
       var ci = (emp.name||'').charCodeAt(0) % colors.length;
+      var avatar = document.createElement('div');
+      avatar.className = 'cl-avatar';
+      avatar.textContent = (emp.name || '?')[0].toUpperCase();
       avatar.style.background = colors[ci];
       avatar.style.color = '#1B4A8A';
-
       var info = document.createElement('div');
       info.style.cssText = 'flex:1;min-width:0;';
       var nameEl = document.createElement('div');
-      nameEl.style.cssText = 'font-size:13.5px;font-weight:600;color:#12233B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      nameEl.style.cssText = 'font-size:13.5px;font-weight:600;color:#12233B;';
       nameEl.textContent = emp.name || '';
       var subtitleEl = document.createElement('div');
       subtitleEl.style.cssText = 'font-size:11.5px;color:#5C7089;margin-top:1px;';
@@ -5383,56 +5376,6 @@ function renderCollectives(employees, groupOrder, groupIcons) {
     grid.appendChild(card);
   });
 }
-
-  // Qruplar
-  var groups = {};
-  (employees || []).forEach(function(emp) {
-    if (emp.group === 'Direktor') return;
-    if (!groups[emp.group]) groups[emp.group] = [];
-    groups[emp.group].push(emp);
-  });
-
-  var order = groupOrder || Object.keys(groups);
-  order.forEach(function(groupName) {
-    if (!groups[groupName] || groups[groupName].length === 0) return;
-    var card = document.createElement('div');
-    card.className = 'cl-group-card';
-    var icon = (groupIcons && groupIcons[groupName]) || '';
-    var header = document.createElement('div');
-    header.className = 'cl-group-header';
-    header.innerHTML = '<div class="cl-group-icon-wrap">' + (icon ? '<img src="' + icon + '" width="20" height="20">' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>') + '</div><div class="cl-group-name">' + escapeHtml(groupName) + '</div><div class="cl-group-count">' + groups[groupName].length + ' nəfər</div>';
-    card.appendChild(header);
-    var divider = document.createElement('div');
-    divider.className = 'cl-group-divider';
-    card.appendChild(divider);
-    var list = document.createElement('div');
-    list.className = 'cl-group-list';
-    groups[groupName].forEach(function(emp) {
-      var row = document.createElement('div');
-      row.className = 'cl-member-row';
-      var initial = (emp.name || '?')[0].toUpperCase();
-      var avatar = document.createElement('div');
-      avatar.className = 'cl-member-avatar';
-      avatar.textContent = initial;
-      var info = document.createElement('div');
-      info.className = 'cl-member-info';
-      var nameEl = document.createElement('div');
-      nameEl.className = 'cl-member-name';
-      nameEl.textContent = emp.name || '';
-      var titleEl = document.createElement('div');
-      titleEl.className = 'cl-member-title';
-      titleEl.textContent = emp.title || emp.group || '';
-      info.appendChild(nameEl);
-      info.appendChild(titleEl);
-      row.appendChild(avatar);
-      row.appendChild(info);
-      list.appendChild(row);
-    });
-    card.appendChild(list);
-    grid.appendChild(card);
-  });
-}
-
 // ═══════════════════════════════════════════════════════════════
 // ADMIN PANEL: COLLECTIVES MANAGEMENT
 // ═══════════════════════════════════════════════════════════════
