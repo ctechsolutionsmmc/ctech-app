@@ -12,15 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="CTECH Service">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/login.css">
-<link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/ctd.css">
-<link rel="stylesheet" href="css/bus-service.css">
-<link rel="stylesheet" href="css/reports.css">
-<link rel="stylesheet" href="css/admin.css">
-<link rel="stylesheet" href="css/collectives.css">
-<link rel="stylesheet" href="css/notif.css">
+<link rel="stylesheet" href="css/main.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>
   (function(){
@@ -67,7 +59,7 @@
         </div>
         <button class="primary" onclick="login()" id="loginBtn">Daxil ol</button>
         <label class="remember">
-          <input type="checkbox" id="rememberMe" checked>
+          <input type="checkbox" id="rememberMe">
           Girişi yadda saxla
         </label>
       </div>
@@ -1975,6 +1967,17 @@
   <div class="loading-text" id="bsLoadingText">Göndərilir...</div>
 </div>
 
+<!-- ===== LOGIN XƏTA MODALI ===== -->
+<div id="loginErrorModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(18,35,59,.5);z-index:200;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
+  <div style="background:#FFFFFF;border-radius:18px;padding:28px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.25);">
+    <div style="width:48px;height:48px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+    </div>
+    <div id="loginErrorText" style="font-size:14px;color:#33445E;font-weight:600;line-height:1.5;margin-bottom:20px;font-family:'Inter',sans-serif;"></div>
+    <button onclick="closeLoginError()" style="width:100%;background:linear-gradient(135deg,#4E93FA,#2F6FED);color:#fff;border:none;padding:13px;border-radius:12px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;">Yenidən cəhd et</button>
+  </div>
+</div>
+
 <!-- Login / About overlays -->
 <div class="loading-overlay" id="loadingOverlay" style="display:none;">
   <div class="loading-box">
@@ -2247,10 +2250,10 @@
 </div>
 
 <script src="js/core.js"></script>
-<script src="js/bus-request.js"></script>
 <script src="js/admin.js"></script>
 <script src="js/bus-service.js"></script>
 <script src="js/reports.js"></script>
+<script src="js/bus-request.js"></script>
 <script src="js/tvm-service.js"></script>
 
 <!-- ===== TVM SERVICE VIEW ===== -->
