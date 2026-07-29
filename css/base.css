@@ -6,6 +6,7 @@
 
 /* ===== RESET & BODY ===== */
 * { box-sizing:border-box; }
+a { text-decoration:none; color:inherit; }
 html,body { height:100%; margin:0; -webkit-text-size-adjust:100%; text-size-adjust:100%; overscroll-behavior-y:contain; }
 body { min-height:100vh; background:#F4F8FD; background-image:radial-gradient(circle at 12% 8%,rgba(59,130,246,.10),transparent 45%),radial-gradient(circle at 90% 90%,rgba(78,147,250,.10),transparent 45%); font-family:'Inter',Arial,sans-serif; }
 
