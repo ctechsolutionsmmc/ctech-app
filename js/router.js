@@ -260,8 +260,50 @@ function initRouter(){
   }
 }
 
+// ── Sağ klik "Open in new tab" dəstəyi ──
+// onclick olan elementlərə avtomatik href əlavə edir
+var ONCLICK_HASH_MAP = {
+  'openBusService':   'bus-service',
+  'startBusService':  'bus-service',
+  'openTvmService':   'tvm-service',
+  'openBusReport':    'bus-report',
+  'openTvmReport':    'tvm-report',
+  'openBusDashboard': 'bus-dashboard',
+  'openBusOngoing':   'bus-ongoing',
+  'openBusRequest':   'bus-request',
+  'openBusBulk':      'bus-bulk',
+  'openAdminPanel':   'admin',
+  'openNotifications':'notifications',
+  'openCollectives':  'collectives'
+};
+
+function applyHrefToClickables(){
+  var allClickable = document.querySelectorAll('[onclick]');
+  allClickable.forEach(function(el){
+    var oc = el.getAttribute('onclick') || '';
+    Object.keys(ONCLICK_HASH_MAP).forEach(function(fnName){
+      if(oc.indexOf(fnName) !== -1){
+        var hash = ONCLICK_HASH_MAP[fnName];
+        // <a> elementə çevir ki sağ klik işləsin
+        if(el.tagName !== 'A'){
+          el.setAttribute('href', '#'+hash);
+          // Normal klikdə default href davranışını bloklayıb router işlətmə
+          // (router artıq hash dəyişikliyini tutur, ikiqat açılmasın)
+          el.addEventListener('click', function(e){
+            // Yeni tabda açmaq üçün Ctrl/Cmd + klik və ya orta klik keç
+            if(e.ctrlKey || e.metaKey || e.button === 1) return;
+            e.preventDefault();
+          }, { passive: false });
+        }
+      }
+    });
+  });
+}
+
 // DOM hazır olandan sonra başlat
 document.addEventListener('DOMContentLoaded', function(){
-  // Bütün JS-lər yüklənəndən sonra initRouter çağırılsın
-  setTimeout(initRouter, 0);
+  setTimeout(function(){
+    initRouter();
+    applyHrefToClickables();
+  }, 0);
 });
