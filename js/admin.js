@@ -1158,6 +1158,7 @@ function openCollectives() {
 
 function closeCollectives() {
   document.getElementById('collectivesView').style.display = 'none';
+  document.getElementById('dashboardView').style.display = 'block';
 }
 function renderCollectives(employees, groupOrder, groupIcons) {
   var director = document.getElementById('collectivesDirector');
