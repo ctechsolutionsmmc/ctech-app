@@ -244,6 +244,7 @@ function initRouter(){
     goHome = function(){
       if(currentUser && ROUTER_READY && !_isNavigating){
         routerNavigate('dashboard', true);
+        if(typeof closeMenu === 'function') closeMenu();
       } else {
         _ghOrig.apply(this, arguments);
       }
