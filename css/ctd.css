@@ -1,0 +1,260 @@
+/* ================================================================
+   CTECH SERVICE PLATFORM — CTD.CSS
+   Desktop əsas menyu dizaynı (ctd-*) — yalnız masaüstü (≥901px)
+   Hero banner, topbar, profil çipi, modul kartları, widget-lər
+   Dark mode: yalnız bu faylın elementlərinə aid hissələr
+   ================================================================ */
+
+/* ═══════════════════════════════════════════════════════════════
+   YENİ ƏSAS MENYU DİZAYNI (CTD = CTech Dashboard) — YALNIZ VEB/MASAÜSTÜ
+   Mobil versiya bu bloka görə HEÇ dəyişmir (bütün .ctd-* elementləri
+   mobil-də display:none, yalnız min-width:901px-də görünür).
+   ═══════════════════════════════════════════════════════════════ */
+
+.ctd-hero, .ctd-content-top-wrap, .ctd-banner2-section, .ctd-footer { display:none; }
+
+@media(min-width:901px){
+
+  #dashboardView[style*="display: block"]{
+    display:block !important;
+    height:auto; min-height:100vh; overflow-y:auto; overflow-x:hidden;
+  }
+  #dashboardView > .header,
+  #dashboardView > .welcome,
+  #dashboardView > .profile-row,
+  #dashboardView > .container,
+  #dashboardView > .footer-note-dash,
+  #dashboardView .menu-wrap{ display:none !important; }
+
+  .ctd-hero, .ctd-content-top-wrap, .ctd-banner2-section{ display:block; }
+  .ctd-topbar-center{ display:flex; align-items:center; gap:18px; }
+.ctd-platform-title{
+    margin-left:16px;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:2.5px;
+    color:#FFFFFF;
+    text-transform:uppercase;
+    white-space:nowrap;
+}
+
+.ctd-platform-title .accent{
+    color:#6EA0FF;
+}
+
+.ctd-footer{
+    display:block;
+}
+
+  /* ── Hero (1-ci banner) ── */
+  .ctd-hero{ position:relative; padding-top:6px; padding-bottom:210px; overflow:hidden; background:#0d2035; }
+  .ctd-hero-bg{ position:absolute; inset:0; background-image:url('../dash-hero.webp'); background-size:cover; background-position:center 40%; background-repeat:no-repeat; }
+  .ctd-hero-scrim{ position:absolute; inset:0; background:linear-gradient(100deg, rgba(10,26,46,0.94) 0%, rgba(10,26,46,0.78) 30%, rgba(15,42,71,0.35) 58%, rgba(15,42,71,0.12) 100%); }
+  .ctd-hero-blur{
+    position:absolute; inset:0; background-image:url('../dash-hero.webp'); background-size:cover; background-position:center 40%; background-repeat:no-repeat;
+    filter:blur(22px); transform:scale(1.08);
+    -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.85) 78%, rgba(0,0,0,1) 100%);
+    mask-image:linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.85) 78%, rgba(0,0,0,1) 100%);
+    pointer-events:none;
+  }
+  .ctd-hero-fade{
+    position:absolute; left:0; right:0; bottom:0; height:300px;
+    background:linear-gradient(to bottom, rgba(221,228,237,0) 0%, rgba(221,228,237,0.15) 55%, rgba(221,228,237,0.55) 75%, #DDE4ED 100%);
+    pointer-events:none;
+  }
+
+  /* ── Topbar ── */
+  .ctd-topbar{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:22px 40px; flex-wrap:wrap; gap:10px; }
+  .ctd-topbar-left{ display:flex; align-items:center; gap:16px; }
+  .ctd-brand{ display:flex; align-items:center; gap:10px; font-family:'Space Grotesk','Inter',sans-serif; font-weight:600; font-size:18px; color:#fff; }
+  .ctd-brand .accent{ color:#9FC2FF; font-weight:500; }
+  .ctd-topbar-right{ display:flex; align-items:center; gap:10px; }
+  .ctd-nav-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+
+    padding:6px 18px;
+    min-width:200px;
+
+    background:rgba(255,255,255,0.22);
+    border:1px solid rgba(255,255,255,0.38);
+    border-radius:999px;
+
+    font-size:13px;
+    font-weight:600;
+    color:#2F6FED;
+
+    cursor:pointer;
+    transition:background .15s;
+    white-space:nowrap;
+}
+
+.ctd-nav-btn svg{
+    width:16px;
+    height:16px;
+    stroke:#2F6FED;
+    flex-shrink:0;
+}
+  .ctd-nav-btn:hover{ background:rgba(255,255,255,0.32); }
+  .ctd-nav-btn.ctd-signout{ background:rgba(220,80,80,0.28); border-color:rgba(255,150,150,0.45); }
+  .ctd-nav-btn.ctd-signout:hover{ background:rgba(220,80,80,0.4); }
+  .ctd-clock-pill{
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.4);
+    backdrop-filter:blur(8px); padding:8px 16px; border-radius:999px; color:#fff; font-size:13px; font-weight:600;
+    box-shadow:0 2px 10px rgba(8,18,32,0.2);
+  }
+  .ctd-clock-pill .dot{ width:7px; height:7px; border-radius:50%; background:#54D68A; box-shadow:0 0 0 0 rgba(84,214,138,.6); animation:ctdPulse 2s infinite; flex-shrink:0; }
+  @keyframes ctdPulse{ 0%{box-shadow:0 0 0 0 rgba(84,214,138,.55);} 70%{box-shadow:0 0 0 6px rgba(84,214,138,0);} 100%{box-shadow:0 0 0 0 rgba(84,214,138,0);} }
+  .ctd-icon-btn{
+    width:38px; height:38px; border-radius:11px; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.4);
+    display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer;
+  }
+
+  /* ── Profil çipi: klikləndikdə açılan animasiyalı menyu (Çıxış + Tətbiq haqqında) ── */
+  .ctd-user-chip{
+    position:relative; display:flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,0.24); border:1px solid rgba(255,255,255,0.42);
+    padding:6px 12px 6px 6px; border-radius:999px; cursor:pointer;
+    box-shadow:0 2px 10px rgba(8,18,32,0.2);
+    transition:background .15s ease;
+  }
+  .ctd-user-chip:hover{ background:rgba(255,255,255,0.32); }
+  .ctd-avatar{ width:30px; height:30px; border-radius:50%; background:#fff; color:#0F2A47; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  .ctd-who{ line-height:1.15; }
+  .ctd-uname{
+    font-size:13px;
+    font-weight:700;
+    color:#2F6FED;
+}
+
+.ctd-urole{
+    font-size:11px;
+    color:#2F6FED;
+}
+  .ctd-chip-caret{ display:flex; align-items:center; color:#fff; opacity:.85; margin-left:2px; transition:transform .2s ease; flex-shrink:0; }
+  .ctd-user-chip.open .ctd-chip-caret{ transform:rotate(180deg); }
+
+  .ctd-user-dd{
+    position:absolute; top:calc(100% + 10px); right:0; min-width:210px;
+    background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px; padding:6px;
+    box-shadow:0 22px 46px rgba(12,26,48,.32); z-index:50;
+    opacity:0; visibility:hidden; pointer-events:none;
+    transform:translateY(-8px) scale(.97);
+    transition:opacity .18s ease, transform .18s ease, visibility .18s;
+  }
+  .ctd-user-dd.open{ opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0) scale(1); }
+  .ctd-user-dd-item{
+    display:flex; align-items:center; gap:10px; width:100%; background:none; border:none;
+    padding:11px 12px; border-radius:9px; cursor:pointer; color:#1B2A3A; font-size:13px; font-weight:600;
+    font-family:'Inter',sans-serif; text-align:left; transition:background .12s ease;
+  }
+  .ctd-user-dd-item:hover{ background:#F0F5FC; }
+  .ctd-user-dd-item.ctd-dd-signout{ color:#C23B3B; }
+  .ctd-user-dd-item.ctd-dd-signout:hover{ background:#FCEEEE; }
+  .ctd-user-dd-sep{ height:1px; background:#E7ECF3; margin:5px 6px; }
+  body.dark-mode .ctd-user-dd{ background:#16212E; border-color:#4A6182; }
+  body.dark-mode .ctd-user-dd-item{ color:#E8EEF5; }
+  body.dark-mode .ctd-user-dd-item:hover{ background:#1C2A3D; }
+  body.dark-mode .ctd-user-dd-sep{ background:#2A3A50; }
+
+  /* ── Hero məzmunu ── */
+  .ctd-hero-inner{ position:relative; z-index:2; padding:8px 40px 0; }
+  .ctd-welcome{ color:#fff; font-size:28px; font-weight:600; margin-bottom:6px; font-family:'Space Grotesk','Inter',sans-serif; }
+  .ctd-welcome span{ color:#9FC2FF; }
+  .ctd-subwelcome{ color:#DCE7F7; font-size:14px; margin-bottom:30px; max-width:400px; }
+
+  .ctd-stat-row{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px; max-width:720px; }
+  .ctd-stat-card{ background:rgba(9,22,39,0.42); border:1px solid rgba(255,255,255,0.22); backdrop-filter:blur(10px); border-radius:14px; padding:14px 16px; }
+  .ctd-stat-top{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .ctd-stat-icon{ width:24px; height:24px; border-radius:7px; display:flex; align-items:center; justify-content:center; }
+  .ctd-stat-label{ font-size:11.5px; color:#D3DFF0; font-weight:500; }
+  .ctd-stat-value{ font-family:'Space Grotesk','Inter',sans-serif; font-size:25px; font-weight:600; color:#fff; line-height:1; margin-bottom:5px; }
+  .ctd-stat-sub{ font-size:11px; color:#A9BAD3; }
+
+  /* ── Bus əməliyyatları bölməsi ── */
+  .ctd-content-top-wrap{ position:relative; z-index:3; background:linear-gradient(180deg, #DDE4ED 0%, #C7D1DD 100%); padding-top:56px; margin-top:-160px; padding-bottom:50px; }
+  .ctd-content-top{ padding:0 40px; }
+  .ctd-content-grid{ display:grid; grid-template-columns:1.6fr 1fr; gap:18px; align-items:stretch; }
+  .ctd-widget-stack{ display:flex; flex-direction:column; gap:18px; }
+  .ctd-section-label{ display:flex; align-items:center; gap:10px; margin:0 0 16px 4px; }
+  .ctd-section-label span{ font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#5B6B7F; }
+  .ctd-section-label.on-dark span{ color:#DCE7F7; }
+  .ctd-section-label.on-dark .rule{ background:#9FC2FF; }
+
+  .ctd-module-card{
+    background:rgba(12,25,42,0.92); border:1px solid rgba(255,255,255,0.16); backdrop-filter:blur(10px);
+    border-radius:18px; padding:20px;
+    box-shadow:0 14px 34px -16px rgba(8,16,30,0.5);
+    display:flex; flex-direction:column;
+  }
+  .ctd-module-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .ctd-module-icon{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ctd-module-icon.blue{ background:rgba(47,111,237,0.28); color:#9FC2FF; }
+  .ctd-module-icon.teal{ background:rgba(14,140,122,0.28); color:#7BDCC9; }
+  .ctd-module-title{ font-size:15px; font-weight:600; color:#fff; }
+  .ctd-module-desc{ font-size:12px; color:#AEBED3; margin-top:1px; }
+  .ctd-module-actions{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-top:16px; }
+  .ctd-action-btn{
+    display:flex; flex-direction:column; align-items:flex-start; gap:7px;
+    padding:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); border-radius:10px;
+    cursor:pointer; transition:border-color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .ctd-action-btn:hover{ border-color:#9FC2FF; background:rgba(255,255,255,0.1); transform:translateY(-1px); }
+  .ctd-action-btn .a-icon{ color:#9FC2FF; }
+  .ctd-action-btn .a-label{ font-size:11.5px; font-weight:500; color:#EAF0F9; }
+
+  .ctd-mini-widget{
+    background:rgba(12,25,42,0.85); border:1px solid rgba(255,255,255,0.16); backdrop-filter:blur(10px);
+    border-radius:14px; padding:14px 16px;
+    display:flex; align-items:center; gap:12px; flex:1;
+    box-shadow:0 1px 2px rgba(20,35,55,0.04), 0 12px 28px -18px rgba(20,35,55,0.18);
+    cursor:pointer; transition:transform .15s ease, border-color .15s ease;
+  }
+  .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:rgba(255,255,255,0.3); }
+  .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:#c9d2dd; }
+  .ctd-mini-icon{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ctd-mini-icon.teal{ background:#E4F5F2; color:#0E8C7A; }
+  .ctd-mini-icon.blue{ background:#EAF1FE; color:#2F6FED; }
+  .ctd-mini-title{ font-size:13px; font-weight:600; color:#fff; margin-bottom:1px; }
+  .ctd-mini-desc{ font-size:11px; color:#AEBED3; }
+
+  /* ── 2-ci banner bölməsi (TVM) ── */
+  .ctd-banner2-section{ position:relative; margin-top:0; padding:56px 40px 210px; overflow:hidden; }
+  .ctd-banner2-bg{ position:absolute; inset:0; background-image:url('../dash-tvm-banner.webp'); background-size:cover; background-position:center 62%; background-repeat:no-repeat; }
+  .ctd-banner2-top-fade{ position:absolute; left:0; right:0; top:0; height:150px; background:linear-gradient(to bottom, #C7D1DD 0%, rgba(199,209,221,0) 100%); }
+  .ctd-banner2-scrim{ position:absolute; inset:0; background:linear-gradient(200deg, rgba(15,42,71,0.32) 0%, rgba(15,42,71,0.16) 30%, rgba(15,42,71,0.10) 55%, rgba(15,42,71,0.30) 100%); }
+  .ctd-banner2-fade-bottom{ position:absolute; left:0; right:0; bottom:0; height:190px; background:linear-gradient(to bottom, rgba(245,247,250,0) 0%, #F5F7FA 92%); }
+  .ctd-banner2-inner{ position:relative; z-index:2; display:flex; }
+  .ctd-banner2-panel{ margin-left:auto; max-width:400px; width:100%; }
+
+  .ctd-widget-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
+  .ctd-widget-tile{
+    background:rgba(9,20,35,0.78); border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(14px);
+    border-radius:16px; padding:16px; box-shadow:0 10px 26px -14px rgba(6,14,26,0.5);
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; cursor:pointer;
+  }
+  .ctd-widget-tile:hover{ transform:translateY(-2px); border-color:rgba(255,255,255,0.34); box-shadow:0 14px 30px -14px rgba(6,14,26,0.55); }
+  .ctd-widget-icon{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
+  .ctd-widget-icon.amber{ background:rgba(201,130,27,0.3); color:#F5C579; }
+  .ctd-widget-icon.teal{ background:rgba(14,140,122,0.3); color:#7BDCC9; }
+  .ctd-widget-icon.blue{ background:rgba(47,111,237,0.3); color:#9FC2FF; }
+  .ctd-widget-title{ font-size:13.5px; font-weight:600; color:#fff; margin-bottom:3px; }
+  .ctd-widget-desc{ font-size:11px; color:#B9C7DC; line-height:1.4; }
+  .ctd-icon-btn { display:none !important; }
+  #themeToggleBtn { display:none !important; }
+  .ctd-footer{ text-align:center; font-size:12px; color:#8A97A6; padding:24px 0 40px; position:relative; z-index:3; background:#F5F7FA; }
+
+  @media (max-width:1240px){
+    .ctd-content-grid{ grid-template-columns:1fr; }
+    .ctd-widget-grid{ grid-template-columns:1fr; }
+    .ctd-widget-tile{ grid-column:span 1 !important; }
+    .ctd-banner2-panel{ max-width:100%; }
+    .ctd-module-actions{ grid-template-columns:repeat(2,1fr); }
+    .ctd-stat-row{ grid-template-columns:repeat(2,1fr); }
+  }
+}
+

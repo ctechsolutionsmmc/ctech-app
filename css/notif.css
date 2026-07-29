@@ -1,0 +1,73 @@
+/* ================================================================
+   CTECH SERVICE PLATFORM — NOTIF.CSS
+   Bildirişlər görünüşü (notif-*) — yalnız mobil (≤900px)
+   Dark mode: yalnız bu faylın elementlərinə aid hissələr
+   ================================================================ */
+
+/* ═══════════════════════════════════════════════════════════════
+   BİLDİRİŞLƏR — yalnız mobil versiya
+   ═══════════════════════════════════════════════════════════════ */
+#notifView{
+  display:none;
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:#F7F9FE; z-index:80;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+body.dark-mode #notifView{ background:#0F1826; }
+@media(min-width:901px){
+  #notifView{ display:none !important; }
+}
+
+.notif-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 18px; background:#FFFFFF; border-bottom:1px solid #E1EAF6;
+  position:sticky; top:0; z-index:2;
+}
+body.dark-mode .notif-header{ background:#141F30; border-color:#2A3B52; }
+.notif-home-btn{
+  width:38px; height:38px; border-radius:11px; border:1px solid #E1EAF6; background:#FFFFFF;
+  display:flex; align-items:center; justify-content:center; color:#12233B; cursor:pointer;
+}
+body.dark-mode .notif-home-btn{ background:#1C2A3D; border-color:#3E5578; color:#E8EEF5; }
+.notif-header-title{ font-size:16px; font-weight:800; color:#12233B; }
+body.dark-mode .notif-header-title{ color:#E8EEF5; }
+
+.notif-list{ padding:16px; display:flex; flex-direction:column; gap:10px; }
+.notif-item{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  padding:14px 16px; cursor:pointer; box-shadow:0 6px 16px rgba(30,68,130,.05);
+  position:relative;
+}
+body.dark-mode .notif-item{ background:#16212E; border-color:#3E5578; }
+.notif-item.unread{ border-color:#2F6FED; background:#F3F7FF; }
+body.dark-mode .notif-item.unread{ background:#16223A; border-color:#4E7FE0; }
+.notif-item-top{ display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+.notif-item-dot{ width:7px; height:7px; border-radius:50%; background:#2F6FED; flex-shrink:0; }
+.notif-item-label{ font-size:11.5px; font-weight:800; color:#2F6FED; letter-spacing:.2px; }
+.notif-item-time{ font-size:11px; color:#9AACC4; margin-left:auto; }
+.notif-item-preview{ font-size:13.5px; color:#33445E; line-height:1.4; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.notif-item.unread .notif-item-preview{ font-weight:700; color:#12233B; }
+body.dark-mode .notif-item.unread .notif-item-preview{ color:#F0F5FC; }
+body.dark-mode .notif-item-preview{ color:#C7D5E8; }
+
+.notif-detail-meta{
+  display:flex; align-items:center; gap:8px; padding:16px 18px 0;
+  font-size:12.5px; font-weight:700; color:#9AACC4;
+}
+.notif-detail-text{
+  margin:14px 18px 0; padding:18px; background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  font-family:'IBM Plex Mono',monospace; font-size:14px; line-height:1.7; color:#22304A;
+  white-space:pre-wrap; word-break:break-word;
+}
+body.dark-mode .notif-detail-text{ background:#16212E; border-color:#3E5578; color:#DCE6F5; }
+.notif-read-btn{
+  display:block; width:calc(100% - 36px); margin:18px;
+  padding:14px; border:none; border-radius:14px;
+  background:linear-gradient(135deg,#4E93FA,#2F6FED); color:#fff;
+  font-family:'Inter',sans-serif; font-size:15px; font-weight:700; cursor:pointer;
+  box-shadow:0 12px 26px rgba(47,111,237,.28);
+}
+.notif-read-btn:active{ transform:scale(.98); }
+
+
+

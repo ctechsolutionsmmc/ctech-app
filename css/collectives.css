@@ -1,0 +1,222 @@
+/* ================================================================
+   CTECH SERVICE PLATFORM — COLLECTIVES.CSS
+   Kollektiv haqqında görünüşü (cl-*) — masaüstü modal + mobil
+   Dark mode: yalnız bu faylın elementlərinə aid hissələr
+   ================================================================ */
+
+/* ═══════════════════════════════════════════════════════════════
+   COLLECTIVES — Kollektiv haqqında (tam səhifə, yalnız veb)
+   ═══════════════════════════════════════════════════════════════ */
+
+#collectivesView{
+  display:none;
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:#F7F9FE;
+  z-index:70;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+body.dark-mode #collectivesView{ background:#0F1826; }
+
+/* Mobil və kiçik ekranlarda gizlət */
+@media (max-width:900px) {
+  #collectivesBtn { display:none !important; }
+  #collectivesView { display:none !important; }
+}
+
+.cl-body{ max-width:1400px; margin:0 auto; padding:32px 32px 20px; }
+
+.cl-page-title{ margin-bottom:24px; }
+.cl-page-title-main{ font-size:26px; font-weight:800; color:#12233B; letter-spacing:.2px; }
+.cl-page-title-sub{ font-size:14px; color:#8CA0BC; font-weight:600; margin-top:2px; }
+body.dark-mode .cl-page-title-main{ color:#E8EEF5; }
+body.dark-mode .cl-page-title-sub{ color:#8CA0BC; }
+/* ── Collectives Modal (desktop) ── */
+.cl-modal-box { position:relative; width:96vw; max-width:1400px; height:92vh; max-height:92vh; border-radius:24px; overflow:hidden; box-shadow:0 40px 90px rgba(18,35,59,.30); display:flex; flex-direction:column; background:#fff; }
+.cl-modal-bg { position:absolute; inset:0; background-image:url('../about-bg.webp'); background-size:cover; background-position:center center; z-index:0; pointer-events:none; }
+.cl-modal-bg::after { content:''; position:absolute; inset:0; background:rgba(240,247,255,0.78); }
+.cl-modal-close { z-index:10; }
+.cl-modal-content { position:relative; z-index:2; overflow-y:auto; padding:44px 50px 40px; height:100%; }
+.cl-page-title { margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid rgba(225,234,246,0.8); }
+.cl-page-title-main { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px; color:#12233B; letter-spacing:.3px; }
+.cl-page-title-sub { font-size:13px; color:#5C7089; margin-top:4px; }
+
+/* Mobil — köhnə tam səhifə saxlanır */
+@media(max-width:900px) {
+  .cl-modal-box { width:100%; max-width:100%; max-height:100vh; border-radius:0; }
+  .cl-modal-bg { display:none; }
+  .cl-modal-content { padding:20px 16px 40px; }
+  .cl-modal-close { display:none; }
+}
+.cl-footer-note{ text-align:center; padding:20px 0 32px; font-size:12.5px; color:#8CA0BC; }
+
+/* Direktor — xüsusi, mərkəzləşdirilmiş kart */
+.cl-director-card{ display:flex; justify-content:center; margin-bottom:24px; }
+.cl-director-row{
+  display:flex; align-items:center; gap:16px;
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px;
+  padding:16px 32px; box-shadow:0 12px 28px rgba(30,68,130,0.06);
+  min-width:340px;
+}
+body.dark-mode .cl-director-row{ background:#16212E; border-color:#4A6182; }
+.cl-director-avatar{
+  width:54px; height:54px; border-radius:12px; flex-shrink:0;
+  background:#E6F1FB; color:#2F6FED;
+  display:flex; align-items:center; justify-content:center;
+}
+body.dark-mode .cl-director-avatar{ background:#1C2A3D; color:#8FB4EA; }
+.cl-director-label{ font-size:13px; font-weight:700; color:#2F6FED; }
+.cl-director-name{ font-size:19px; font-weight:800; color:#12233B; margin-top:1px; }
+body.dark-mode .cl-director-name{ color:#E8EEF5; }
+
+/* 4 sütunlu grid (masaüstü üçün sabit) */
+.cl-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:20px;
+}
+@media (max-width:1300px){
+  .cl-grid{ grid-template-columns:repeat(2, 1fr); }
+}
+
+/* İşçi kartı */
+.cl-card {
+  background:rgba(255,255,255,0.82);
+  border:1px solid rgba(225,234,246,0.7);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 12px 28px rgba(30,68,130,0.08);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+body.dark-mode .cl-card {
+  background:#16212E;
+  border-color:#4A6182;
+}
+
+.cl-header {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px 16px;
+  border-bottom:3px solid #2F6FED;
+  background:rgba(248,250,253,0.7);
+}
+
+body.dark-mode .cl-header {
+  background:#1C2A3D;
+}
+
+.cl-icon {
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.cl-title {
+  flex:1;
+  font-weight:700;
+  font-size:15px;
+  color:#12233B;
+  letter-spacing:0.3px;
+}
+
+body.dark-mode .cl-title {
+  color:#E8EEF5;
+}
+
+.cl-badge {
+  padding:2px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:700;
+  color:#1B4A8A;
+  background:#E6F1FB;
+  white-space:nowrap;
+}
+
+body.dark-mode .cl-badge {
+  background:#1C2A3D;
+  color:#8FB4EA;
+}
+
+.cl-list {
+  padding:12px 16px 16px;
+}
+
+.cl-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 0;
+  border-bottom:1px solid #F0F5FC;
+}
+
+.cl-row:last-child {
+  border-bottom:none;
+}
+
+body.dark-mode .cl-row {
+  border-bottom-color:#1C2A3D;
+}
+
+.cl-avatar {
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.cl-info {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.cl-name {
+  font-size:14px;
+  font-weight:600;
+  color:#12233B;
+}
+
+body.dark-mode .cl-name {
+  color:#E8EEF5;
+}
+
+.cl-title-text {
+  font-size:12px;
+  color:#5C7089;
+}
+
+body.dark-mode .cl-title-text {
+  color:#8CA0BC;
+}
+
+/* Admin panel Collectives siyahısı */
+#admCollectivesList .adm-reorder-row .adm-reorder-num {
+  width:24px;
+  height:24px;
+  border-radius:7px;
+  background:#EEF3FC;
+  color:#8CA0BC;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:800;
+  flex-shrink:0;
+}
+
+body.dark-mode #admCollectivesList .adm-reorder-row .adm-reorder-num {
+  background:#1C2A3D;
+  color:#8FA0B8;
+}
