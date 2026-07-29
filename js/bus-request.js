@@ -12,6 +12,14 @@ var brSelected = { carrier:'', brand:'', problem:'', technicians:[] };
 var brFormDirty = false;
 var brNextTicketId = '';
 
+// Validator / SAM kart SN siyahıları — əvvəlcədən elan olunmalıdır,
+// yoxsa fetch bitməzdən əvvəl axtarış undefined üzərində .concat() çağırıb səssiz xəta verir
+var busValidatorSNList = [];
+var busSamCardSNList = [];
+var busCombinedSNSet = null;
+var busValidatorSNLoaded = false;
+var busValidatorSNLoading = false;
+
 function openBusRequest(){
   closeMenu();
   if(window.innerWidth < 901){ return; } // yalnız veb
@@ -549,4 +557,3 @@ document.addEventListener('click', function(e){
   if(!e.target.closest('#bs_old_sn') && !e.target.closest('#bs_old_sn_dd')){ closeBusSnDD('bs_old_sn_dd'); }
   if(!e.target.closest('#bs_new_sn') && !e.target.closest('#bs_new_sn_dd')){ closeBusSnDD('bs_new_sn_dd'); }
 });
-
