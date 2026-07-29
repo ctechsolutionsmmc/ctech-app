@@ -86,19 +86,19 @@
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg>
             <span>Haqqında</span>
           </button>
-          <button class="menu-item" id="adminMenuItem" onclick="openAdminPanel()" style="display:none;">
+          <a class="menu-item" id="adminMenuItem" href="#admin" onclick="openAdminPanel();return false;" style="display:none;">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Admin Panel</span>
-          </button>
+          </a>
           <button class="menu-item" onclick="signOut()">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
             <span>Çıxış</span>
           </button>
         </div>
       </div>
-      <button class="icon-btn" id="collectivesBtn" onclick="openCollectives()" aria-label="Kollektiv haqqında" style="display:none;margin-left:10px;">
+      <a class="icon-btn" id="collectivesBtn" href="#collectives" onclick="openCollectives();return false;" aria-label="Kollektiv haqqında" style="display:none;margin-left:10px;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </button>
+      </a>
     </div>
 
     <div class="brand-mini">CTECH <span>SOLUTIONS</span> MMC</div>
@@ -124,10 +124,10 @@
         <div class="profile-name" id="profileName">-</div>
         <div class="profile-role" id="profileRole">-</div>
       </div>
-      <button class="profile-notif-btn" id="notifBtn" onclick="openNotifications()" aria-label="Bildirişlər">
+      <a class="profile-notif-btn" id="notifBtn" href="#notifications" onclick="openNotifications();return false;" aria-label="Bildirişlər">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-      </button>
+      </a>
     </div>
   </div>
 
@@ -154,10 +154,10 @@
 </div>
       </div>
       <div class="ctd-topbar-right">
-        <div class="ctd-nav-btn" id="ctdCollectivesBtn" onclick="openCollectives()" role="button">
+        <a class="ctd-nav-btn" id="ctdCollectivesBtn" href="#collectives" onclick="openCollectives();return false;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Heyət haqqında
-        </div>
+        </a>
         
         <div class="ctd-user-chip" id="ctdUserChip" onclick="toggleUserMenu()" role="button">
           <div class="ctd-avatar" id="ctdAvatarInitials">--</div>
@@ -178,16 +178,17 @@
 
 <div class="ctd-user-dd-sep"></div>
 
-<button class="ctd-user-dd-item"
+<a class="ctd-user-dd-item"
         id="ctdAdminBtn"
-        onclick="event.stopPropagation(); openAdminPanel();"
+        href="#admin"
+        onclick="event.stopPropagation(); openAdminPanel(); return false;"
         style="display:none;">
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
     <circle cx="12" cy="12" r="3"/>
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
   </svg>
   Admin panel
-</button>
+</a>
 
 <div class="ctd-user-dd-sep"></div>
 
@@ -268,27 +269,27 @@
             </div>
           </div>
           <div class="ctd-module-actions">
-            <div class="ctd-action-btn" id="ctdBrBtn" onclick="openBusRequest()" style="display:none;">
+            <a class="ctd-action-btn" id="ctdBrBtn" href="#bus-request" onclick="openBusRequest();return false;" style="display:none;">
               <span class="a-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
               <span class="a-label">Yeni müraciət</span>
-            </div>
-            <div class="ctd-action-btn" onclick="startBusService()">
+            </a>
+            <a class="ctd-action-btn" href="#bus-service" onclick="startBusService();return false;">
               <span class="a-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></span>
               <span class="a-label">Yeni servis</span>
-            </div>
-            <div class="ctd-action-btn" onclick="openBusOngoing()">
+            </a>
+            <a class="ctd-action-btn" href="#bus-ongoing" onclick="openBusOngoing();return false;">
               <span class="a-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></span>
               <span class="a-label">Davam edən servis</span>
-            </div>
-            <div class="ctd-action-btn" id="ctdBulkBtn" onclick="openBusBulk()" style="display:none;">
+            </a>
+            <a class="ctd-action-btn" id="ctdBulkBtn" href="#bus-bulk" onclick="openBusBulk();return false;" style="display:none;">
               <span class="a-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
               <span class="a-label">Toplu idxal</span>
-            </div>
+            </a>
           </div>
         </div>
 
         <div class="ctd-widget-stack">
-          <div class="ctd-mini-widget" onclick="openBusDashboard()">
+          <a class="ctd-mini-widget" href="#bus-dashboard" onclick="openBusDashboard();return false;">
             <div class="ctd-mini-icon teal">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
             </div>
@@ -296,8 +297,8 @@
               <div class="ctd-mini-title">Bus dashboard</div>
               <div class="ctd-mini-desc">Statistika və hesabatlar</div>
             </div>
-          </div>
-          <div class="ctd-mini-widget" onclick="openBusReport()">
+          </a>
+          <a class="ctd-mini-widget" href="#bus-report" onclick="openBusReport();return false;">
             <div class="ctd-mini-icon blue">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
             </div>
@@ -305,7 +306,7 @@
               <div class="ctd-mini-title">Bus real-time report</div>
               <div class="ctd-mini-desc">Canlı siyahı və Excel ixracı</div>
             </div>
-          </div>
+          </a>
         </div>
 
       </div>
@@ -322,20 +323,20 @@
       <div class="ctd-banner2-panel">
         <div class="ctd-section-label on-dark"><span>TVM və hesabatlar</span></div>
         <div class="ctd-widget-grid">
-          <div class="ctd-widget-tile" style="grid-column:span 2;" onclick="openTvmService()">
+          <a class="ctd-widget-tile" style="grid-column:span 2;" href="#tvm-service" onclick="openTvmService();return false;">
             <div class="ctd-widget-icon amber">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="16.5" rx="1.5"/><rect x="8" y="4.5" width="8" height="6" rx=".5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="15.3" x2="13" y2="15.3"/><path d="M9 21.5h6l-1-2.8h-4z"/></svg>
             </div>
             <div class="ctd-widget-title">TVM service</div>
             <div class="ctd-widget-desc">Bilet satış aparatları texniki servis</div>
-          </div>
-          <div class="ctd-widget-tile" onclick="openTvmReport()">
+          </a>
+          <a class="ctd-widget-tile" href="#tvm-report" onclick="openTvmReport();return false;">
             <div class="ctd-widget-icon amber">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
             </div>
             <div class="ctd-widget-title">TVM real-time report</div>
             <div class="ctd-widget-desc">Canlı siyahı və Excel ixracı</div>
-          </div>
+          </a>
           <div class="ctd-widget-tile" onclick="moduleAlert('Dashboard-TVM')">
             <div class="ctd-widget-icon blue">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
@@ -353,21 +354,21 @@
 
   <div class="container">
     <div class="primary-row">
-      <div class="card-big" onclick="startBusService()">
+      <a class="card-big" href="#bus-service" onclick="startBusService();return false;">
         <div class="card-icon-big icon-bus">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9"/><path d="M3 16h18"/><path d="M3 16v1.5a1 1 0 0 0 1 1h1"/><path d="M21 16v1.5a1 1 0 0 1-1 1h-1"/><path d="M6 5v6M12 5v6M18 5v6"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
         </div>
         <div class="card-title-big">BUS SERVICE</div>
         <div class="card-sub-big">Avtobus texniki servis əməliyyatları</div>
         <button id="busRequestQuickBtn" onclick="event.stopPropagation(); openBusRequest();" style="display:none;position:relative;z-index:2;margin-top:10px;background:#FFFFFF;color:#2F6FED;border:1.5px solid #C9D8F2;padding:7px 14px;border-radius:10px;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;">+ Yeni Müraciət</button>
-      </div>
-      <div class="card-big" onclick="openTvmService()">
+      </a>
+      <a class="card-big" href="#tvm-service" onclick="openTvmService();return false;">
         <div class="card-icon-big icon-tvm">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="16.5" rx="1.5"/><rect x="8" y="4.5" width="8" height="6" rx=".5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="15.3" x2="13" y2="15.3"/><path d="M9 21.5h6l-1-2.8h-4z"/></svg>
         </div>
         <div class="card-title-big">TVM SERVICE</div>
         <div class="card-sub-big">Bilet satış aparatları texniki servis</div>
-      </div>
+      </a>
     </div>
 
     <div id="dashboardsSection">
@@ -376,12 +377,12 @@
         <div class="dash-connector"></div>
       </div>
       <div class="secondary-row">
-        <div class="card-small" onclick="openBusDashboard()">
+        <a class="card-small" href="#bus-dashboard" onclick="openBusDashboard();return false;">
           <div class="card-icon-small icon-bus">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
           </div>
           <div><div class="card-title-small">Dashboard BUS</div><div class="card-sub-small">Statistika və hesabatlar</div></div>
-        </div>
+        </a>
         <div class="card-small" onclick="moduleAlert('Dashboard-TVM')">
           <div class="card-icon-small icon-tvm">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
@@ -397,18 +398,18 @@
         <div class="dash-connector"></div>
       </div>
       <div class="secondary-row">
-        <div class="card-small" onclick="openBusReport()">
+        <a class="card-small" href="#bus-report" onclick="openBusReport();return false;">
           <div class="card-icon-small icon-bus">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
           </div>
           <div><div class="card-title-small">BUS Real-Time Report</div><div class="card-sub-small">Canlı siyahı və Excel ixracı</div></div>
-        </div>
-        <div class="card-small" onclick="openTvmReport()">
+        </a>
+        <a class="card-small" href="#tvm-report" onclick="openTvmReport();return false;">
           <div class="card-icon-small icon-tvm">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
           </div>
           <div><div class="card-title-small">TVM Real-Time Report</div><div class="card-sub-small">Canlı siyahı və Excel ixracı</div></div>
-        </div>
+        </a>
       </div>
     </div>
 
@@ -2250,10 +2251,10 @@
 </div>
 
 <script src="js/core.js"></script>
+<script src="js/bus-request.js"></script>
 <script src="js/admin.js"></script>
 <script src="js/bus-service.js"></script>
 <script src="js/reports.js"></script>
-<script src="js/bus-request.js"></script>
 <script src="js/tvm-service.js"></script>
 <script src="js/router.js"></script>
 
