@@ -7,17 +7,86 @@
 var API_URL = "https://script.google.com/macros/s/AKfycbytFqFdrsHqKrD2YnurKsXATyjAMLbFAtV3gEcLxmPF_DjfGk2A9yyBrhs7XgoM-uYcbw/exec";
 var currentUser = null;
 var SESSION_KEY = "ctech_session";
-var SESSION_DAYS = 14;
 var clockStarted = false;
 var notifPollingStarted = false;
 var _dotVisible = true;
 var MOON_PATH = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
 var SUN_PATH = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
 
+// ── Session sabitləri ──
+var IDLE_TIMEOUT_MS   = 60 * 60 * 1000;       // 1 saat fəaliyyətsizlik
+var MAX_SESSION_MS    = 8  * 60 * 60 * 1000;  // 8 saat maksimum sessiya
+var REMEMBER_ME_MS    = 14 * 24 * 60 * 60 * 1000; // 14 gün (Remember Me)
+
+// ── Idle timer ──
+var _idleTimer = null;
+var _sessionTimer = null;
+
+function resetIdleTimer(){
+  clearTimeout(_idleTimer);
+  _idleTimer = setTimeout(function(){
+    signOut();
+  }, IDLE_TIMEOUT_MS);
+}
+
+function startSessionTimer(expiresAt){
+  clearTimeout(_sessionTimer);
+  var remaining = expiresAt - Date.now();
+  if(remaining <= 0){ signOut(); return; }
+  _sessionTimer = setTimeout(function(){ signOut(); }, remaining);
+}
+
+function attachIdleListeners(){
+  ['mousemove','keydown','mousedown','touchstart','scroll'].forEach(function(ev){
+    document.addEventListener(ev, resetIdleTimer, { passive: true });
+  });
+  resetIdleTimer();
+}
+
 // ── Session idarəetməsi ──
-function saveSession(u){ try{ localStorage.setItem(SESSION_KEY, JSON.stringify({user:u, expires:Date.now()+(SESSION_DAYS*86400000)})); }catch(e){} }
-function clearSession(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
-function loadSession(){ try{ var r=localStorage.getItem(SESSION_KEY); if(!r)return null; var d=JSON.parse(r); if(Date.now()>d.expires){clearSession();return null;} return d.user; }catch(e){return null;} }
+function saveSession(u, rememberMe){
+  var duration = rememberMe ? REMEMBER_ME_MS : MAX_SESSION_MS;
+  var expiresAt = Date.now() + duration;
+  try{
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      user: u,
+      expires: expiresAt,
+      rememberMe: !!rememberMe
+    }));
+  }catch(e){}
+  return expiresAt;
+}
+
+function clearSession(){
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
+  clearTimeout(_idleTimer);
+  clearTimeout(_sessionTimer);
+}
+
+function loadSession(){
+  try{
+    var r = localStorage.getItem(SESSION_KEY);
+    if(!r) return null;
+    var d = JSON.parse(r);
+    if(Date.now() > d.expires){ clearSession(); return null; }
+    return d;
+  }catch(e){ return null; }
+}
+
+// ── Login xəta modalı ──
+function showLoginError(msg){
+  var el = document.getElementById('loginErrorText');
+  if(el) el.textContent = msg;
+  var modal = document.getElementById('loginErrorModal');
+  if(modal) modal.style.display = 'flex';
+}
+
+function closeLoginError(){
+  var modal = document.getElementById('loginErrorModal');
+  if(modal) modal.style.display = 'none';
+  var pw = document.getElementById('password');
+  if(pw){ pw.value = ''; pw.focus(); }
+}
 
 // ── Login ──
 function togglePassword(){
@@ -29,23 +98,44 @@ function togglePassword(){
 
 function showLoading(){ var ov=document.getElementById('loadingOverlay'); if(ov){ ov.style.display='flex'; ov.classList.add('open'); } document.getElementById('loadingSpinner').style.display='block'; document.getElementById('successIcon').classList.remove('show'); document.getElementById('failIcon').classList.remove('show'); document.getElementById('loadingText').innerHTML='Yoxlanılır...'; }
 function showLoadingSuccess(cb){ document.getElementById('loadingSpinner').style.display='none'; document.getElementById('successIcon').classList.add('show'); document.getElementById('loadingText').innerHTML='Uğurlu!'; setTimeout(function(){ var ov2=document.getElementById('loadingOverlay'); if(ov2){ ov2.classList.remove('open'); ov2.style.display='none'; } cb(); }, 700); }
-function showLoadingFail(msg){ document.getElementById('loadingSpinner').style.display='none'; document.getElementById('failIcon').classList.add('show'); document.getElementById('loadingText').innerHTML='Uğursuz'; setTimeout(function(){ document.getElementById('loadingOverlay').classList.remove('open'); var btn=document.getElementById('loginBtn'); btn.disabled=false; btn.innerHTML='Daxil ol'; alert(msg); }, 700); }
+function showLoadingFail(msg){
+  document.getElementById('loadingSpinner').style.display='none';
+  document.getElementById('failIcon').classList.add('show');
+  document.getElementById('loadingText').innerHTML='Uğursuz';
+  setTimeout(function(){
+    document.getElementById('loadingOverlay').classList.remove('open');
+    document.getElementById('loadingOverlay').style.display='none';
+    var btn=document.getElementById('loginBtn');
+    btn.disabled=false;
+    btn.innerHTML='Daxil ol';
+    showLoginError(msg);
+  }, 700);
+}
 
 function login(){
   var email=document.getElementById('email').value;
   var password=document.getElementById('password').value;
   var btn=document.getElementById('loginBtn');
-  if(!email){ alert('Email daxil edin'); return; }
-  if(!password){ alert('Şifrəni daxil edin'); return; }
+  if(!email){ showLoginError('Email daxil edin'); return; }
+  if(!password){ showLoginError('Şifrəni daxil edin'); return; }
   btn.disabled=true; btn.innerHTML='Yoxlanılır...'; showLoading();
   fetch(API_URL,{ method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'checkUser',email:email,password:password}) })
   .then(function(r){return r.json();})
   .then(function(result){
-    if(result.status==='OK'){ currentUser=result; if(document.getElementById('rememberMe').checked){saveSession(result);}else{clearSession();} showLoadingSuccess(function(){showDashboard();}); }
+    if(result.status==='OK'){
+      currentUser=result;
+      var rememberMe = document.getElementById('rememberMe').checked;
+      var expiresAt = saveSession(result, rememberMe);
+      showLoadingSuccess(function(){
+        showDashboard();
+        attachIdleListeners();
+        startSessionTimer(expiresAt);
+      });
+    }
     else if(result.status==='WRONG_PASSWORD'){ showLoadingFail('Şifrə yanlışdır'); }
-    else { showLoadingFail(result.debug?'DENIED\n\n'+result.debug:'Bu hesab üçün giriş icazəsi yoxdur'); }
+    else { showLoadingFail(result.debug?'Giriş rədd edildi:\n'+result.debug:'Bu hesab üçün giriş icazəsi yoxdur'); }
   })
-  .catch(function(e){ showLoadingFail('XƏTA: '+e.message); });
+  .catch(function(e){ showLoadingFail('Şəbəkə xətası: '+e.message); });
 }
 
 document.getElementById('password').addEventListener('keydown',function(e){ if(e.key==='Enter'){login();} });
@@ -130,7 +220,26 @@ function closeMenu(){ document.getElementById('menuPanel').classList.remove('ope
 function showAbout(){ closeMenu(); document.getElementById('aboutModal').classList.add('open'); }
 function hideAbout(){ document.getElementById('aboutModal').classList.remove('open'); }
 function toggleUserMenu(){ var dd=document.getElementById('ctdUserDropdown'); if(!dd)return; dd.classList.toggle('open'); }
-function signOut(){ closeMenu(); clearSession(); currentUser=null; document.getElementById('email').value=''; document.getElementById('password').value=''; var btn=document.getElementById('loginBtn'); btn.disabled=false; btn.innerHTML='Daxil ol'; document.getElementById('dashboardView').style.display='none'; document.getElementById('busServiceView').style.display='none'; document.getElementById('loginView').style.display=''; }
+
+function signOut(){
+  closeMenu();
+  clearSession();
+  currentUser=null;
+  // Remember Me sıfırla
+  var rm=document.getElementById('rememberMe');
+  if(rm) rm.checked=false;
+  // Login formu təmizlə
+  document.getElementById('email').value='';
+  document.getElementById('password').value='';
+  var btn=document.getElementById('loginBtn');
+  btn.disabled=false;
+  btn.innerHTML='Daxil ol';
+  // Bütün view-ları bağla, login-i aç
+  document.getElementById('dashboardView').style.display='none';
+  document.getElementById('busServiceView').style.display='none';
+  document.getElementById('loginView').style.display='';
+}
+
 function moduleAlert(n){ alert(n+' modulu tezliklə hazır olacaq'); }
 
 document.addEventListener('click',function(e){ var panel=document.getElementById('menuPanel'); if(!panel)return; if(!panel.contains(e.target)&&!e.target.closest('.icon-btn'))closeMenu(); });
@@ -168,12 +277,14 @@ if('caches' in window){
   }).catch(function(){});
 }
 
-// ── Session yükləmə ──
-var savedUser=loadSession();
-if(savedUser && savedUser.email){
-  currentUser=savedUser;
+// ── Session yükləmə (səhifə açılanda) ──
+var _savedSession = loadSession();
+if(_savedSession && _savedSession.user && _savedSession.user.email){
+  currentUser = _savedSession.user;
   showDashboard();
-} else if(savedUser){
+  attachIdleListeners();
+  startSessionTimer(_savedSession.expires);
+} else if(_savedSession){
   clearSession();
 }
 try{ var savedTheme=localStorage.getItem('ctech_theme'); if(savedTheme==='dark'&&window.innerWidth<901){applyTheme(true);} }catch(e){}
