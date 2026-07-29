@@ -1,82 +1,2412 @@
 <!DOCTYPE html>
-<html lang="az">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>CTECH Service Platform</title>
 
 <link rel="manifest" href="manifest.json">
-
 <meta name="theme-color" content="#2F6FED">
 <meta name="mobile-web-app-capable" content="yes">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CTECH Service">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-
 <link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="css/main.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<script>
+  (function(){
+    var meta = document.querySelector('meta[name="viewport"]');
+    if(!meta){ meta = document.createElement('meta'); meta.name="viewport"; document.head.appendChild(meta); }
+    meta.setAttribute("content","width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");
+  })();
+</script>
 
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html, body {
-    height:100%;
-    background:#F4F8FD;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-family:Arial,sans-serif;
-  }
-  .wrap {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:22px;
-  }
-  .badge {
-    width:88px;
-    height:88px;
-    border-radius:22px;
-    background:linear-gradient(135deg,#4E93FA,#2F6FED);
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    font-size:32px;
-    letter-spacing:1px;
-  }
-  .title {
-    font-size:15px;
-    color:#12233B;
-    font-weight:600;
-    letter-spacing:0.5px;
-  }
-  button {
-    background:linear-gradient(135deg,#4E93FA,#2F6FED);
-    color:#fff;
-    border:none;
-    padding:14px 40px;
-    border-radius:12px;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
-  }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@600&display=swap" rel="stylesheet">
+
 </head>
+
 <body>
 
-<div class="wrap">
-  <div class="badge">CT</div>
-  <div class="title">CTECH Technical Service Platform</div>
-  <button onclick="location.replace('https://script.google.com/macros/s/AKfycbxi0k5hC-JTZ-Zm7_Ih-Jakptlck_OUq034wJ2WDouWTrWddMfZ07wOOCJhxLfNSE6H6A/exec')">Daxil ol</button>
+<!-- ===== LOGIN VIEW ===== -->
+<div id="loginView">
+  <img class="login-banner" src="banner.webp" alt="CTECH Solutions">
+  <svg class="route-line" viewBox="0 0 800 800" preserveAspectRatio="none">
+    <polyline points="0,650 180,650 260,570 500,570 580,490 800,490" fill="none" stroke="#4E93FA" stroke-width="1.5" stroke-dasharray="2 8"/>
+    <polyline points="800,150 620,150 540,230 300,230 220,310 0,310" fill="none" stroke="#8FB8FB" stroke-width="1.5" stroke-dasharray="2 8"/>
+  </svg>
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand-name">CTECH <span>SOLUTIONS</span> MMC</div>
+    </div>
+    <div class="card">
+      <div class="card-top">
+        <h1>Technical Service Platform</h1>
+        <span class="field-label">Email ünvanı</span>
+        <div class="input-row">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C7089" stroke-width="2"><path d="M3 6l9 7 9-7M3 6v12h18V6H3z"/></svg>
+          <input id="email" type="email" placeholder="ad.soyad@ctech.az" autocomplete="email">
+        </div>
+        <span class="field-label">Şifrə</span>
+        <div class="input-row">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C7089" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input id="password" type="password" placeholder="Şifrəni daxil edin" autocomplete="current-password">
+          <button type="button" class="toggle-eye" onclick="togglePassword()" aria-label="Şifrəni göstər">
+            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C7089" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <button class="primary" onclick="login()" id="loginBtn">Daxil ol</button>
+        <label class="remember">
+          <input type="checkbox" id="rememberMe" checked>
+          Girişi yadda saxla
+        </label>
+      </div>
+    </div>
+    <div class="footer-note">© 2026 Ctech Solutions MMC</div>
+  </div>
 </div>
 
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
-</script>
+<!-- ===== DASHBOARD VIEW ===== -->
+<div id="dashboardView">
+  <div class="header">
+    <div class="header-left">
+      <div class="menu-wrap">
+        <button class="icon-btn" onclick="toggleMenu()" aria-label="Menyu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="menu-panel" id="menuPanel">
+          <button class="menu-item" onclick="goHome()">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+            <span>Ana səhifə</span>
+          </button>
+          <button class="menu-item" onclick="showAbout()">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg>
+            <span>Haqqında</span>
+          </button>
+          <button class="menu-item" id="adminMenuItem" onclick="openAdminPanel()" style="display:none;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Admin Panel</span>
+          </button>
+          <button class="menu-item" onclick="signOut()">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            <span>Çıxış</span>
+          </button>
+        </div>
+      </div>
+      <button class="icon-btn" id="collectivesBtn" onclick="openCollectives()" aria-label="Kollektiv haqqında" style="display:none;margin-left:10px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </button>
+    </div>
+
+    <div class="brand-mini">CTECH <span>SOLUTIONS</span> MMC</div>
+    <div class="header-right">
+      <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Gecə rejimi">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="clock-box">
+        <div class="status-dot"></div>
+        <span id="clockDate">--.--.----</span>
+        <span class="clock-sep">|</span>
+        <span id="clock">--:--</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-chip">
+      <div class="profile-avatar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <div class="profile-text">
+        <div class="profile-name" id="profileName">-</div>
+        <div class="profile-role" id="profileRole">-</div>
+      </div>
+      <button class="profile-notif-btn" id="notifBtn" onclick="openNotifications()" aria-label="Bildirişlər">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="welcome">
+    <div class="welcome-box">
+      <div class="welcome-name" id="welcomeName">Xoş gəlmisiniz</div>
+      <div class="welcome-sub">Bugün hansı bölmə ilə işləyirsiniz?</div>
+    </div>
+  </div>
+
+  <!-- ═══ DESKTOP-ONLY: yeni əsas menyu dizaynı (hero + banner) ═══ -->
+  <div class="ctd-hero">
+    <div class="ctd-hero-bg"></div>
+    <div class="ctd-hero-scrim"></div>
+    <div class="ctd-hero-blur"></div>
+    <div class="ctd-hero-fade"></div>
+
+    <div class="ctd-topbar">
+      <div class="ctd-topbar-left">
+        <div class="ctd-brand">CTECH <span class="accent">SOLUTIONS</span> MMC</div>
+        <div class="ctd-clock-pill"><span class="dot"></span><span id="ctdClockText">--.--.---- · --:--</span></div>
+      </div>
+      <div class="ctd-topbar-right">
+        <div class="ctd-icon-btn" onclick="toggleTheme()" role="button" aria-label="Gecə rejimi">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="ctdThemeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+        <div class="ctd-nav-btn" onclick="showAbout()" role="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg>
+          Tətbiq haqqında
+        </div>
+        <div class="ctd-nav-btn" id="ctdCollectivesBtn" onclick="openCollectives()" role="button" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Heyət haqqında
+        </div>
+        <div class="ctd-nav-btn" id="ctdAdminBtn" onclick="openAdminPanel()" role="button" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Admin panel
+        </div>
+        <div class="ctd-nav-btn ctd-signout" onclick="signOut()" role="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          Çıxış
+        </div>
+        <div class="ctd-user-chip">
+          <div class="ctd-avatar" id="ctdAvatarInitials">--</div>
+          <div class="ctd-who">
+            <div class="ctd-uname" id="ctdUserName">-</div>
+            <div class="ctd-urole" id="ctdUserRole">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctd-hero-inner">
+      <div class="ctd-welcome">Xoş gəlmisiniz, <span id="ctdWelcomeName">-</span></div>
+      <div class="ctd-subwelcome">Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.</div>
+
+      <div class="ctd-stat-row">
+        <div class="ctd-stat-card">
+          <div class="ctd-stat-top">
+            <div class="ctd-stat-icon" style="background:rgba(47,111,237,0.25); color:#9FC2FF;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div class="ctd-stat-label">Açıq servislər</div>
+          </div>
+          <div class="ctd-stat-value" id="dashStatOpen">—</div>
+          <div class="ctd-stat-sub">Bus Service</div>
+        </div>
+        <div class="ctd-stat-card">
+          <div class="ctd-stat-top">
+            <div class="ctd-stat-icon" style="background:rgba(14,140,122,0.28); color:#7BDCC9;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div class="ctd-stat-label">Bugünkü servislər</div>
+          </div>
+          <div class="ctd-stat-value" id="dashStatToday">—</div>
+          <div class="ctd-stat-sub">Bus Service</div>
+        </div>
+        <div class="ctd-stat-card">
+          <div class="ctd-stat-top">
+            <div class="ctd-stat-icon" style="background:rgba(201,130,27,0.28); color:#F5C579;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg>
+            </div>
+            <div class="ctd-stat-label">Aktiv texnik</div>
+          </div>
+          <div class="ctd-stat-value" id="dashStatTech">—</div>
+          <div class="ctd-stat-sub">Bugün</div>
+        </div>
+        <div class="ctd-stat-card">
+          <div class="ctd-stat-top">
+            <div class="ctd-stat-icon" style="background:rgba(255,255,255,0.22); color:#fff;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+            </div>
+            <div class="ctd-stat-label">Son daxil olan</div>
+          </div>
+          <div class="ctd-stat-value" id="dashStatLatestTime" style="font-size:16px;">—</div>
+          <div class="ctd-stat-sub" id="dashStatLatestInfo">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ctd-content-top-wrap">
+    <div class="ctd-content-top">
+      <div class="ctd-section-label"><div class="rule"></div><span>Bus əməliyyatları</span></div>
+      <div class="ctd-content-grid">
+
+        <div class="ctd-module-card">
+          <div class="ctd-module-head">
+            <div class="ctd-module-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9"/><path d="M3 16h18"/><path d="M3 16v1.5a1 1 0 0 0 1 1h1"/><path d="M21 16v1.5a1 1 0 0 1-1 1h-1"/><path d="M6 5v6M12 5v6M18 5v6"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+            </div>
+            <div>
+              <div class="ctd-module-title">Bus service</div>
+              <div class="ctd-module-desc">Servis müraciətləri və icra</div>
+            </div>
+          </div>
+          <div class="ctd-module-actions">
+            <div class="ctd-action-btn" id="ctdBrBtn" onclick="openBusRequest()" style="display:none;">
+              <span class="a-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+              <span class="a-label">Yeni müraciət</span>
+            </div>
+            <div class="ctd-action-btn" onclick="startBusService()">
+              <span class="a-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></span>
+              <span class="a-label">Yeni servis</span>
+            </div>
+            <div class="ctd-action-btn" onclick="openBusOngoing()">
+              <span class="a-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></span>
+              <span class="a-label">Davam edən servis</span>
+            </div>
+            <div class="ctd-action-btn" id="ctdBulkBtn" onclick="openBusBulk()" style="display:none;">
+              <span class="a-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+              <span class="a-label">Toplu idxal</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctd-widget-stack">
+          <div class="ctd-mini-widget" onclick="openBusDashboard()">
+            <div class="ctd-mini-icon teal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+            </div>
+            <div>
+              <div class="ctd-mini-title">Bus dashboard</div>
+              <div class="ctd-mini-desc">Statistika və hesabatlar</div>
+            </div>
+          </div>
+          <div class="ctd-mini-widget" onclick="openBusReport()">
+            <div class="ctd-mini-icon blue">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+            </div>
+            <div>
+              <div class="ctd-mini-title">Bus real-time report</div>
+              <div class="ctd-mini-desc">Canlı siyahı və Excel ixracı</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="ctd-banner2-section">
+    <div class="ctd-banner2-bg"></div>
+    <div class="ctd-banner2-scrim"></div>
+    <div class="ctd-banner2-top-fade"></div>
+    <div class="ctd-banner2-fade-bottom"></div>
+
+    <div class="ctd-banner2-inner">
+      <div class="ctd-banner2-panel">
+        <div class="ctd-section-label on-dark"><span>TVM və hesabatlar</span></div>
+        <div class="ctd-widget-grid">
+          <div class="ctd-widget-tile" style="grid-column:span 2;" onclick="openTvmService()">
+            <div class="ctd-widget-icon amber">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="16.5" rx="1.5"/><rect x="8" y="4.5" width="8" height="6" rx=".5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="15.3" x2="13" y2="15.3"/><path d="M9 21.5h6l-1-2.8h-4z"/></svg>
+            </div>
+            <div class="ctd-widget-title">TVM service</div>
+            <div class="ctd-widget-desc">Bilet satış aparatları texniki servis</div>
+          </div>
+          <div class="ctd-widget-tile" onclick="openTvmReport()">
+            <div class="ctd-widget-icon amber">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+            </div>
+            <div class="ctd-widget-title">TVM real-time report</div>
+            <div class="ctd-widget-desc">Canlı siyahı və Excel ixracı</div>
+          </div>
+          <div class="ctd-widget-tile" onclick="moduleAlert('Dashboard-TVM')">
+            <div class="ctd-widget-icon blue">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+            </div>
+            <div class="ctd-widget-title">TVM dashboard</div>
+            <div class="ctd-widget-desc">Statistika və hesabatlar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ctd-footer">© 2026 CTECH SOLUTIONS MMC. Bütün hüquqlar qorunur.</footer>
+
+
+  <div class="container">
+    <div class="primary-row">
+      <div class="card-big" onclick="startBusService()">
+        <div class="card-icon-big icon-bus">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9"/><path d="M3 16h18"/><path d="M3 16v1.5a1 1 0 0 0 1 1h1"/><path d="M21 16v1.5a1 1 0 0 1-1 1h-1"/><path d="M6 5v6M12 5v6M18 5v6"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+        </div>
+        <div class="card-title-big">BUS SERVICE</div>
+        <div class="card-sub-big">Avtobus texniki servis əməliyyatları</div>
+        <button id="busRequestQuickBtn" onclick="event.stopPropagation(); openBusRequest();" style="display:none;position:relative;z-index:2;margin-top:10px;background:#FFFFFF;color:#2F6FED;border:1.5px solid #C9D8F2;padding:7px 14px;border-radius:10px;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;">+ Yeni Müraciət</button>
+      </div>
+      <div class="card-big" onclick="openTvmService()">
+        <div class="card-icon-big icon-tvm">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="16.5" rx="1.5"/><rect x="8" y="4.5" width="8" height="6" rx=".5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="15.3" x2="13" y2="15.3"/><path d="M9 21.5h6l-1-2.8h-4z"/></svg>
+        </div>
+        <div class="card-title-big">TVM SERVICE</div>
+        <div class="card-sub-big">Bilet satış aparatları texniki servis</div>
+      </div>
+    </div>
+
+    <div id="dashboardsSection">
+      <div class="dash-divider">
+        <div class="dash-badge">DASHBOARDS</div>
+        <div class="dash-connector"></div>
+      </div>
+      <div class="secondary-row">
+        <div class="card-small" onclick="openBusDashboard()">
+          <div class="card-icon-small icon-bus">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+          </div>
+          <div><div class="card-title-small">Dashboard BUS</div><div class="card-sub-small">Statistika və hesabatlar</div></div>
+        </div>
+        <div class="card-small" onclick="moduleAlert('Dashboard-TVM')">
+          <div class="card-icon-small icon-tvm">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+          </div>
+          <div><div class="card-title-small">Dashboard TVM</div><div class="card-sub-small">Statistika və hesabatlar</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="reportsSection">
+      <div class="dash-divider">
+        <div class="dash-badge">HESABATLAR</div>
+        <div class="dash-connector"></div>
+      </div>
+      <div class="secondary-row">
+        <div class="card-small" onclick="openBusReport()">
+          <div class="card-icon-small icon-bus">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+          </div>
+          <div><div class="card-title-small">BUS Real-Time Report</div><div class="card-sub-small">Canlı siyahı və Excel ixracı</div></div>
+        </div>
+        <div class="card-small" onclick="openTvmReport()">
+          <div class="card-icon-small icon-tvm">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+          </div>
+          <div><div class="card-title-small">TVM Real-Time Report</div><div class="card-sub-small">Canlı siyahı və Excel ixracı</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner-wrap">
+      <img class="banner-img" src="banner.webp" alt="İctimai nəqliyyat">
+    </div>
+  </div>
+  <div class="footer-note-dash">© 2026 Ctech Solutions MMC</div>
+</div>
+
+<!-- ===== COLLECTIVES (Kollektiv haqqında) — yalnız veb versiya, tam səhifə ===== -->
+<div id="collectivesView" style="display:none;">
+
+  <div class="adm-header">
+    <button class="adm-home-btn" onclick="closeCollectives()" aria-label="Ana səhifəyə qayıt">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="adm-logo">CTECH <span>SOLUTIONS</span> MMC</div>
+    <div style="justify-self:end;display:flex;align-items:center;gap:12px;">
+      <button class="icon-btn" id="clThemeToggleBtn" onclick="toggleTheme()" aria-label="Gecə rejimi">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="clThemeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="adm-profile-chip">
+        <div class="adm-profile-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="adm-profile-text">
+          <div class="adm-profile-name" id="clProfileName">Toğrul Əliyev</div>
+          <div class="adm-profile-role" id="clProfileRole">Admin</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cl-body">
+    <div class="cl-page-title">
+      <div class="cl-page-title-main">Kollektiv haqqında</div>
+      <div class="cl-page-title-sub">Texniki heyət və şöbə məlumatları</div>
+    </div>
+
+    <!-- Loading -->
+    <div id="collectivesLoader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 0;gap:20px;">
+      <div style="width:50px;height:50px;border:5px solid #DCE6F5;border-top-color:#2F6FED;border-radius:50%;animation:spin .8s linear infinite;"></div>
+      <div style="font-size:15px;font-weight:600;color:#5C7089;">Kollektiv məlumatları hazırlanır...</div>
+    </div>
+
+    <!-- Məzmun -->
+    <div id="collectivesContent" style="display:none;">
+      <div id="collectivesDirector"></div>
+      <div id="collectivesGrid" class="cl-grid"></div>
+    </div>
+  </div>
+
+  <div class="cl-footer-note">© 2026 CTECH SOLUTIONS MMC. Bütün hüquqlar qorunur.</div>
+</div>
+
+<!-- ===== BİLDİRİŞLƏR (yalnız mobil) ===== -->
+<div id="notifView" style="display:none;">
+  <div class="notif-header">
+    <button class="notif-home-btn" onclick="closeNotifications()" aria-label="Ana səhifəyə qayıt">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="notif-header-title">Bildirişlər</div>
+    <div style="width:38px;"></div>
+  </div>
+
+  <!-- Siyahı görünüşü -->
+  <div id="notifListView">
+    <div class="notif-list" id="notifList">
+      <div class="adm-empty">Yüklənir...</div>
+    </div>
+  </div>
+
+  <!-- Mesaj görünüşü -->
+  <div id="notifDetailView" style="display:none;">
+    <div class="notif-detail-meta">
+      <span id="notifDetailDateTime">--.--.---- --:--</span>
+    </div>
+    <div class="notif-detail-text" id="notifDetailText"></div>
+    <button class="notif-read-btn" onclick="markNotificationReadAndClose()">Oxudum</button>
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL (yalnız veb versiya) ===== -->
+<div id="adminPanelView">
+
+  <div class="adm-header">
+    <button class="adm-home-btn" onclick="closeAdminPanel()" aria-label="Ana səhifəyə qayıt">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="adm-logo">CTECH <span>SOLUTIONS</span> MMC</div>
+    <div class="adm-profile-chip">
+      <div class="adm-profile-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="adm-profile-text">
+        <div class="adm-profile-name" id="admProfileName">Toğrul Əliyev</div>
+        <div class="adm-profile-role" id="admProfileRole">Admin</div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="adm-profile-caret"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+  </div>
+
+  <div class="adm-body">
+
+    <div class="adm-sidebar">
+      <button class="adm-nav-item active" data-section="users" onclick="switchAdminSection('users',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>User Management</span>
+      </button>
+      <button class="adm-nav-item" data-section="bus" onclick="switchAdminSection('bus',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6v6M16 6v6M2 12h19.6M18 18h3v-6.6a2 2 0 0 0-.6-1.4l-3-3A2 2 0 0 0 16 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+        <span>BUS Management</span>
+      </button>
+      <button class="adm-nav-item" data-section="tvm" onclick="switchAdminSection('tvm',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="6" x2="15" y2="6"/><circle cx="12" cy="16" r="2"/></svg>
+        <span>TVM Management</span>
+      </button>
+      <button class="adm-nav-item" data-section="tech" onclick="switchAdminSection('tech',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Technicians</span>
+      </button>
+      <button class="adm-nav-item" data-section="leaders" onclick="switchAdminSection('leaders',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Group Leaders</span>
+      </button>
+        <button class="adm-nav-item" data-section="collectives" onclick="switchAdminSection('collectives',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Collectives</span>
+      </button>
+      <button class="adm-nav-item" data-section="messages" onclick="switchAdminSection('messages',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Messages</span>
+      </button>
+      <button class="adm-nav-item" data-section="homedash" onclick="switchAdminSection('homedash',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span>Home Dashboards</span>
+      </button>
+    </div>
+
+    <div class="adm-content">
+
+      <!-- ═══ USER MANAGEMENT ═══ -->
+      <div class="adm-section" id="admSection-users">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> User Management</div>
+            <div class="adm-title">User Management</div>
+          </div>
+          <button class="adm-add-btn" onclick="openUserModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add User</button>
+        </div>
+
+        <div class="adm-stats-row">
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div><div class="adm-stat-label">Total Users</div><div class="adm-stat-value" id="admUsrStatTotal">—</div><div class="adm-stat-sub">Bütün istifadəçilər</div></div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg></div>
+            <div><div class="adm-stat-label">Active Users</div><div class="adm-stat-value" id="admUsrStatActive">—</div><div class="adm-stat-sub">Aktiv</div></div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg></div>
+            <div><div class="adm-stat-label">Inactive Users</div><div class="adm-stat-value" id="admUsrStatInactive">—</div><div class="adm-stat-sub">Passiv</div></div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><div class="adm-stat-label">Admins</div><div class="adm-stat-value" id="admUsrStatAdmins">—</div><div class="adm-stat-sub">Administratorlar</div></div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-teal"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div><div class="adm-stat-label">Technicians</div><div class="adm-stat-value" id="admUsrStatTech">—</div><div class="adm-stat-sub">Texniklər</div></div>
+          </div>
+        </div>
+
+        <div class="adm-toolbar">
+          <div class="adm-search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" id="admUsrSearch" placeholder="Search user..." oninput="admUsersDebouncedRender()">
+          </div>
+          <select class="adm-filter-select" id="admUsrRoleFilter" onchange="admRenderUsersTable()">
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="group leader">Group Leader</option>
+            <option value="technician">Technician</option>
+            <option value="user">User</option>
+          </select>
+          <select class="adm-filter-select" id="admUsrStatusFilter" onchange="admRenderUsersTable()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <button class="adm-export-btn" onclick="admExportUsers()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+        </div>
+
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead><tr><th>Full Name</th><th>Email</th><th>Role</th><th>Status</th><th class="adm-th-act">Actions</th></tr></thead>
+            <tbody id="admUsrTableBody">
+              <tr><td colspan="5"><div class="adm-empty">Yüklənir...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="adm-pagination">
+          <div class="adm-page-info" id="admUsrPageInfo">—</div>
+          <div class="adm-page-btns" id="admUsrPageBtns"></div>
+        </div>
+      </div>
+
+      <!-- ═══ BUS MANAGEMENT ═══ -->
+      <div class="adm-section" id="admSection-bus" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> BUS Management</div>
+            <div class="adm-title">BUS Management</div>
+          </div>
+        </div>
+
+        <div class="adm-subtabs">
+          <button class="adm-subtab active" data-sub="registry" onclick="switchBusSubtab('registry',this)">BUS Reyestri</button>
+          <button class="adm-subtab" data-sub="problems" onclick="switchBusSubtab('problems',this)">Nasazlıqlar</button>
+          <button class="adm-subtab" data-sub="solutions" onclick="switchBusSubtab('solutions',this)">Həllər</button>
+          <button class="adm-subtab" data-sub="equipment" onclick="switchBusSubtab('equipment',this)">Avadanlıq</button>
+          <button class="adm-subtab" data-sub="locations" onclick="switchBusSubtab('locations',this)">Lokasiyalar</button>
+          <button class="adm-subtab" data-sub="validatorsn" onclick="switchBusSubtab('validatorsn',this)">Validator SN</button>
+          <button class="adm-subtab" data-sub="samcardsn" onclick="switchBusSubtab('samcardsn',this)">SAM Card SN</button>
+        </div>
+
+        <!-- ── Alt-bölmə: BUS Reyestri ── -->
+        <div class="adm-bus-sub" id="admBusSub-registry">
+          <div class="adm-toolbar">
+            <div class="adm-search-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input type="text" id="admBusRegSearch" placeholder="BUS ID, D.Q.N. və ya daşıyıcı axtar..." oninput="admBusRegDebouncedRender()">
+            </div>
+            <button class="adm-export-btn" onclick="admExportBusRegistry()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+            <button class="adm-add-btn" onclick="openBusRegistryModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Bus</button>
+          </div>
+
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <thead><tr><th>BUS ID</th><th>D.Q.N.</th><th>Daşıyıcı</th><th>Model</th><th class="adm-th-act">Actions</th></tr></thead>
+              <tbody id="admBusRegTableBody"><tr><td colspan="5"><div class="adm-empty">Yüklənir...</div></td></tr></tbody>
+            </table>
+          </div>
+
+          <div class="adm-pagination">
+            <div class="adm-page-info" id="admBusRegPageInfo">—</div>
+            <div class="adm-page-btns" id="admBusRegPageBtns"></div>
+          </div>
+        </div>
+
+        <!-- ── Alt-bölmə: Nasazlıqlar / Həllər / Avadanlıq / Lokasiyalar (sadə, sıralana bilən siyahılar) ── -->
+        <div class="adm-bus-sub" id="admBusSub-problems" style="display:none;">
+          <div class="adm-list-head">
+            <div class="adm-list-count" id="admBusProblemsCount">— element</div>
+            <button class="adm-add-btn" onclick="openBusListModal('BUS_PROBLEMS')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Problem</button>
+          </div>
+          <div class="adm-reorder-list" id="admBusProblemsList"><div class="adm-empty">Yüklənir...</div></div>
+        </div>
+
+        <div class="adm-bus-sub" id="admBusSub-solutions" style="display:none;">
+          <div class="adm-list-head">
+            <div class="adm-list-count" id="admBusSolutionsCount">— element</div>
+            <button class="adm-add-btn" onclick="openBusListModal('BUS_SOLUTIONS')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Solution</button>
+          </div>
+          <div class="adm-reorder-list" id="admBusSolutionsList"><div class="adm-empty">Yüklənir...</div></div>
+        </div>
+
+        <div class="adm-bus-sub" id="admBusSub-equipment" style="display:none;">
+          <div class="adm-list-head">
+            <div class="adm-list-count" id="admBusEquipmentCount">— element</div>
+            <button class="adm-add-btn" onclick="openBusListModal('BUS_EQUIPMENT')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Equipment</button>
+          </div>
+          <div class="adm-reorder-list" id="admBusEquipmentList"><div class="adm-empty">Yüklənir...</div></div>
+        </div>
+
+        <div class="adm-bus-sub" id="admBusSub-locations" style="display:none;">
+          <div class="adm-list-head">
+            <div class="adm-list-count" id="admBusLocationsCount">— element</div>
+            <button class="adm-add-btn" onclick="openBusListModal('BUS_LOCATIONS')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Location</button>
+          </div>
+          <div class="adm-reorder-list" id="admBusLocationsList"><div class="adm-empty">Yüklənir...</div></div>
+        </div>
+
+        <!-- ── Alt-bölmə: Validator SN (~2600 sətir — axtarış-əsaslı, çox-seçimli) ── -->
+        <div class="adm-bus-sub" id="admBusSub-validatorsn" style="display:none;">
+          <div class="adm-toolbar">
+            <div class="adm-search-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input type="text" id="admValSnSearch" placeholder="Validator SN axtar (məs: IKB19310078)..." oninput="admValSnDebouncedSearch()">
+            </div>
+            <button class="adm-add-btn" onclick="openValidatorSNModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Validator SN</button>
+          </div>
+
+          <div class="adm-valsn-bulkbar" id="admValSnBulkBar" style="display:none;">
+            <span id="admValSnSelectedCount">0 seçildi</span>
+            <button class="adm-modal-save adm-modal-save-danger" onclick="admBulkDeleteValidatorSN()">Seçilənləri sil</button>
+            <button class="adm-modal-cancel" onclick="admValSnClearSelection()">Ləğv et</button>
+          </div>
+
+          <div class="adm-reorder-list" id="admValSnResults">
+            <div class="adm-empty">Axtarış edin (məs: SN-in son rəqəmləri) — nəticələr aşağıda görünəcək</div>
+          </div>
+        </div>
+
+        <!-- ── Alt-bölmə: SAM Card SN (~4000 sətir — axtarış-əsaslı, çox-seçimli) ── -->
+        <div class="adm-bus-sub" id="admBusSub-samcardsn" style="display:none;">
+          <div class="adm-toolbar">
+            <div class="adm-search-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input type="text" id="admSamSnSearch" placeholder="SAM Card SN axtar (məs: 615100113)..." oninput="admSamSnDebouncedSearch()">
+            </div>
+            <button class="adm-add-btn" onclick="openSamCardSNModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add SAM Card SN</button>
+          </div>
+
+          <div class="adm-valsn-bulkbar" id="admSamSnBulkBar" style="display:none;">
+            <span id="admSamSnSelectedCount">0 seçildi</span>
+            <button class="adm-modal-save adm-modal-save-danger" onclick="admBulkDeleteSamCardSN()">Seçilənləri sil</button>
+            <button class="adm-modal-cancel" onclick="admSamSnClearSelection()">Ləğv et</button>
+          </div>
+
+          <div class="adm-reorder-list" id="admSamSnResults">
+            <div class="adm-empty">Axtarış edin (məs: SN-in son rəqəmləri) — nəticələr aşağıda görünəcək</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add/Edit SAM Card SN modal -->
+      <div class="adm-modal-overlay" id="admSamSnModal" style="display:none;">
+        <div class="adm-modal adm-modal-sm">
+          <div class="adm-modal-head">
+            <div class="adm-modal-title" id="admSamSnModalTitle">Add SAM Card SN</div>
+            <button class="adm-modal-close" onclick="closeSamCardSNModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+          <div class="adm-modal-body">
+            <div class="adm-form-field">
+              <label id="admSamSnFieldLabel">SAM Card SN *</label>
+              <input type="text" id="admSamSnValue" placeholder="Məs: 615100113" style="font-family:'IBM Plex Mono',monospace;">
+            </div>
+            <div class="adm-form-error" id="admSamSnFormError" style="display:none;"></div>
+          </div>
+          <div class="adm-modal-foot">
+            <button class="adm-modal-cancel" onclick="closeSamCardSNModal()">Cancel</button>
+            <button class="adm-modal-save" id="admSamSnSaveBtn" onclick="submitSamCardSNModal()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add/Edit Validator SN modal -->
+      <div class="adm-modal-overlay" id="admValSnModal" style="display:none;">
+        <div class="adm-modal adm-modal-sm">
+          <div class="adm-modal-head">
+            <div class="adm-modal-title" id="admValSnModalTitle">Add Validator SN</div>
+            <button class="adm-modal-close" onclick="closeValidatorSNModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+          <div class="adm-modal-body">
+            <div class="adm-form-field">
+              <label id="admValSnFieldLabel">Validator SN *</label>
+              <input type="text" id="admValSnValue" placeholder="Məs: IKB19310078" style="font-family:'IBM Plex Mono',monospace;">
+            </div>
+            <div class="adm-form-error" id="admValSnFormError" style="display:none;"></div>
+          </div>
+          <div class="adm-modal-foot">
+            <button class="adm-modal-cancel" onclick="closeValidatorSNModal()">Cancel</button>
+            <button class="adm-modal-save" id="admValSnSaveBtn" onclick="submitValidatorSNModal()">Save</button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ═══ TVM MANAGEMENT ═══ -->
+      <div class="adm-section" id="admSection-tvm" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> TVM Management</div>
+            <div class="adm-title">TVM Management</div>
+          </div>
+        </div>
+
+        <div class="adm-subtabs">
+          <button class="adm-subtab active" data-sub="registry" onclick="switchTvmSubtab('registry',this)">TVM Reyestri</button>
+          <button class="adm-subtab" data-sub="problems" onclick="switchTvmSubtab('problems',this)">Nasazlıqlar</button>
+          <button class="adm-subtab" data-sub="solutions" onclick="switchTvmSubtab('solutions',this)">Həllər</button>
+          <button class="adm-subtab" data-sub="leaders" onclick="switchTvmSubtab('leaders',this)">Qrup Rəhbərləri</button>
+        </div>
+
+        <!-- ── Alt-bölmə: TVM Reyestri ── -->
+        <div class="adm-tvm-sub" id="admTvmSub-registry">
+          <div class="adm-stats-row adm-stats-row-3">
+            <div class="adm-stat-card">
+              <div class="adm-stat-icon adm-c-orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="6" x2="15" y2="6"/><circle cx="12" cy="16" r="2"/></svg></div>
+              <div><div class="adm-stat-label">Total TVMs</div><div class="adm-stat-value" id="admTvmStatTotal">—</div><div class="adm-stat-sub">Bütün cihazlar</div></div>
+            </div>
+            <div class="adm-stat-card">
+              <div class="adm-stat-icon adm-c-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></div>
+              <div><div class="adm-stat-label">Metro</div><div class="adm-stat-value" id="admTvmStatMetro">—</div><div class="adm-stat-sub">Metro stansiyaları</div></div>
+            </div>
+            <div class="adm-stat-card">
+              <div class="adm-stat-icon adm-c-teal"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6v6M16 6v6M2 12h19.6M18 18h3v-6.6a2 2 0 0 0-.6-1.4l-3-3A2 2 0 0 0 16 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></div>
+              <div><div class="adm-stat-label">Digər Lokasiyalar</div><div class="adm-stat-value" id="admTvmStatStops">—</div><div class="adm-stat-sub">Avtobus dayanacağı və s.</div></div>
+            </div>
+          </div>
+
+          <div class="adm-toolbar">
+            <div class="adm-search-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input type="text" id="admTvmRegSearch" placeholder="TVM İD və ya lokasiya axtar..." oninput="admTvmRegDebouncedRender()">
+            </div>
+            <button class="adm-export-btn" onclick="admExportTvmRegistry()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+            <button class="adm-add-btn" onclick="openTvmRegistryModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add TVM</button>
+          </div>
+
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <thead><tr><th>TVM İD</th><th>Lokasiya</th><th>Servis Lokasiyası</th><th class="adm-th-act">Actions</th></tr></thead>
+              <tbody id="admTvmRegTableBody"><tr><td colspan="4"><div class="adm-empty">Yüklənir...</div></td></tr></tbody>
+            </table>
+          </div>
+
+          <div class="adm-pagination">
+            <div class="adm-page-info" id="admTvmRegPageInfo">—</div>
+            <div class="adm-page-btns" id="admTvmRegPageBtns"></div>
+          </div>
+        </div>
+
+        <!-- ── Alt-bölmə: Nasazlıqlar / Həllər / Qrup Rəhbərləri (sadə, sıralana bilən siyahılar) ── -->
+        <div class="adm-tvm-sub" id="admTvmSub-problems" style="display:none;">
+          <div class="adm-list-head">
+            <div class="adm-list-count" id="admTvmProblemsCount">— element</div>
+            <button class="adm-add-btn" onclick="openTvmListModal('TVM_PROBLEMS')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Problem</button>
+          </div>
+          <div class="adm-reorder-list" id="admTvmProblemsList"><div class="adm-empty">Yüklənir...</div></div>
+        </div>
+
+        <div class="adm-tvm-sub" id="admTvmSub-solutions" style="display:none;">
+          <div class="adm-list-head">
+            <div class="adm-list-count" id="admTvmSolutionsCount">— element</div>
+            <button class="adm-add-btn" onclick="openTvmListModal('TVM_SOLUTIONS')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Solution</button>
+          </div>
+          <div class="adm-reorder-list" id="admTvmSolutionsList"><div class="adm-empty">Yüklənir...</div></div>
+        </div>
+
+        <div class="adm-tvm-sub" id="admTvmSub-leaders" style="display:none;">
+          <div class="adm-list-head">
+            <div class="adm-list-count" id="admTvmLeadersCount">— element</div>
+            <button class="adm-add-btn" onclick="openTvmListModal('TVM_TeamLeaders')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Leader</button>
+          </div>
+          <div class="adm-reorder-list" id="admTvmLeadersList"><div class="adm-empty">Yüklənir...</div></div>
+        </div>
+      </div>
+
+      <!-- ═══ TECHNICIANS ═══ -->
+      <div class="adm-section" id="admSection-tech" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> Technicians</div>
+            <div class="adm-title">Technicians</div>
+          </div>
+        </div>
+        <div class="adm-list-head">
+          <div class="adm-list-count" id="admTechCount">— texnik</div>
+          <button class="adm-add-btn" onclick="openTvmListModal('TECHNICALS')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Technician</button>
+        </div>
+        <div class="adm-reorder-list" id="admTechList"><div class="adm-empty">Yüklənir...</div></div>
+      </div>
+
+      <!-- ═══ GROUP LEADERS ═══ -->
+      <div class="adm-section" id="admSection-leaders" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> Group Leaders</div>
+            <div class="adm-title">Group Leaders</div>
+          </div>
+        </div>
+        <div class="adm-list-head">
+          <div class="adm-list-count" id="admLeadersCount">— rəhbər</div>
+          <button class="adm-add-btn" onclick="openTvmListModal('TEAM_LEADERS')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Leader</button>
+        </div>
+        <div class="adm-reorder-list" id="admLeadersList"><div class="adm-empty">Yüklənir...</div></div>
+      </div>
+
+      <!-- ═══ COLLECTIVES ═══ -->
+      <div class="adm-section" id="admSection-collectives" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> Collectives</div>
+            <div class="adm-title">Collectives</div>
+          </div>
+          <button class="adm-add-btn" onclick="openCollectiveAddModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Member</button>
+        </div>
+
+        <div class="adm-stats-row adm-stats-row-3">
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div><div class="adm-stat-label">Total Members</div><div class="adm-stat-value" id="admClStatTotal">—</div><div class="adm-stat-sub">Bütün əməkdaşlar</div></div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+            <div><div class="adm-stat-label">Categories</div><div class="adm-stat-value" id="admClStatCategories">—</div><div class="adm-stat-sub">Qrup sayı</div></div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-teal"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div><div class="adm-stat-label">Largest Group</div><div class="adm-stat-value" id="admClStatLargest">—</div><div class="adm-stat-sub" id="admClStatLargestName">—</div></div>
+          </div>
+        </div>
+
+        <div class="adm-toolbar">
+          <div class="adm-search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" id="admClSearch" placeholder="Ad və ya vəzifə axtar..." oninput="admClDebouncedRender()">
+          </div>
+          <select class="adm-filter-select" id="admClGroupFilter" onchange="admRenderCollectivesTable()">
+            <option value="">All Groups</option>
+            <option value="Direktor">Direktor</option>
+            <option value="Texniki Dəstək Qrup Rəhbərləri">Texniki Dəstək Qrup Rəhbərləri</option>
+            <option value="Texniki Heyət">Texniki Heyət</option>
+            <option value="Kiçik Texniki Heyət">Kiçik Texniki Heyət</option>
+            <option value="Sürücü Heyəti">Sürücü Heyəti</option>
+            <option value="Təmir Şöbəsi">Təmir Şöbəsi</option>
+            <option value="Monitorinq və Nəzarət Şöbəsi">Monitorinq və Nəzarət Şöbəsi</option>
+            <option value="Anbar Təsərrüfatı">Anbar Təsərrüfatı</option>
+            <option value="Təsərrüfat və Təmizlik Xidməti">Təsərrüfat və Təmizlik Xidməti</option>
+          </select>
+          <button class="adm-export-btn" onclick="admExportCollectives()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+        </div>
+
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead><tr><th>Full Name</th><th>Vəzifə</th><th>Qrup</th><th class="adm-th-act">Actions</th></tr></thead>
+            <tbody id="admClTableBody"><tr><td colspan="4"><div class="adm-empty">Yüklənir...</div></td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="adm-pagination">
+          <div class="adm-page-info" id="admClPageInfo">—</div>
+          <div class="adm-page-btns" id="admClPageBtns"></div>
+        </div>
+      </div>
+
+      <!-- ═══ MESSAGES ═══ -->
+      <div class="adm-section" id="admSection-messages" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> Messages</div>
+            <div class="adm-title">Messages</div>
+          </div>
+        </div>
+
+        <div class="adm-msg-compose">
+          <div class="adm-msg-compose-title">Yeni bildiriş göndər</div>
+          <div class="adm-msg-row">
+            <div class="adm-form-field" style="flex:1;">
+              <label>Tarix</label>
+              <input type="date" id="admMsgDate">
+            </div>
+            <div class="adm-form-field" style="flex:1;">
+              <label>Saat</label>
+              <input type="text" inputmode="numeric" pattern="[0-9:]*" maxlength="5" id="admMsgTime" placeholder="--:--" autocomplete="off" oninput="formatTimeInput(this)">
+            </div>
+          </div>
+          <div class="adm-form-field">
+            <label>Mesaj mətni *</label>
+            <textarea id="admMsgText" rows="4" placeholder="Bütün istifadəçilərə göndəriləcək bildiriş mətnini yazın..."></textarea>
+          </div>
+          <div class="adm-form-error" id="admMsgFormError" style="display:none;"></div>
+          <div class="adm-msg-hint">Bildiriş mobil tətbiqdə 48 saat ərzində aktiv olacaq.</div>
+          <button class="adm-modal-save" id="admMsgSendBtn" onclick="submitAdminNotification()">Göndər</button>
+        </div>
+
+        <div class="adm-msg-history-title">Son göndərilən bildirişlər (48 saat)</div>
+        <div class="adm-reorder-list" id="admMsgHistoryList"><div class="adm-empty">Yüklənir...</div></div>
+      </div>
+
+      <!-- ═══ HOME DASHBOARDS ═══ -->
+      <div class="adm-section" id="admSection-homedash" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> Home Dashboards</div>
+            <div class="adm-title">Home Dashboards</div>
+          </div>
+        </div>
+        <div class="adm-msg-hint" style="margin-bottom:16px;">Əsas menyudakı 4 stat kartında hansı məlumatın əks olunacağını buradan idarə edin. (Hazırda yalnız Bus Service ilə bağlı ölçülər mövcuddur.)</div>
+
+        <div id="admHomeDashSlots" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:760px;margin-bottom:18px;"></div>
+
+        <div class="adm-form-error" id="admHomeDashError" style="display:none;"></div>
+        <button class="adm-modal-save" onclick="submitDashboardConfig()">Yadda saxla</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Add/Edit User modal -->
+  <div class="adm-modal-overlay" id="admUserModal" style="display:none;">
+    <div class="adm-modal">
+      <div class="adm-modal-head">
+        <div class="adm-modal-title" id="admUserModalTitle">Add User</div>
+        <button class="adm-modal-close" onclick="closeUserModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="adm-modal-body">
+        <div class="adm-form-field">
+          <label>Full Name *</label>
+          <input type="text" id="admUsrFullName" placeholder="Məs: Toğrul Əliyev">
+        </div>
+        <div class="adm-form-field">
+          <label>Email *</label>
+          <input type="email" id="admUsrEmail" placeholder="Məs: togrul.eliyev@ctech.az">
+        </div>
+        <div class="adm-form-field">
+          <label id="admUsrPasswordLabel">Password *</label>
+          <input type="text" id="admUsrPassword" placeholder="Şifrə">
+        </div>
+        <div class="adm-form-row">
+          <div class="adm-form-field">
+            <label>Role *</label>
+            <select id="admUsrRole">
+              <option value="Admin">Admin</option>
+              <option value="Group Leader">Group Leader</option>
+              <option value="Technician" selected>Technician</option>
+              <option value="User">User</option>
+            </select>
+          </div>
+          <div class="adm-form-field">
+            <label>Status *</label>
+            <select id="admUsrStatus">
+              <option value="Active" selected>Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="adm-form-error" id="admUsrFormError" style="display:none;"></div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-modal-cancel" onclick="closeUserModal()">Cancel</button>
+        <button class="adm-modal-save" id="admUsrSaveBtn" onclick="submitUserModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TVM Registry Add/Edit modal -->
+  <div class="adm-modal-overlay" id="admTvmRegModal" style="display:none;">
+    <div class="adm-modal">
+      <div class="adm-modal-head">
+        <div class="adm-modal-title" id="admTvmRegModalTitle">Add TVM</div>
+        <button class="adm-modal-close" onclick="closeTvmRegistryModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="adm-modal-body">
+        <div class="adm-form-field">
+          <label>TVM İD *</label>
+          <input type="text" id="admTvmRegId" placeholder="Məs: IKB15110041">
+        </div>
+        <div class="adm-form-field">
+          <label>Lokasiya</label>
+          <input type="text" id="admTvmRegLocation" placeholder="Məs: H.Aslanov-1">
+        </div>
+        <div class="adm-form-field">
+          <label>Servis Lokasiyası</label>
+          <input type="text" id="admTvmRegServiceLocation" placeholder="Məs: Metro">
+        </div>
+        <div class="adm-form-error" id="admTvmRegFormError" style="display:none;"></div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-modal-cancel" onclick="closeTvmRegistryModal()">Cancel</button>
+        <button class="adm-modal-save" id="admTvmRegSaveBtn" onclick="submitTvmRegistryModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TVM sadə siyahı (Problem/Solution/Leader) Add/Edit modal -->
+  <div class="adm-modal-overlay" id="admTvmListModal" style="display:none;">
+    <div class="adm-modal">
+      <div class="adm-modal-head">
+        <div class="adm-modal-title" id="admTvmListModalTitle">Add</div>
+        <button class="adm-modal-close" onclick="closeTvmListModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="adm-modal-body">
+        <div class="adm-form-field">
+          <label id="admTvmListFieldLabel">Dəyər *</label>
+          <input type="text" id="admTvmListValue" placeholder="">
+        </div>
+        <div class="adm-form-error" id="admTvmListFormError" style="display:none;"></div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-modal-cancel" onclick="closeTvmListModal()">Cancel</button>
+        <button class="adm-modal-save" id="admTvmListSaveBtn" onclick="submitTvmListModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUS Registry Add/Edit modal -->
+  <div class="adm-modal-overlay" id="admBusRegModal" style="display:none;">
+    <div class="adm-modal">
+      <div class="adm-modal-head">
+        <div class="adm-modal-title" id="admBusRegModalTitle">Add Bus</div>
+        <button class="adm-modal-close" onclick="closeBusRegistryModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="adm-modal-body">
+        <div class="adm-form-field">
+          <label>BUS ID</label>
+          <input type="text" id="admBusRegId" placeholder="Məs: 15897">
+        </div>
+        <div class="adm-form-field">
+          <label>Daşıyıcı</label>
+          <input type="text" id="admBusRegCarrier" placeholder="Məs: BakuBus MMC">
+        </div>
+        <div class="adm-form-field">
+          <label>D.Q.N.</label>
+          <input type="text" id="admBusRegDqn" placeholder="Məs: 77-JA-568">
+        </div>
+        <div class="adm-form-field">
+          <label>Model</label>
+          <input type="text" id="admBusRegModel" placeholder="Məs: BYD">
+        </div>
+        <div class="adm-form-error" id="admBusRegFormError" style="display:none;"></div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-modal-cancel" onclick="closeBusRegistryModal()">Cancel</button>
+        <button class="adm-modal-save" id="admBusRegSaveBtn" onclick="submitBusRegistryModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUS sadə siyahı (Problem/Solution/Equipment/Location) Add/Edit modal -->
+  <div class="adm-modal-overlay" id="admBusListModal" style="display:none;">
+    <div class="adm-modal">
+      <div class="adm-modal-head">
+        <div class="adm-modal-title" id="admBusListModalTitle">Add</div>
+        <button class="adm-modal-close" onclick="closeBusListModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="adm-modal-body">
+        <div class="adm-form-field">
+          <label id="admBusListFieldLabel">Dəyər *</label>
+          <input type="text" id="admBusListValue" placeholder="">
+        </div>
+        <div class="adm-form-error" id="admBusListFormError" style="display:none;"></div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-modal-cancel" onclick="closeBusListModal()">Cancel</button>
+        <button class="adm-modal-save" id="admBusListSaveBtn" onclick="submitBusListModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirm -->
+  <div class="adm-modal-overlay" id="admDeleteConfirm" style="display:none;">
+    <div class="adm-modal adm-modal-sm">
+      <div class="adm-modal-body" style="text-align:center;padding-top:28px;">
+        <div class="adm-delete-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div>
+        <div class="adm-modal-title" style="margin-top:12px;">İstifadəçini sil?</div>
+        <div class="adm-delete-text" id="admDeleteText">Bu əməliyyat geri qaytarıla bilməz.</div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-modal-cancel" onclick="closeDeleteConfirm()">Cancel</button>
+        <button class="adm-modal-save adm-modal-save-danger" onclick="admConfirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BUS Service açılış overlay -->
+<div id="busOpenOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(244,248,253,0.95);z-index:55;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+  <div style="width:60px;height:60px;border:5px solid #DCE6F5;border-top-color:#2F6FED;border-radius:50%;animation:spin .8s linear infinite;"></div>
+  <div style="font-size:15px;font-weight:600;color:#2F4C6E;font-family:'Inter',sans-serif;">BUS Service yüklənir...</div>
+  <div style="font-size:12px;color:#8CA0BC;">Məlumatlar hazırlanır</div>
+</div>
+
+
+<!-- ===== BUS REPORT VIEW ===== -->
+<div id="busReportView" style="display:none;flex-direction:column;">
+
+  <div class="rpt-header">
+    <button onclick="closeBusReport()" class="bs-home-btn" aria-label="Ana səhifəyə qayıt">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="rpt-title">BUS <span>Real-Time</span> Report</div>
+    <div class="rpt-header-btns">
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Gecə rejimi" title="Gecə/Gündüz rejimi">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="rptThemeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="rpt-btn rpt-btn-refresh" onclick="loadReportData()" aria-label="Yenilə" title="Yenilə">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        <span>Yenilə</span>
+      </button>
+      <button class="rpt-btn rpt-btn-export" id="rptExcelBtn" onclick="exportToExcel()" aria-label="Excel yüklə" title="Excel yüklə" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Excel</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="rpt-toolbar">
+    <div class="rpt-search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" class="rpt-search" id="rptGlobalSearch" placeholder="Ticket ID, Tarix, D.Q.N., BUS ID və ya Daşıyıcı üzrə axtar..." oninput="applyFiltersDebounced()">
+    </div>
+    <select class="adm-filter-select" id="rptDaysBackSelect" onchange="rptChangeDaysBack()">
+      <option value="90">Son 90 gün</option>
+      <option value="180">Son 6 ay</option>
+      <option value="365">Son 1 il</option>
+      <option value="0">Hamısı</option>
+    </select>
+    <div class="rpt-type-filter" id="rptTypeFilter">
+      <button class="rpt-type-btn rpt-type-btn-active" data-type="all" onclick="setRptServiceTypeFilter('all',this)">Hamısı</button>
+      <button class="rpt-type-btn" data-type="individual" onclick="setRptServiceTypeFilter('individual',this)">Fərdi Servis</button>
+      <button class="rpt-type-btn" data-type="bulk" onclick="setRptServiceTypeFilter('bulk',this)">Toplu Servis</button>
+    </div>
+    <div class="rpt-date-box">
+      <div class="status-dot"></div>
+      <span id="rptDateBox">--.--.----</span>
+      <span class="rpt-date-sep">|</span>
+      <span id="rptClockBox">--:--:--</span>
+    </div>
+    <span class="rpt-info" id="rptCount">— nəticə</span>
+  </div>
+
+  <div class="rpt-oldhint" id="rptOldHint" style="display:none;"></div>
+
+  <div class="rpt-body-scroll">
+    <div class="rpt-table-wrap">
+      <table class="rpt-table">
+        <colgroup>
+          <col class="col-id"><col class="col-date"><col class="col-plate"><col class="col-bus"><col class="col-carrier"><col class="col-act">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Tarix</th>
+            <th>D.Q.N.</th>
+            <th id="rptThBusId">BUS ID</th>
+            <th class="col-carrier">Daşıyıcı</th>
+            <th class="col-act"></th>
+          </tr>
+        </thead>
+        <tbody id="rptTableBody">
+          <tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Məlumatlar yüklənir...</span></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="rpt-loadmore-wrap" id="rptLoadMoreWrap" style="display:none;">
+      <button class="rpt-loadmore-btn" onclick="rptShowMore()" id="rptLoadMoreBtn">Daha çox göstər</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== DAVAM EDƏN SERVİS (yalnız veb, ayrıca pəncərə — Status=Açıq) ===== -->
+<div id="busOngoingView" style="display:none;flex-direction:column;">
+
+  <div class="rpt-header">
+    <button onclick="closeBusOngoing()" class="bs-home-btn" aria-label="Ana səhifəyə qayıt">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="rpt-title">Davam Edən <span>Servislər</span></div>
+    <div class="rpt-header-btns">
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Gecə rejimi" title="Gecə/Gündüz rejimi">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="ongThemeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="rpt-btn rpt-btn-refresh" onclick="loadOngoingData()" aria-label="Yenilə" title="Yenilə">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        <span>Yenilə</span>
+      </button>
+      <button class="rpt-btn rpt-btn-export" id="ongExcelBtn" onclick="exportOngoingToExcel()" aria-label="Excel yüklə" title="Excel yüklə" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Excel</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="rpt-toolbar">
+    <div class="rpt-search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" class="rpt-search" id="ongGlobalSearch" placeholder="Ticket ID, Tarix, D.Q.N., BUS ID və ya Daşıyıcı üzrə axtar..." oninput="applyOngoingFiltersDebounced()">
+    </div>
+    <div class="rpt-type-filter" id="ongTypeFilter">
+      <button class="rpt-type-btn rpt-type-btn-active" data-type="all" onclick="setOngServiceTypeFilter('all',this)">Hamısı</button>
+      <button class="rpt-type-btn" data-type="individual" onclick="setOngServiceTypeFilter('individual',this)">Fərdi Servis</button>
+      <button class="rpt-type-btn" data-type="bulk" onclick="setOngServiceTypeFilter('bulk',this)">Toplu Servis</button>
+    </div>
+    <div class="rpt-date-box">
+      <div class="status-dot"></div>
+      <span id="ongDateBox">--.--.----</span>
+      <span class="rpt-date-sep">|</span>
+      <span id="ongClockBox">--:--:--</span>
+    </div>
+    <span class="rpt-info" id="ongCount">— nəticə</span>
+  </div>
+
+  <div class="rpt-body-scroll">
+    <div class="rpt-table-wrap">
+      <table class="rpt-table">
+        <colgroup>
+          <col class="col-id"><col class="col-date"><col class="col-plate"><col class="col-bus"><col class="col-carrier"><col class="col-act">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Tarix</th>
+            <th>D.Q.N.</th>
+            <th>BUS ID</th>
+            <th class="col-carrier">Daşıyıcı</th>
+            <th class="col-act"></th>
+          </tr>
+        </thead>
+        <tbody id="ongTableBody">
+          <tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Məlumatlar yüklənir...</span></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="rpt-loadmore-wrap" id="ongLoadMoreWrap" style="display:none;">
+      <button class="rpt-loadmore-btn" onclick="ongShowMore()" id="ongLoadMoreBtn">Daha çox göstər</button>
+    </div>
+  </div>
+
+</div>
+<div id="busDetailView" style="display:none;flex-direction:column;">
+
+  <div class="rpt-header">
+    <button onclick="closeBusDetail()" class="bs-home-btn" aria-label="Geri">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="rpt-title" id="dvTicketTitle">Servis Detalları</div>
+    <div style="width:32px;"></div>
+  </div>
+
+  <div class="dv-body" id="dvBody">
+    <!-- JS tərəfindən doldurulur -->
+  </div>
+
+</div>
+
+<!-- ===== TVM REAL-TIME REPORT ===== -->
+<div id="tvmReportView" style="display:none;flex-direction:column;">
+
+  <div class="rpt-header">
+    <button onclick="closeTvmReport()" class="bs-home-btn" aria-label="Ana səhifəyə qayıt">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="rpt-title">TVM <span>Real-Time</span> Report</div>
+    <div class="rpt-header-btns">
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Gecə rejimi" title="Gecə/Gündüz rejimi">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="tvmRptThemeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="rpt-btn rpt-btn-refresh" onclick="loadTvmReportData()" aria-label="Yenilə" title="Yenilə">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        <span>Yenilə</span>
+      </button>
+      <button class="rpt-btn rpt-btn-export" id="tvmRptExcelBtn" onclick="exportTvmToExcel()" aria-label="Excel yüklə" title="Excel yüklə" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Excel</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="rpt-toolbar">
+    <div class="rpt-search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" class="rpt-search" id="tvmRptGlobalSearch" placeholder="Ticket ID, Tarix, TVM SN və ya Lokasiya üzrə axtar..." oninput="applyTvmFiltersDebounced()">
+    </div>
+    <select class="adm-filter-select" id="tvmRptDaysBackSelect" onchange="tvmRptChangeDaysBack()">
+      <option value="90">Son 90 gün</option>
+      <option value="180">Son 6 ay</option>
+      <option value="365">Son 1 il</option>
+      <option value="0">Hamısı</option>
+    </select>
+    <div class="rpt-date-box">
+      <div class="status-dot"></div>
+      <span id="tvmRptDateBox">--.--.----</span>
+      <span class="rpt-date-sep">|</span>
+      <span id="tvmRptClockBox">--:--:--</span>
+    </div>
+    <span class="rpt-info" id="tvmRptCount">— nəticə</span>
+  </div>
+
+  <div class="rpt-oldhint" id="tvmRptOldHint" style="display:none;"></div>
+
+  <div class="rpt-body-scroll">
+    <div class="rpt-table-wrap">
+      <table class="rpt-table">
+        <colgroup>
+          <col class="col-id"><col class="col-date"><col class="col-plate"><col class="col-carrier"><col class="col-act">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Tarix</th>
+            <th>TVM SN</th>
+            <th class="col-carrier">TVM Lokasiya</th>
+            <th class="col-act"></th>
+          </tr>
+        </thead>
+        <tbody id="tvmRptTableBody">
+          <tr><td colspan="5"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Məlumatlar yüklənir...</span></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="rpt-loadmore-wrap" id="tvmRptLoadMoreWrap" style="display:none;">
+      <button class="rpt-loadmore-btn" onclick="tvmRptShowMore()" id="tvmRptLoadMoreBtn">Daha çox göstər</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TVM DETAIL VIEW (yalnız baxış) ===== -->
+<div id="tvmDetailView" style="display:none;flex-direction:column;">
+
+  <div class="rpt-header">
+    <button onclick="closeTvmDetail()" class="bs-home-btn" aria-label="Geri">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="rpt-title" id="tvmDvTicketTitle">Servis Detalları</div>
+    <div style="width:32px;"></div>
+  </div>
+
+  <div class="dv-body" id="tvmDvBody">
+    <!-- JS tərəfindən doldurulur -->
+  </div>
+
+</div>
+
+<!-- ===== BUS DASHBOARD ===== -->
+<div id="busDashboardView">
+
+  <div class="dash-header">
+    <button onclick="closeBusDashboard()" class="bs-home-btn" aria-label="Ana səhifəyə qayıt">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="dash-title">BUS <span>DASHBOARD</span></div>
+    <div class="dash-right">
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Tema">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dashThemeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="dash-tabs" id="dashTabs">
+        <div class="dash-tab active" data-period="24h">24 saat</div>
+        <div class="dash-tab" data-period="week">Bu həftə</div>
+        <div class="dash-tab" data-period="month">Bu ay</div>
+        <div class="dash-tab" data-period="all">Hamısı</div>
+      </div>
+      <button class="dash-excel-btn" onclick="exportDashboardExcel()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Excel
+      </button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+
+    <div class="dash-type-filter-row">
+      <div class="rpt-type-filter" id="dashTypeFilter">
+        <button class="rpt-type-btn rpt-type-btn-active" data-type="all" onclick="setDashServiceTypeFilter('all',this)">Hamısı</button>
+        <button class="rpt-type-btn" data-type="individual" onclick="setDashServiceTypeFilter('individual',this)">Fərdi Servis</button>
+        <button class="rpt-type-btn" data-type="bulk" onclick="setDashServiceTypeFilter('bulk',this)">Toplu Servis</button>
+      </div>
+    </div>
+
+    <!-- Desktop tam görünüş -->
+    <div class="dash-desktop-view">
+      <div class="dash-container">
+
+        <div class="dash-top-grid">
+          <div class="dash-metric">
+            <div><div class="dash-metric-label">Ümumi servis</div><div class="dash-metric-value" id="dashTotalAll">—</div></div>
+            <div class="dash-metric-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10a2 2 0 0 0 2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2a2 2 0 0 0-2-2z"/></svg></div>
+          </div>
+          <div class="dash-metric">
+            <div><div class="dash-metric-label">Bu gün</div><div class="dash-metric-value" id="dashTotalToday">—</div></div>
+            <div class="dash-metric-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></div>
+          </div>
+          <div class="dash-metric">
+            <div><div class="dash-metric-label">Bu həftə</div><div class="dash-metric-value" id="dashTotalWeek">—</div></div>
+            <div class="dash-metric-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+          </div>
+          <div class="dash-range-btn" onclick="openDashModal()">
+            <div class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+            <div class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+          </div>
+        </div>
+
+        <div class="dash-section-title">Ən çox rast gəlinən problem</div>
+        <div class="dash-radial-grid" id="dashProblemGrid"></div>
+
+        <div class="dash-section-title">Ən çox rast gəlinən həll</div>
+        <div class="dash-ranklist" id="dashSolutionList"></div>
+
+        <div class="dash-section-title">Servis kateqoriyaları</div>
+        <div class="dash-tile-grid" id="dashCategoryGrid"></div>
+
+        <div class="dash-grid-2" style="margin-top:20px;">
+          <div>
+            <div class="dash-section-title" style="margin-top:0;">Texnik fəaliyyəti</div>
+            <div class="dash-lead-card" id="dashTechList"></div>
+          </div>
+          <div>
+            <div class="dash-section-title" style="margin-top:0;">Qrup rəhbəri fəaliyyəti</div>
+            <div class="dash-lead-card" id="dashLeaderList"></div>
+          </div>
+        </div>
+
+        <div class="dash-grid-2" style="margin-top:20px;">
+          <div>
+            <div class="dash-section-title" style="margin-top:0;">Daşıyıcı firma üzrə statistika</div>
+            <div class="dash-ranklist" id="dashCarrierList"></div>
+          </div>
+          <div>
+            <div class="dash-section-title" style="margin-top:0;">Servis verilən ünvan</div>
+            <div class="dash-ranklist" id="dashLocationList"></div>
+          </div>
+        </div>
+
+        <div class="dash-section-title">Təkrarlanan problemli avtobuslar</div>
+        <div class="dash-alert-panel" id="dashRecurringPanel"></div>
+
+      </div>
+    </div>
+
+    <!-- Mobil sadə görünüş -->
+    <div class="dash-mobile-view">
+      <div class="dash-m-metrics">
+        <div>Ümumi servis: <b id="dashMTotalAll">—</b></div>
+        <div>Bu gün: <b id="dashMTotalToday">—</b></div>
+        <div>Bu həftə: <b id="dashMTotalWeek">—</b></div>
+      </div>
+      <div id="dashMobileSections"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Tarix/Filtr modalı -->
+<div class="dash-modal-overlay" id="dashModal" style="display:none;">
+  <div class="dash-modal">
+    <div class="dash-modal-head">
+      <div class="dash-modal-head-title" id="dashModalTitle">Tarix aralığı və filtrlər</div>
+      <div class="dash-modal-head-btns">
+        <button class="dash-reset-btn" id="dashResetBtnEl" onclick="resetDashFilters()">Sıfırla</button>
+        <button class="dash-close-btn" onclick="closeDashModal()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+    </div>
+    <div class="dash-modal-body" id="dashModalFilterBody">
+      <div class="dash-modal-left">
+        <div class="dcal-head">
+          <div class="dcal-nav" onclick="dcalNav(-1)">‹</div>
+          <div class="dcal-label" id="dcalLabel"></div>
+          <div class="dcal-nav" onclick="dcalNav(1)">›</div>
+        </div>
+        <div class="dcal-grid" id="dcalGrid"></div>
+        <div class="dcal-selected-txt" id="dcalSelectedTxt">Başlanğıc tarixi seçin</div>
+      </div>
+      <div class="dash-modal-right">
+        <div class="dash-chip-row" id="dashChipRow"></div>
+        <div id="dashSubfilters"></div>
+        <div class="dash-search-warn" id="dashSearchWarn" style="display:none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Zəhmət olmasa tarix aralığı seçin və ya ən azı bir filtr kateqoriyası aktivləşdirin.
+        </div>
+        <button class="dash-search-btn" onclick="runDashSearch()">Axtar</button>
+      </div>
+    </div>
+    <div class="dash-modal-results" id="dashModalResults">
+      <div id="dashModalResultsBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="dash-loading-overlay" id="dashLoading" style="display:none;">
+  <div class="spinner" style="width:44px;height:44px;border-width:4px;"></div>
+  <div class="dash-loading-text">Hazırlanır...</div>
+</div>
+
+
+<!-- ===== BUS SERVICE VIEW ===== -->
+<div id="busServiceView">
+
+  <div class="bs-header">
+    <button onclick="attemptBusHome()" class="bs-home-btn" aria-label="Ana səhifəyə qayıt">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:20px;letter-spacing:2px;color:#12233B;text-transform:uppercase;text-align:center;">CTECH <span style="color:#2F6FED;">SOLUTIONS</span> MMC</span>
+    <div></div>
+  </div>
+
+  <div class="bs-body">
+
+    <!-- Ticket ID -->
+    <div id="bsTicketRow" style="padding:0 0 8px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <div id="bsTicketBadge"></div>
+    </div>
+
+    <!-- Tarix / Saat -->
+    <div class="bs-section">
+      <div class="bs-section-title">Müraciət məlumatları</div>
+      <div class="bs-date-time-row">
+        <div class="bs-field">
+          <label class="bs-label">Tarix *</label>
+          <input type="date" id="bs_date" class="bs-input">
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">Saat *</label>
+          <input type="text" inputmode="numeric" pattern="[0-9:]*" maxlength="5" id="bs_time_lbl" class="bs-input" placeholder="--:--" autocomplete="off" oninput="formatTimeInput(this)">
+        </div>
+      </div>
+      <div class="bs-field">
+        <label class="bs-label">Müraciət edən (Ad Soyad, Vəzifə) *</label>
+        <input type="text" id="bs_requester" class="bs-input" placeholder="Məs. Əli Hüseynov, Sürücü">
+      </div>
+      <div class="bs-field">
+        <label class="bs-label">Əlaqə nömrəsi *</label>
+        <input type="tel" id="bs_phone" class="bs-input" placeholder="+994 XX XXX XX XX">
+      </div>
+    </div>
+
+    <!-- Avtobus məlumatları -->
+    <div class="bs-section">
+      <div class="bs-section-title">Avtobus məlumatları</div>
+
+      <!-- D.Q.N. — axtarış buradan başlayır -->
+      <div class="bs-row">
+        <div class="bs-field">
+          <label class="bs-label">D.Q.N. *</label>
+          <div class="bs-busid-wrap" id="busid_wrap">
+            <input type="text" id="bs_plate" class="bs-input" placeholder="99-AA-000" maxlength="10" autocomplete="off" autocapitalize="characters">
+            <div class="bs-registry-dd" id="bs_registry_dd"></div>
+          </div>
+          <div class="bs-registry-reset" id="bs_registry_reset" onclick="resetRegistrySelection()">✕ Reyestr seçimini ləğv et</div>
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">BUS ID *</label>
+          <input type="text" id="bs_busid" class="bs-input" placeholder="ID" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off">
+        </div>
+      </div>
+
+      <!-- Daşıyıcı -->
+      <div class="bs-field">
+        <label class="bs-label">Daşıyıcı şirkət *</label>
+        <div class="bs-inline-dd" id="dd_carrier">
+          <button type="button" class="bs-picker-btn" id="bs_carrier_btn" onclick="toggleDD('carrier')">
+            <span id="bs_carrier_lbl" style="color:#9AACC4;">Seçin</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_carrier_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_carrier_list"></div>
+        </div>
+      </div>
+
+      <!-- Marka/Model + Marşrut -->
+      <div class="bs-row">
+        <div class="bs-field">
+          <label class="bs-label">Marka/Modeli *</label>
+          <div class="bs-inline-dd" id="dd_brand">
+            <button type="button" class="bs-picker-btn" id="bs_brand_btn" onclick="toggleDD('brand')">
+              <span id="bs_brand_lbl" style="color:#9AACC4;">Seçin</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_brand_arrow"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="bs-dd-list" id="dd_brand_list"></div>
+          </div>
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">Marşrut nömrəsi *</label>
+          <input type="text" id="bs_route" class="bs-input" placeholder="Məs. 125A" autocapitalize="characters">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Problem / Həll -->
+    <div class="bs-section">
+      <div class="bs-section-title">Servis məlumatları</div>
+      <div class="bs-field">
+        <label class="bs-label">Müraciət / Problem *</label>
+        <div class="bs-inline-dd" id="dd_problem">
+          <button type="button" class="bs-picker-btn" id="bs_problem_btn" onclick="toggleDD('problem')">
+            <span id="bs_problem_lbl" style="color:#9AACC4;">Seçin</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_problem_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_problem_list"></div>
+        </div>
+      </div>
+      <div class="bs-field">
+        <label class="bs-label">Həll / Açıqlama *</label>
+        <div class="bs-inline-dd" id="dd_solution">
+          <button type="button" class="bs-picker-btn" id="bs_solution_btn" onclick="toggleDD('solution')">
+            <span id="bs_solution_lbl" style="color:#9AACC4;">Seçin (çoxlu seçim)</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_solution_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_solution_list"></div>
+        </div>
+        <div class="bs-chips" id="bs_solution_chips"></div>
+      </div>
+      <!-- Note: həmişə görünür, könüllüdür (yalnız Problem/Həll "Digər" olduqda məcburidir) -->
+      <div class="bs-field" id="bs_note_wrap">
+        <label class="bs-label">Qeyd</label>
+        <textarea id="bs_note" class="bs-textarea" placeholder="Əlavə qeyd yazın (könüllü)..."></textarea>
+      </div>
+    </div>
+
+    <!-- Cihaz dəyişimi -->
+    <div class="bs-section">
+      <div class="bs-section-title">Servis Kategoriyası</div>
+      <div class="bs-field">
+        <label class="bs-label">Servis Kategoriyası *</label>
+        <div class="bs-inline-dd" id="dd_equipment">
+          <button type="button" class="bs-picker-btn" id="bs_equipment_btn" onclick="toggleDD('equipment')">
+            <span id="bs_equipment_lbl" style="color:#9AACC4;">Seçin</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_equipment_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_equipment_list"></div>
+        </div>
+      </div>
+      <div class="bs-row">
+        <div class="bs-field" style="position:relative;">
+          <label class="bs-label">Köhnə cihaz SN <span class="bs-label-hint">(Validator və ya SAM Card, birdən çox əlavə edilə bilər)</span></label>
+          <input type="text" id="bs_old_sn" class="bs-input" placeholder="SN axtar və seç..." autocomplete="off" oninput="busSnInputHandler(this,'bs_old_sn_dd','bs_old_sn_warn')" onfocus="busSnInputHandler(this,'bs_old_sn_dd','bs_old_sn_warn')" onkeydown="busSnInputKeydown(event,this,'old')">
+          <div class="bs-registry-dd" id="bs_old_sn_dd" style="display:none;"></div>
+          <div class="bs-chips" id="bs_old_sn_chips"></div>
+          <div class="bs-sn-warn" id="bs_old_sn_warn" style="display:none;"></div>
+        </div>
+        <div class="bs-field" style="position:relative;">
+          <label class="bs-label">Yeni cihaz SN <span class="bs-label-hint">(Validator və ya SAM Card, birdən çox əlavə edilə bilər)</span></label>
+          <input type="text" id="bs_new_sn" class="bs-input" placeholder="SN axtar və seç..." autocomplete="off" oninput="busSnInputHandler(this,'bs_new_sn_dd','bs_new_sn_warn')" onfocus="busSnInputHandler(this,'bs_new_sn_dd','bs_new_sn_warn')" onkeydown="busSnInputKeydown(event,this,'new')">
+          <div class="bs-registry-dd" id="bs_new_sn_dd" style="display:none;"></div>
+          <div class="bs-chips" id="bs_new_sn_chips"></div>
+          <div class="bs-sn-warn" id="bs_new_sn_warn" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="bs-sn-conflict-err" id="bs_sn_conflict_err" style="display:none;">✕ Eyni SN həm Köhnə, həm Yeni xanada ola bilməz</div>
+    </div>
+
+    <!-- Servis vaxtı / yeri -->
+    <div class="bs-section">
+      <div class="bs-section-title">Servis vaxtı və yeri</div>
+      <div class="bs-row">
+        <div class="bs-field">
+          <label class="bs-label">Başlanğıc saatı *</label>
+          <input type="text" inputmode="numeric" pattern="[0-9:]*" maxlength="5" id="bs_start_lbl" class="bs-input" placeholder="--:--" autocomplete="off" oninput="formatTimeInput(this)">
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">Bitiş saatı *</label>
+          <input type="text" inputmode="numeric" pattern="[0-9:]*" maxlength="5" id="bs_end_lbl" class="bs-input" placeholder="--:--" autocomplete="off" oninput="formatTimeInput(this)">
+        </div>
+      </div>
+      <div class="bs-field">
+        <label class="bs-label">Servis verilən ünvan *</label>
+        <div class="bs-inline-dd" id="dd_location">
+          <button type="button" class="bs-picker-btn" id="bs_location_btn" onclick="toggleDD('location')">
+            <span id="bs_location_lbl" style="color:#9AACC4;">Seçin</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_location_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_location_list"></div>
+        </div>
+      </div>
+      <div class="bs-field" id="bs_location_note_wrap" style="display:none;">
+        <label class="bs-label">Ünvan qeydi *</label>
+        <textarea id="bs_location_note" class="bs-textarea" placeholder="Ünvanı ətraflı yazın..."></textarea>
+      </div>
+    </div>
+
+    <!-- Texnik heyət -->
+    <div class="bs-section">
+      <div class="bs-section-title">Texnik heyət</div>
+      <div class="bs-field" style="position:relative;">
+        <label class="bs-label">1. Texnik</label>
+        <input type="text" class="bs-input" id="bs_tech1_lbl" placeholder="Texnik axtar (könüllü)..." autocomplete="off"
+          oninput="techSearchHandler(this,'tech1','tech2')" onfocus="techSearchHandler(this,'tech1','tech2')">
+        <div class="bs-registry-dd" id="bs_tech1_dd" style="display:none;"></div>
+      </div>
+      <div class="bs-field" style="position:relative;">
+        <label class="bs-label">2. Texnik</label>
+        <input type="text" class="bs-input" id="bs_tech2_lbl" placeholder="Texnik axtar (könüllü)..." autocomplete="off"
+          oninput="techSearchHandler(this,'tech2','tech1')" onfocus="techSearchHandler(this,'tech2','tech1')">
+        <div class="bs-registry-dd" id="bs_tech2_dd" style="display:none;"></div>
+      </div>
+      <div class="bs-field">
+        <label class="bs-label">Qrup rəhbəri *</label>
+        <div class="bs-inline-dd" id="dd_leader">
+          <button type="button" class="bs-picker-btn" id="bs_leader_btn" onclick="toggleDD('leader')">
+            <span id="bs_leader_lbl" style="color:#9AACC4;">Seçin</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_leader_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_leader_list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.bs-body -->
+
+  <div class="bs-submit">
+    <button type="button" class="bs-submit-btn" id="bsSubmitBtn" onclick="submitBusService()">Göndər</button>
+  </div>
+
+</div><!-- /#busServiceView -->
+
+<!-- ═══ YENİ MÜRACİƏT (yalnız qrup rəhbəri/admin, yalnız veb) ═══ -->
+<div id="busRequestView" style="display:none;">
+
+  <div class="bs-header">
+    <button onclick="attemptBusRequestHome()" class="bs-home-btn" aria-label="Ana səhifəyə qayıt">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:20px;letter-spacing:2px;color:#12233B;text-transform:uppercase;text-align:center;">CTECH <span style="color:#2F6FED;">SOLUTIONS</span> MMC</span>
+    <div></div>
+  </div>
+
+  <div class="bs-body">
+
+    <div id="brTicketRow" style="padding:0 0 8px;">
+      <div id="brTicketBadge"></div>
+    </div>
+
+    <div class="bs-section">
+      <div class="bs-section-title">Müraciət məlumatları</div>
+      <div class="bs-date-time-row">
+        <div class="bs-field">
+          <label class="bs-label">Tarix *</label>
+          <input type="date" id="br_date" class="bs-input">
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">Saat *</label>
+          <input type="text" inputmode="numeric" pattern="[0-9:]*" maxlength="5" id="br_time_lbl" class="bs-input" placeholder="--:--" autocomplete="off" oninput="formatTimeInput(this)">
+        </div>
+      </div>
+      <div class="bs-field">
+        <label class="bs-label">Müraciət edən (Ad Soyad, Vəzifə) *</label>
+        <input type="text" id="br_requester" class="bs-input" placeholder="Məs. Əli Hüseynov, Sürücü">
+      </div>
+      <div class="bs-field">
+        <label class="bs-label">Əlaqə nömrəsi *</label>
+        <input type="tel" id="br_phone" class="bs-input" placeholder="+994 XX XXX XX XX">
+      </div>
+    </div>
+
+    <div class="bs-section">
+      <div class="bs-section-title">Avtobus məlumatları</div>
+
+      <div class="bs-row">
+        <div class="bs-field">
+          <label class="bs-label">D.Q.N. *</label>
+          <div class="bs-busid-wrap" id="br_busid_wrap">
+            <input type="text" id="br_plate" class="bs-input" placeholder="99-AA-000" maxlength="10" autocomplete="off" autocapitalize="characters">
+            <div class="bs-registry-dd" id="br_registry_dd"></div>
+          </div>
+          <div class="bs-registry-reset" id="br_registry_reset" onclick="brResetRegistrySelection()">✕ Reyestr seçimini ləğv et</div>
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">BUS ID *</label>
+          <input type="text" id="br_busid" class="bs-input" placeholder="ID" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="bs-field">
+        <label class="bs-label">Daşıyıcı şirkət *</label>
+        <div class="bs-inline-dd" id="dd_brCarrier">
+          <button type="button" class="bs-picker-btn" id="br_carrier_btn" onclick="brOpenSimpleList('carrier','carriers','br_carrier_lbl','dd_brCarrier_list')">
+            <span id="br_carrier_lbl" style="color:#9AACC4;">Seçin</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_brCarrier_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_brCarrier_list"></div>
+        </div>
+      </div>
+
+      <div class="bs-row">
+        <div class="bs-field">
+          <label class="bs-label">Marka/Modeli *</label>
+          <div class="bs-inline-dd" id="dd_brBrand">
+            <button type="button" class="bs-picker-btn" id="br_brand_btn" onclick="brOpenSimpleList('brand','busModels','br_brand_lbl','dd_brBrand_list')">
+              <span id="br_brand_lbl" style="color:#9AACC4;">Seçin</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_brBrand_arrow"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="bs-dd-list" id="dd_brBrand_list"></div>
+          </div>
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">Marşrut nömrəsi *</label>
+          <input type="text" id="br_route" class="bs-input" placeholder="Məs. 125A" autocapitalize="characters">
+        </div>
+      </div>
+    </div>
+
+    <div class="bs-section">
+      <div class="bs-section-title">Servis məlumatları</div>
+      <div class="bs-field">
+        <label class="bs-label">Müraciət / Problem *</label>
+        <div class="bs-inline-dd" id="dd_brProblem">
+          <button type="button" class="bs-picker-btn" id="br_problem_btn" onclick="brOpenSimpleList('problem','busProblems','br_problem_lbl','dd_brProblem_list')">
+            <span id="br_problem_lbl" style="color:#9AACC4;">Seçin</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_brProblem_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_brProblem_list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bs-section">
+      <div class="bs-section-title">Texnik təhkim et</div>
+      <div class="bs-field" style="position:relative;">
+        <label class="bs-label">Texnik(lər) <span class="bs-label-hint">(ən azı 1, maksimum 2)</span></label>
+        <input type="text" class="bs-input" id="br_tech_search" placeholder="Texnik axtar..." autocomplete="off"
+          oninput="brTechSearchHandler(this)" onfocus="brTechSearchHandler(this)">
+        <div class="bs-registry-dd" id="br_tech_dd" style="display:none;"></div>
+        <div class="bs-chips" id="br_tech_chips"></div>
+        <div id="br_tech_status" style="font-size:11.5px;color:#9AACC4;font-weight:600;margin-top:6px;"></div>
+      </div>
+    </div>
+
+  </div><!-- /.bs-body -->
+
+  <div class="bs-submit">
+    <button type="button" class="bs-submit-btn" id="brSubmitBtn" onclick="submitBusRequest()">Göndər</button>
+  </div>
+
+</div><!-- /#busRequestView -->
+
+<!-- Inline pickers are rendered inside each .bs-inline-dd -->
+
+<!-- Exit Confirm Dialog -->
+<!-- Ümumi xəbərdarlıq vidgeti (native alert() əvəzinə) -->
+<div id="warnToastOverlay" style="display:none;">
+  <div class="warn-toast-box">
+    <div class="warn-toast-icon">⚠</div>
+    <div class="warn-toast-text" id="warnToastText"></div>
+    <button class="warn-toast-btn" onclick="closeWarnToast()">Anladım</button>
+  </div>
+</div>
+
+<div id="bsConfirmOverlay" style="display:none;">
+  <div class="bs-confirm-box">
+    <div class="bs-confirm-title">Çıxmaq istəyirsiniz?</div>
+    <div class="bs-confirm-text">Daxil etdiyiniz məlumatlar silinəcək.</div>
+    <div class="bs-confirm-btns">
+      <button class="bs-confirm-no" onclick="closeConfirm()">Xeyr</button>
+      <button class="bs-confirm-yes" onclick="confirmExit()">Bəli</button>
+    </div>
+  </div>
+</div>
+
+<!-- Draft Bərpa Təsdiq Dialoqu (6.2) -->
+<div id="bsDraftConfirmOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(18,35,59,.5);z-index:95;align-items:center;justify-content:center;padding:24px;">
+  <div class="bs-confirm-box">
+    <div class="bs-confirm-title">Yarımçıq qalmış məlumat tapıldı</div>
+    <div class="bs-confirm-text" id="bsDraftConfirmText">Bu formada natamam saxlanılmış məlumat var. Davam etmək istəyirsiniz?</div>
+    <div class="bs-confirm-btns">
+      <button class="bs-confirm-no" onclick="declineBsDraft()">Xeyr</button>
+      <button class="bs-confirm-yes" onclick="acceptBsDraft()">Bəli</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pull-to-refresh Təsdiq Dialoqu (6.1) -->
+<div id="bsRefreshConfirmOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(18,35,59,.5);z-index:95;align-items:center;justify-content:center;padding:24px;">
+  <div class="bs-confirm-box">
+    <div class="bs-confirm-title">Səhifəni yeniləmək istəyirsiniz?</div>
+    <div class="bs-confirm-text">Daxil etdiyiniz məlumatlar yadda saxlanılmayıb — yeniləsəniz silinəcək.</div>
+    <div class="bs-confirm-btns">
+      <button class="bs-confirm-no" onclick="cancelPullRefresh()">Xeyr</button>
+      <button class="bs-confirm-yes" onclick="confirmPullRefresh()">Bəli</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUS Submit Loading Overlay -->
+<div id="bsLoadingOverlay" style="display:none;">
+  <div class="spinner" id="bsSpinner"></div>
+  <div id="bsSuccessIcon" style="display:none;width:64px;height:64px;border-radius:50%;background:#3FCB78;align-items:center;justify-content:center;animation:popIn .35s ease;">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>
+  </div>
+  <div class="loading-text" id="bsLoadingText">Göndərilir...</div>
+</div>
+
+<!-- Login / About overlays -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none;">
+  <div class="loading-box">
+    <div class="spinner" id="loadingSpinner"></div>
+    <div class="result-icon success" id="successIcon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>
+    </div>
+    <div class="result-icon fail" id="failIcon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </div>
+    <div class="loading-text" id="loadingText">Yoxlanılır...</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="aboutModal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-brand"><div class="modal-brand-text">CTECH <span>SOLUTIONS</span> MMC</div></div>
+    <div class="modal-title">Texniki Servis Platforma haqqında</div>
+    <div class="modal-text">Texniki Servis Platforması, CTECH Solutions MMC-nin ictimai nəqliyyatda (BUS and METRO) istifadə olunan <strong>nağdsız ödəniş sistemi avadanlıqları</strong> və <strong>bilet satış avtomatları (TVM)</strong> üzrə texniki xidmət proseslərini vahid rəqəmsal sistemdə idarə etmək məqsədilə hazırlanıb.</div>
+    <div class="modal-text">Sahədə iş görən texniklərin gördükləri işləri sürətli və standart formada qeydə almasını, bu məlumatların isə real vaxt rejimində hesabat və statistikaya çevrilməsini təmin edir.</div>
+    <div class="modal-subtitle">İstifadə qaydası</div>
+    <div class="modal-steps">
+      <div class="modal-step"><div class="modal-step-num">1</div><div class="modal-step-text">Aid olduğunuz bölməni seçin — BUS Service və ya TVM Service.</div></div>
+      <div class="modal-step"><div class="modal-step-num">2</div><div class="modal-step-text">Xidmət göstərdiyiniz obyekti müəyyən edin və aşkar olunan problemi qeyd edin.</div></div>
+      <div class="modal-step"><div class="modal-step-num">3</div><div class="modal-step-text">Mövcud şablonlardan uyğun olanı seçərək formu doldurun.</div></div>
+      <div class="modal-step"><div class="modal-step-num">4</div><div class="modal-step-text">"Göndər" düyməsi ilə məlumatı sistemə ötürün — qeydiyyat avtomatik təsdiqlənir.</div></div>
+    </div>
+    <div class="modal-text">Daxil etdiyiniz hər məlumat Dashboard bölmələrində strukturlaşdırılmış hesabata çevrilir və komanda rəhbərliyi tərəfindən izlənilir.</div>
+    <button class="modal-close" onclick="hideAbout()">Bağla</button>
+  </div>
+</div>
+
+<!-- ===== BUS BULK SERVICE VIEW ===== -->
+<div id="busBulkView">
+  <!-- HEADER -->
+  <div class="bk-header">
+    <div class="bk-header-left">
+      <button class="bk-home-btn" onclick="attemptBusBulkHome()" aria-label="Geri">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      </button>
+    </div>
+    <div class="bk-header-center">
+      <div class="bk-title-main">BUS <span>Bulk Service</span></div>
+      <div class="bk-subtitle">Toplu Servis Yaradılması</div>
+    </div>
+    <div class="bk-header-right">
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Tema">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="bkThemeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="bk-refresh-btn" onclick="resetBulkForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        Sıfırla
+      </button>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="bk-body">
+    <div class="bk-main-layout">
+
+      <!-- SECTION 1: Servis Parametrləri -->
+      <div class="bk-panel">
+        <div class="bk-panel-title"><span class="bk-num">1</span> 📅 Servis Parametrləri</div>
+        <div class="bk-params-layout">
+          <div class="bk-cal-wrap">
+            <div class="bk-cal-head">
+              <button class="bk-cal-nav" onclick="bkCalNav(-1)">‹</button>
+              <div class="bk-cal-label" id="bkCalLabel">İyul 2026</div>
+              <button class="bk-cal-nav" onclick="bkCalNav(1)">›</button>
+            </div>
+            <div class="bk-cal-grid" id="bkCalGrid"></div>
+            <div id="bkSelectedDateLabel" style="display:none;margin-top:10px;background:#2F6FED;color:#fff;border-radius:10px;padding:9px 16px;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.5px;text-align:center;"></div>
+          </div>
+          <div class="bk-times-wrap">
+            <label class="bk-label">Başlanğıc saatı *</label>
+            <div class="bk-time-input">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              <input type="text" inputmode="numeric" maxlength="5" id="bk_start_time" placeholder="--:--" oninput="bkFormatTime(this)">
+            </div>
+            <label class="bk-label" style="margin-top:10px;">Bitiş saatı *</label>
+            <div class="bk-time-input">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              <input type="text" inputmode="numeric" maxlength="5" id="bk_end_time" placeholder="--:--" oninput="bkFormatTime(this)">
+            </div>
+            <label class="bk-label" style="margin-top:10px;">Servis kateqoriyası *</label>
+            <select class="bk-select" id="bk_category"><option value="">Seçin</option></select>
+            <label class="bk-label" style="margin-top:10px;">Servis ünvanı</label>
+            <select class="bk-select" id="bk_location"><option value="">Seçin (könüllü)</option></select>
+            <div id="bk_location_note_wrap" style="display:none;margin-top:8px;">
+              <textarea class="bk-textarea" id="bk_location_note" placeholder="Ünvanı ətraflı yazın..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Daşıyıcı -->
+      <div class="bk-panel">
+        <div class="bk-panel-title"><span class="bk-num">2</span> 🚌 Daşıyıcı</div>
+
+        <!-- Soldan sağa: Dropdown | Badge | Checkbox | Axtarış -->
+        <div class="bk-carrier-row">
+
+          <!-- 1: Daşıyıcı dropdown -->
+          <div class="bk-carrier-dd-wrap">
+            <label class="bk-label">Daşıyıcı firma *</label>
+            <div style="position:relative;">
+              <button class="bk-carrier-btn" id="bk_carrier_btn" onclick="bkToggleCarrierDD()">
+                <span id="bk_carrier_lbl">Seçin</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="bk-carrier-dd-list" id="bkCarrierDDList" style="display:none;"></div>
+            </div>
+          </div>
+
+          <!-- 2: Badge (seçim sonrası) + Checkbox üstündə -->
+          <div id="bkCarrierCountWrap" style="display:none;flex-direction:column;align-items:center;gap:6px;">
+            <button class="bk-all-toggle" id="bkAllToggle" onclick="bkToggleAllMode()" title="Hamısını seç / DQN seç">
+              <svg class="bk-toggle-tick" width="11" height="9" viewBox="0 0 11 9" fill="none">
+                <path d="M1 4l3 3.5L10 1" stroke="#3FCB78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="bk-count-badge" id="bkCountBadge">
+              <div class="bk-count-ic">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 16V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9"/><path d="M3 16h18"/><circle cx="7" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
+              </div>
+              <div>
+                <div class="bk-count-num" id="bkCountNum">0</div>
+                <div class="bk-count-txt">avtobus</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3: DQN Axtarış (checkbox söndükdə aktiv) -->
+          <div id="bkDqnSearchWrap" style="display:none;">
+            <label class="bk-label">DQN axtar</label>
+            <div style="position:relative;">
+              <div class="bk-dqn-search-box" id="bkDqnSearchBox">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C7089" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" class="bk-dqn-search-input" id="bkDqnInput"
+                  placeholder="99-JV-697"
+                  oninput="bkDqnInputHandler(this)"
+                  autocomplete="off">
+                <button class="bk-dqn-clear-btn" id="bkDqnClear" onclick="bkClearDqnInput()" style="display:none;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+              </div>
+              <div class="bk-dqn-suggestions" id="bkDqnSuggestions"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bildiriş -->
+        <div class="bk-dqn-notice" id="bkDqnNotice" style="display:none;margin-top:12px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg>
+          <span id="bkDqnNoticeText">Bütün avtobuslar seçilidir.</span>
+        </div>
+
+        <!-- Seçilmiş DQN chip-ləri -->
+        <div class="bk-dqn-chips" id="bkDqnChips" style="margin-top:10px;"></div>
+
+        <!-- Hidden select (JS uyğunluğu üçün) -->
+        <select id="bk_carrier" style="display:none;" onchange="bkOnCarrierChange()"><option value="">Seçin</option></select>
+      </div>
+
+      <!-- SECTION 3: Şablon Mətnlər -->
+      <div class="bk-panel">
+        <div class="bk-panel-title"><span class="bk-num">3</span> 📄 Şablon Mətnlər</div>
+        <div class="bk-tmpl-grid">
+          <div class="bk-field">
+            <label class="bk-label">Tələb (şablon) *</label>
+            <select class="bk-select" id="bk_request_tmpl"><option value="">Seçin</option></select>
+          </div>
+          <div class="bk-field">
+            <label class="bk-label">Qeyd / Note</label>
+            <textarea class="bk-textarea" id="bk_note" placeholder="Qeyd daxil edin (istəyə bağlı)"></textarea>
+          </div>
+          <div class="bk-field">
+            <label class="bk-label">Həll (şablon) *</label>
+            <select class="bk-select" id="bk_solution_tmpl"><option value="">Seçin</option></select>
+          </div>
+          <div class="bk-field" style="grid-column:1/-1;">
+            <label class="bk-label">Köhnə SN / Yeni SN <span class="bs-label-hint">(hər seçilmiş DQN üçün ayrıca)</span></label>
+            <div class="bk-sn-empty" id="bkSnEmptyState">Yalnız spesifik DQN seçimi aktiv olduqda görünür</div>
+            <div id="bkSnPerDqnContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: Personal -->
+      <div class="bk-panel">
+        <div class="bk-panel-title"><span class="bk-num">4</span> 👥 Personal</div>
+        <div class="bk-row">
+          <div class="bk-field" style="position:relative;">
+            <label class="bk-label">Texnik 1</label>
+            <input type="text" class="bk-input" id="bk_tech1" placeholder="Texnik axtar..." autocomplete="off"
+              oninput="bkTechSearchHandler(this,'bk_tech1','bk_tech2')" onfocus="bkTechSearchHandler(this,'bk_tech1','bk_tech2')">
+            <div class="bs-registry-dd" id="bk_tech1_dd" style="display:none;"></div>
+          </div>
+          <div class="bk-field" style="position:relative;">
+            <label class="bk-label">Texnik 2</label>
+            <input type="text" class="bk-input" id="bk_tech2" placeholder="Texnik axtar..." autocomplete="off"
+              oninput="bkTechSearchHandler(this,'bk_tech2','bk_tech1')" onfocus="bkTechSearchHandler(this,'bk_tech2','bk_tech1')">
+            <div class="bs-registry-dd" id="bk_tech2_dd" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="bk-field">
+          <label class="bk-label">Qrup rəhbəri *</label>
+          <select class="bk-select" id="bk_leader"><option value="">Seçin</option></select>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="bk-footer" style="display:flex;justify-content:flex-end;padding:16px 24px;background:#fff;border-top:1px solid #E1EAF6;">
+    <button class="bk-submit-btn" onclick="bkSubmitDirect()" id="bkDirectSubmitBtn" style="background:linear-gradient(135deg,#4E93FA,#2F6FED);color:#fff;border:none;padding:13px 28px;border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 8px 20px rgba(47,111,237,.3);display:flex;align-items:center;gap:8px;min-width:200px;justify-content:center;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      İdxal et
+    </button>
+  </div>
+</div>
+
+<div id="bkLoadingOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(244,248,253,.94);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <div class="bk-loading-box">
+    <div class="spinner" id="bkSpinner"></div>
+    <div id="bkSuccessIcon" style="display:none;width:64px;height:64px;border-radius:50%;background:#3FCB78;align-items:center;justify-content:center;animation:popIn .35s ease;">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3"><path d="M4 12l6 6L20 6"/></svg>
+    </div>
+    <div class="bk-loading-text" id="bkLoadingText">Hazırlanır...</div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+
+<!-- ===== TVM SERVICE VIEW ===== -->
+<div id="tvmServiceView" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#EEF4FC;z-index:41;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+
+  <div class="bs-header">
+    <button class="bs-home-btn" onclick="attemptTvmHome()" aria-label="Geri">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+    </button>
+    <div class="bs-header-center">
+      <div class="bs-logo">C<span>TECH</span></div>
+    </div>
+    <div></div>
+  </div>
+
+  <!-- Çıxış təsdiqi (yarımçıq məlumat varsa) -->
+  <div id="tvmConfirmOverlay" style="display:none;">
+    <div class="bs-confirm-box">
+      <div class="bs-confirm-title">Çıxmaq istəyirsiniz?</div>
+      <div class="bs-confirm-text">Daxil etdiyiniz məlumatlar silinəcək.</div>
+      <div class="bs-confirm-btns">
+        <button class="bs-confirm-no" onclick="closeTvmConfirm()">Xeyr</button>
+        <button class="bs-confirm-yes" onclick="confirmTvmExit()">Bəli</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket badge -->
+  <div class="bs-body" style="max-width:560px;margin:0 auto;padding-bottom:0;">
+    <div style="padding:10px 0 0;display:flex;align-items:center;justify-content:space-between;">
+      <div id="tvmTicketBadge"></div>
+    </div>
+  </div>
+
+  <div class="bs-body" style="max-width:560px;margin:0 auto;">
+
+    <!-- 1. Servis məlumatları -->
+    <div class="bs-section">
+      <div class="bs-section-title">Servis məlumatları</div>
+
+      <div class="bs-field">
+        <label class="bs-label">Tarix *</label>
+        <input type="date" class="bs-input" id="tvm_date">
+      </div>
+
+      <div class="bs-field">
+        <label class="bs-label">Nasazlığın yaranma vaxtı *</label>
+        <div class="bs-time-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          <input type="text" class="bs-time-input" id="tvm_fault_time" inputmode="numeric" maxlength="5" placeholder="--:--" oninput="tvmFormatTime(this)">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. TVM İD -->
+    <div class="bs-section">
+      <div class="bs-section-title">Validator məlumatları</div>
+      <div class="bs-field">
+        <label class="bs-label">TVM İD *</label>
+        <div style="position:relative;">
+          <input type="text" class="bs-input" id="tvm_sn" placeholder="Məs: 041 (son rəqəmlər)" inputmode="numeric" maxlength="12" oninput="tvmSnInputHandler(this)" autocomplete="off" style="font-family:'IBM Plex Mono',monospace;font-size:20px;letter-spacing:2px;text-align:center;">
+          <div class="bs-registry-dd" id="tvm_sn_dd" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="bs-field" id="tvm_location_wrap" style="display:none;">
+        <label class="bs-label">TVM Lokasiya</label>
+        <div class="bs-input" id="tvm_location_display" style="background:#EAF8F0;border-color:#B7EBC9;color:#0C6B34;font-weight:600;"></div>
+      </div>
+      <div class="bs-field" id="tvm_service_location_wrap" style="display:none;">
+        <label class="bs-label">Servis Lokasiyası</label>
+        <div class="bs-input" id="tvm_service_location_display" style="background:#EAF8F0;border-color:#B7EBC9;color:#0C6B34;font-weight:600;"></div>
+      </div>
+    </div>
+
+    <!-- 3. Vaxt məlumatları -->
+    <div class="bs-section">
+      <div class="bs-section-title">Vaxt məlumatları</div>
+      <div class="bs-row">
+        <div class="bs-field">
+          <label class="bs-label">Servis başladı *</label>
+          <div class="bs-time-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <input type="text" class="bs-time-input" id="tvm_start_time" inputmode="numeric" maxlength="5" placeholder="--:--" oninput="tvmFormatTime(this)">
+          </div>
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">Servis bitdi *</label>
+          <div class="bs-time-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <input type="text" class="bs-time-input" id="tvm_end_time" inputmode="numeric" maxlength="5" placeholder="--:--" oninput="tvmFormatTime(this)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Problem və həll -->
+    <div class="bs-section">
+      <div class="bs-section-title">Problem və həll</div>
+
+      <div class="bs-field">
+        <label class="bs-label">Nasazlıq *</label>
+        <div class="bs-inline-dd" id="dd_tvm_fault">
+          <button type="button" class="bs-picker-btn" id="bs_tvm_fault_btn" onclick="toggleDD('tvm_fault')">
+            <span id="bs_tvm_fault_lbl" style="color:#9AACC4;">Seçin (çoxlu seçim)</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_tvm_fault_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_tvm_fault_list"></div>
+        </div>
+        <div class="bs-chips" id="tvm_fault_chips"></div>
+      </div>
+
+      <div class="bs-field">
+        <label class="bs-label">Görülən iş *</label>
+        <div class="bs-inline-dd" id="dd_tvm_solution">
+          <button type="button" class="bs-picker-btn" id="bs_tvm_solution_btn" onclick="toggleDD('tvm_solution')">
+            <span id="bs_tvm_solution_lbl" style="color:#9AACC4;">Seçin (çoxlu seçim)</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_tvm_solution_arrow"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bs-dd-list" id="dd_tvm_solution_list"></div>
+        </div>
+        <div class="bs-chips" id="tvm_solution_chips"></div>
+      </div>
+
+      <div class="bs-field">
+        <label class="bs-label">Qeyd</label>
+        <textarea class="bs-textarea" id="tvm_note" placeholder="Əlavə qeyd yazın (könüllü)..." rows="3"></textarea>
+      </div>
+
+      <div class="bs-row">
+        <div class="bs-field">
+          <label class="bs-label">Köhnə SN</label>
+          <input type="text" class="bs-input" id="tvm_old_sn" placeholder="Könüllü">
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">Yeni SN</label>
+          <input type="text" class="bs-input" id="tvm_new_sn" placeholder="Könüllü">
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Personal -->
+    <div class="bs-section">
+      <div class="bs-section-title">Personal</div>
+      <div class="bs-row">
+        <div class="bs-field" style="position:relative;">
+          <label class="bs-label">Texnik *</label>
+          <input type="text" class="bs-input" id="bs_tvm_tech_lbl" placeholder="Texnik axtar..." autocomplete="off"
+            oninput="techSearchHandler(this,'tvm_tech',null)" onfocus="techSearchHandler(this,'tvm_tech',null)">
+          <div class="bs-registry-dd" id="bs_tvm_tech_dd" style="display:none;"></div>
+        </div>
+        <div class="bs-field">
+          <label class="bs-label">Qrup rəhbəri *</label>
+          <div class="bs-inline-dd" id="dd_tvm_leader">
+            <button type="button" class="bs-picker-btn" id="bs_tvm_leader_btn" onclick="toggleDD('tvm_leader')">
+              <span id="bs_tvm_leader_lbl" style="color:#9AACC4;">Seçin</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_tvm_leader_arrow"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="bs-dd-list" id="dd_tvm_leader_list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.bs-body -->
+
+  <!-- FOOTER -->
+  <div class="bs-submit">
+    <button class="bs-submit-btn" id="tvmSubmitBtn" onclick="submitTvmService()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+      <span id="tvmSubmitBtnText">Göndər</span>
+    </button>
+  </div>
+
+</div><!-- /#tvmServiceView -->
+
+<!-- TVM Loading Overlay -->
+<div id="tvmLoadingOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(244,248,253,.95);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <div class="spinner" id="tvmSpinner"></div>
+  <div id="tvmSuccessIcon" style="display:none;width:64px;height:64px;border-radius:50%;background:#3FCB78;align-items:center;justify-content:center;">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M4 12l6 6L20 6"/></svg>
+  </div>
+  <div class="loading-text" id="tvmLoadingText">Göndərilir...</div>
+</div>
+
+  <!-- Collective Add/Edit modal -->
+  <div class="adm-modal-overlay" id="admCollectiveModal" style="display:none;">
+    <div class="adm-modal">
+      <div class="adm-modal-head">
+        <div class="adm-modal-title" id="admCollectiveModalTitle">Add Member</div>
+        <button class="adm-modal-close" onclick="closeCollectiveModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="adm-modal-body">
+        <div class="adm-form-field">
+          <label>Ad Soyad *</label>
+          <input type="text" id="admCollectiveName" placeholder="Məs: Renat Bayramov">
+        </div>
+        <div class="adm-form-field">
+          <label>Vəzifə *</label>
+          <input type="text" id="admCollectiveTitle" placeholder="Məs: Direktor">
+        </div>
+        <div class="adm-form-field">
+          <label>Qrup *</label>
+          <select id="admCollectiveGroup">
+            <option value="">Seçin</option>
+            <option value="Direktor">Direktor</option>
+            <option value="Texniki Dəstək Qrup Rəhbərləri">Texniki Dəstək Qrup Rəhbərləri</option>
+            <option value="Texniki Heyət">Texniki Heyət</option>
+            <option value="Kiçik Texniki Heyət">Kiçik Texniki Heyət</option>
+            <option value="Sürücü Heyəti">Sürücü Heyəti</option>
+            <option value="Təmir Şöbəsi">Təmir Şöbəsi</option>
+            <option value="Monitorinq və Nəzarət Şöbəsi">Monitorinq və Nəzarət Şöbəsi</option>
+            <option value="Anbar Təsərrüfatı">Anbar Təsərrüfatı</option>
+            <option value="Təsərrüfat və Təmizlik Xidməti">Təsərrüfat və Təmizlik Xidməti</option>
+          </select>
+        </div>
+        <div class="adm-form-error" id="admCollectiveFormError" style="display:none;"></div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-modal-cancel" onclick="closeCollectiveModal()">Cancel</button>
+        <button class="adm-modal-save" id="admCollectiveSaveBtn" onclick="submitCollectiveModal()">Save</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
