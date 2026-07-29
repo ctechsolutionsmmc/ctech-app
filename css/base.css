@@ -55,3 +55,12 @@ button, .icon-btn, .card-big, .card-small, .menu-item, .dash-tab,
     -webkit-overflow-scrolling:touch;
   }
 }
+
+/* ===== GECƏ/GÜNDÜZ DÜYMƏSİ — YALNIZ MOBİL ===== */
+/* toggleTheme() funksiyası yalnız mobil (≤900px) üçündür, desktop-da işləmir.
+   Bu düymələr desktop-da gizlədilir. */
+@media (min-width:901px){
+  #rptThemeBtn, #ongThemeBtn, #tvmRptThemeBtn, #dashThemeBtn, #bkThemeBtn{
+    display:none !important;
+  }
+}
