@@ -2181,6 +2181,11 @@ function tvmFormatTime(el){ formatTimeInput(el); tvmFormDirty = true; }
 // həm Validator, həm SAM Card dəyişdirilibsə, hər ikisi eyni xanaya
 // ayrı-ayrı çiplər kimi əlavə oluna bilər.
 // ═══════════════════════════════════════════════════════════════
+var busValidatorSNList = [];
+var busSamCardSNList = [];
+var busCombinedSNSet = null; // Set — O(1) tam-uyğunluq yoxlaması üçün (hər iki baza birlikdə)
+var busValidatorSNLoaded = false;
+var busValidatorSNLoading = false;
 
 // ═══════════════════════════════════════════════════════════════
 // BİLDİRİŞLƏR (yalnız mobil) — Admin-dən göndərilən mesajlar.
