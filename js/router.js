@@ -228,6 +228,46 @@ function initRouter(){
     };
   }
 
+  // ── "Bağla / X" funksiyaları — həmişə URL-i və tarixçəni dashboard-a sinxronlaşdır ──
+  // Bu funksiyalar öz DOM-larını düzgün bağlasa da, bəziləri URL/tarixçəni yeniləmir.
+  // Təhlükəsizlik qatı: raw funksiyanı çağırdıqdan sonra router-i də dashboard-a keçir.
+  var simpleCloseFns = ['closeCollectives','closeBusRequest','closeNotifications','closeAdminPanel'];
+  simpleCloseFns.forEach(function(fnName){
+    if(typeof window[fnName] === 'function'){
+      var _origClose = window[fnName];
+      window[fnName] = function(){
+        _origClose.apply(this, arguments);
+        // Görünən view artıq dashboard olduğu üçün sadəcə URL/tarixçəni sinxronlaşdır (yenidən açma)
+        if(currentUser && ROUTER_READY){
+          _currentRoute = 'dashboard';
+          try{ history.replaceState({ route:'dashboard' }, '', '#dashboard'); }catch(e){}
+        }
+      };
+    }
+  });
+
+  // bsGoBack / closeTvmService / closeBusBulk — target dashboard və ya başqa view ola bilər,
+  // raw funksiya icra olunandan sonra hansı view görünürsə, URL-i ona uyğunlaşdır
+  var smartCloseFns = {
+    'bsGoBack':      function(){ return (typeof bsReturnTarget!=='undefined' && bsReturnTarget==='report') ? 'bus-report' : 'dashboard'; },
+    'closeTvmService': function(){ return (typeof tvmReturnTarget!=='undefined' && tvmReturnTarget==='report') ? 'tvm-report' : 'dashboard'; },
+    'closeBusBulk':  function(){ return (typeof bkReturnTarget!=='undefined' && bkReturnTarget==='busService') ? 'bus-service' : 'dashboard'; }
+  };
+  Object.keys(smartCloseFns).forEach(function(fnName){
+    if(typeof window[fnName] === 'function'){
+      var _origSmartClose = window[fnName];
+      var targetFn = smartCloseFns[fnName];
+      window[fnName] = function(){
+        var target = targetFn(); // return target CALLdan ƏVVƏL oxunmalıdır (raw fn onu sıfırlaya bilər)
+        _origSmartClose.apply(this, arguments);
+        if(currentUser && ROUTER_READY){
+          _currentRoute = target;
+          try{ history.replaceState({ route:target }, '', '#'+target); }catch(e){}
+        }
+      };
+    }
+  });
+
   // showDashboard — login sonrası
   if(typeof showDashboard === 'function'){
     var _sdOrig = showDashboard;
