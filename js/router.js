@@ -1,11 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-// ROUTER.JS — Hash-based SPA Router
+// ROUTER.JS — SPA Router (pushState + hash)
 // CTECH Service Platform
-// Mövcud open/close funksiyalarına toxunmadan history idarəsi
+// Safari swipe-back, Android back, URL sync, scroll reset
 // ═══════════════════════════════════════════════════════════════
 
 var ROUTER_READY = false;
-var _routerIgnoreNext = false; // proqramatik hash dəyişəndə popstate-i keç
+var _currentRoute = 'dashboard';
+var _isNavigating = false;
 
 // ── Bütün view ID-ləri ──
 var ALL_VIEWS = [
@@ -15,292 +16,302 @@ var ALL_VIEWS = [
   'collectivesView','busDetailView','tvmDetailView'
 ];
 
-// ── Hash → view açma funksiyası xəritəsi ──
-// Hər hash üçün: { open: fn, close: fn, authCheck: fn }
+// ── Route xəritəsi ──
 function routerGetMap(){
   return {
-    'dashboard':    { open: function(){ goHome(); },                          needsAuth: true  },
-    'bus-service':  { open: function(){ openBusService(); },                  needsAuth: true  },
-    'tvm-service':  { open: function(){ openTvmService(); },                  needsAuth: true  },
-    'bus-report':   { open: function(){ openBusReport(); },                   needsAuth: true  },
-    'tvm-report':   { open: function(){ openTvmReport(); },                   needsAuth: true  },
-    'bus-dashboard':{ open: function(){ openBusDashboard(); },                needsAuth: true  },
-    'bus-ongoing':  { open: function(){ openBusOngoing(); },                  needsAuth: true  },
-    'bus-request':  { open: function(){ openBusRequest(); },                  needsAuth: true,
-                      desktopOnly: true },
-    'bus-bulk':     { open: function(){ openBusBulk(); },                     needsAuth: true,
-                      desktopOnly: true },
-    'admin':        { open: function(){ openAdminPanel(); },                  needsAuth: true,
-                      desktopOnly: true },
-    'notifications':{ open: function(){ openNotifications(); },               needsAuth: true,
-                      mobileOnly: true  },
-    'collectives':  { open: function(){ openCollectives(); },                 needsAuth: true,
-                      desktopOnly: true }
+    'dashboard':     { open: _openDashboardRaw,    needsAuth: true },
+    'bus-service':   { open: function(){ typeof openBusService === 'function' && openBusService._orig && openBusService._orig(); },   needsAuth: true },
+    'tvm-service':   { open: function(){ typeof openTvmService === 'function' && openTvmService._orig && openTvmService._orig(); },   needsAuth: true },
+    'bus-report':    { open: function(){ typeof openBusReport === 'function' && openBusReport._orig && openBusReport._orig(); },      needsAuth: true },
+    'tvm-report':    { open: function(){ typeof openTvmReport === 'function' && openTvmReport._orig && openTvmReport._orig(); },      needsAuth: true },
+    'bus-dashboard': { open: function(){ typeof openBusDashboard === 'function' && openBusDashboard._orig && openBusDashboard._orig(); }, needsAuth: true },
+    'bus-ongoing':   { open: function(){ typeof openBusOngoing === 'function' && openBusOngoing._orig && openBusOngoing._orig(); },   needsAuth: true },
+    'bus-request':   { open: function(){ typeof openBusRequest === 'function' && openBusRequest._orig && openBusRequest._orig(); },   needsAuth: true, desktopOnly: true },
+    'bus-bulk':      { open: function(){ typeof openBusBulk === 'function' && openBusBulk._orig && openBusBulk._orig(); },            needsAuth: true, desktopOnly: true },
+    'admin':         { open: function(){ typeof openAdminPanel === 'function' && openAdminPanel._orig && openAdminPanel._orig(); },   needsAuth: true, desktopOnly: true },
+    'notifications': { open: function(){ typeof openNotifications === 'function' && openNotifications._orig && openNotifications._orig(); }, needsAuth: true, mobileOnly: true },
+    'collectives':   { open: function(){ typeof openCollectives === 'function' && openCollectives._orig && openCollectives._orig(); }, needsAuth: true, desktopOnly: true }
   };
 }
 
-// ── Cari hash-i oxu (# olmadan) ──
-function routerCurrentHash(){
-  var h = window.location.hash.replace('#','').split('/')[0];
+// ── Raw dashboard açma (router loop olmadan) ──
+function _openDashboardRaw(){
+  var dv = document.getElementById('dashboardView');
+  var lv = document.getElementById('loginView');
+  var bv = document.getElementById('busServiceView');
+  if(lv) lv.style.display = 'none';
+  if(bv) bv.style.display = 'none';
+  if(dv) dv.style.display = 'block';
+}
+
+// ── URL-dən hash oxu ──
+function _getHashFromUrl(){
+  var h = window.location.hash.replace('#','').trim();
   return h || 'dashboard';
 }
 
-// ── Detail ID-ni oxu: #bus-detail/BUS-00123 → BUS-00123 ──
-function routerDetailId(){
+function _getDetailId(){
   var parts = window.location.hash.replace('#','').split('/');
   return parts[1] || null;
 }
 
-// ── Hash dəyiş (history-ə əlavə et) ──
-function routerPush(hash){
-  if(window.location.hash === '#'+hash) return;
-  _routerIgnoreNext = false;
-  window.location.hash = hash;
-}
-
-// ── Hash dəyiş (history-ə əlavə etmədən — replace) ──
-function routerReplace(hash){
-  _routerIgnoreNext = true;
-  history.replaceState(null, '', '#'+hash);
-}
-
-// ── Bütün view-ları bağla (loginView xaric) ──
+// ── Bütün view-ları bağla + scroll sıfırla ──
 function routerHideAll(){
   ALL_VIEWS.forEach(function(id){
     if(id === 'loginView') return;
     var el = document.getElementById(id);
     if(!el) return;
     el.style.display = 'none';
+    el.scrollTop = 0;
   });
+  window.scrollTo(0,0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
 
-// ── Əsas navigate funksiyası ──
-function routerNavigate(hash, fromPopState){
-  if(!ROUTER_READY) return;
+// ── Əsas navigate: view-u aç, URL-i yenilə ──
+function routerNavigate(route, pushToHistory){
+  if(!ROUTER_READY || !currentUser) return;
+  if(_isNavigating) return;
+  _isNavigating = true;
 
-  // Login tələb edir amma user yoxdur
-  if(!currentUser){
-    routerReplace('login');
-    return;
-  }
+  var base = route.split('/')[0];
+  var detailId = route.indexOf('/') !== -1 ? route.split('/')[1] : null;
 
   var map = routerGetMap();
 
+  // Desktop/mobile məhdudiyyəti
+  var r = map[base];
+  if(r){
+    if(r.desktopOnly && window.innerWidth < 901){
+      _isNavigating = false;
+      routerNavigate('dashboard', pushToHistory);
+      return;
+    }
+    if(r.mobileOnly && window.innerWidth >= 901){
+      _isNavigating = false;
+      routerNavigate('dashboard', pushToHistory);
+      return;
+    }
+  }
+
+  // URL-i yenilə
+  var newHash = '#' + route;
+  if(window.location.hash !== newHash){
+    if(pushToHistory){
+      history.pushState({ route: route }, '', newHash);
+    } else {
+      history.replaceState({ route: route }, '', newHash);
+    }
+  }
+
+  _currentRoute = route;
+
+  // View-ları bağla
+  routerHideAll();
+
   // Detail view-lar
-  if(hash.indexOf('bus-detail') === 0){
-    var bid = routerDetailId();
-    if(bid && typeof openBusDetail === 'function'){
-      openBusDetail(bid);
+  if(base === 'bus-detail' && detailId){
+    if(typeof openBusDetail === 'function' && openBusDetail._orig){
+      openBusDetail._orig(detailId);
     }
+    _isNavigating = false;
     return;
   }
-  if(hash.indexOf('tvm-detail') === 0){
-    var tid = routerDetailId();
-    if(tid && typeof openTvmDetail === 'function'){
-      openTvmDetail(tid);
+  if(base === 'tvm-detail' && detailId){
+    if(typeof openTvmDetail === 'function' && openTvmDetail._orig){
+      openTvmDetail._orig(detailId);
     }
+    _isNavigating = false;
     return;
   }
 
-  var route = map[hash];
-  if(!route){
-    // Naməlum hash → dashboard-a yönləndir
-    routerReplace('dashboard');
-    routerNavigate('dashboard', false);
-    return;
+  // Normal route
+  if(r){
+    r.open();
+  } else {
+    _openDashboardRaw();
+    _currentRoute = 'dashboard';
+    history.replaceState({ route: 'dashboard' }, '', '#dashboard');
   }
 
-  // Desktop-only yoxlaması
-  if(route.desktopOnly && window.innerWidth < 901){
-    routerReplace('dashboard');
-    routerNavigate('dashboard', false);
-    return;
-  }
-
-  // Mobile-only yoxlaması
-  if(route.mobileOnly && window.innerWidth >= 901){
-    routerReplace('dashboard');
-    routerNavigate('dashboard', false);
-    return;
-  }
-
-  route.open();
+  _isNavigating = false;
 }
 
-// ── popstate (Back/Forward düyməsi + iPhone swipe) ──
-window.addEventListener('popstate', function(){
-  if(_routerIgnoreNext){ _routerIgnoreNext = false; return; }
-  var hash = routerCurrentHash();
+// ── popstate: Back/Forward + Safari swipe + Android back ──
+window.addEventListener('popstate', function(e){
+  if(!ROUTER_READY || !currentUser) return;
+
+  var route;
+  if(e.state && e.state.route){
+    route = e.state.route;
+  } else {
+    route = _getHashFromUrl();
+  }
 
   // Unsaved work yoxlaması
   if(typeof isUnsavedWorkPresent === 'function' && isUnsavedWorkPresent()){
-    // Geri getməni bloklayıb confirm göstər
-    history.pushState(null, '', window.location.href);
+    history.pushState({ route: _currentRoute }, '', '#' + _currentRoute);
     if(typeof showUnsavedWarning === 'function') showUnsavedWarning();
     return;
   }
 
-  routerNavigate(hash, true);
+  // Hash yoxdursa (Safari bəzən boş state verir) → dashboard
+  if(!route || route === 'login') route = 'dashboard';
+
+  routerNavigate(route, false);
 });
 
-// ── Wrapper-lər: mövcud open funksiyaları çağırıldıqda hash-i yenilə ──
-// Bu pattern ilə mövcud JS-ə toxunmuruq, sadəcə sonradan override edirik
-
-function _routerWrap(originalFnName, hash, originalFn){
-  return function(){
-    var result = originalFn.apply(this, arguments);
-    if(currentUser) routerPush(hash);
-    return result;
+// ── Funksiya wrapper: orijinalı saxla, hash push et ──
+function _wrapFn(fnRef, routeHash){
+  if(typeof fnRef !== 'function') return fnRef;
+  var wrapped = function(){
+    fnRef._orig.apply(this, arguments);
+    if(currentUser && ROUTER_READY && !_isNavigating){
+      routerNavigate(routeHash, true);
+    }
   };
+  wrapped._orig = fnRef._orig || fnRef;
+  return wrapped;
 }
 
-// ── Router-i başlat (bütün JS faylları yüklənəndən sonra) ──
+// ── Router başlat ──
 function initRouter(){
-  ROUTER_READY = true;
+  // Orijinal funksiyaları saxla
+  var fns = {
+    openBusService:   typeof openBusService   === 'function' ? openBusService   : null,
+    openTvmService:   typeof openTvmService   === 'function' ? openTvmService   : null,
+    openBusReport:    typeof openBusReport    === 'function' ? openBusReport    : null,
+    openTvmReport:    typeof openTvmReport    === 'function' ? openTvmReport    : null,
+    openBusDashboard: typeof openBusDashboard === 'function' ? openBusDashboard : null,
+    openBusOngoing:   typeof openBusOngoing   === 'function' ? openBusOngoing   : null,
+    openBusRequest:   typeof openBusRequest   === 'function' ? openBusRequest   : null,
+    openBusBulk:      typeof openBusBulk      === 'function' ? openBusBulk      : null,
+    openAdminPanel:   typeof openAdminPanel   === 'function' ? openAdminPanel   : null,
+    openNotifications:typeof openNotifications=== 'function' ? openNotifications: null,
+    openCollectives:  typeof openCollectives  === 'function' ? openCollectives  : null,
+    openBusDetail:    typeof openBusDetail    === 'function' ? openBusDetail    : null,
+    openTvmDetail:    typeof openTvmDetail    === 'function' ? openTvmDetail    : null,
+    goHome:           typeof goHome           === 'function' ? goHome           : null,
+    showDashboard:    typeof showDashboard    === 'function' ? showDashboard    : null,
+    startBusService:  typeof startBusService  === 'function' ? startBusService  : null
+  };
 
-  var map = routerGetMap();
+  // Hər funksiyaya ._orig əlavə et
+  Object.keys(fns).forEach(function(name){
+    if(fns[name]) fns[name]._orig = fns[name]._orig || fns[name];
+  });
 
-  // openBusService
-  if(typeof openBusService === 'function'){
-    var _obs = openBusService;
-    openBusService = function(){ _obs.apply(this,arguments); if(currentUser) routerPush('bus-service'); };
-  }
-  // openTvmService
-  if(typeof openTvmService === 'function'){
-    var _ots = openTvmService;
-    openTvmService = function(){ _ots.apply(this,arguments); if(currentUser) routerPush('tvm-service'); };
-  }
-  // openBusReport
-  if(typeof openBusReport === 'function'){
-    var _obr = openBusReport;
-    openBusReport = function(){ _obr.apply(this,arguments); if(currentUser) routerPush('bus-report'); };
-  }
-  // openTvmReport
-  if(typeof openTvmReport === 'function'){
-    var _otr = openTvmReport;
-    openTvmReport = function(){ _otr.apply(this,arguments); if(currentUser) routerPush('tvm-report'); };
-  }
-  // openBusDashboard
-  if(typeof openBusDashboard === 'function'){
-    var _obd = openBusDashboard;
-    openBusDashboard = function(){ _obd.apply(this,arguments); if(currentUser) routerPush('bus-dashboard'); };
-  }
-  // openBusOngoing
-  if(typeof openBusOngoing === 'function'){
-    var _obo = openBusOngoing;
-    openBusOngoing = function(){ _obo.apply(this,arguments); if(currentUser) routerPush('bus-ongoing'); };
-  }
-  // openBusRequest
-  if(typeof openBusRequest === 'function'){
-    var _obreq = openBusRequest;
-    openBusRequest = function(){ _obreq.apply(this,arguments); if(currentUser) routerPush('bus-request'); };
-  }
-  // openBusBulk
-  if(typeof openBusBulk === 'function'){
-    var _obb = openBusBulk;
-    openBusBulk = function(){ _obb.apply(this,arguments); if(currentUser) routerPush('bus-bulk'); };
-  }
-  // openAdminPanel
-  if(typeof openAdminPanel === 'function'){
-    var _oadm = openAdminPanel;
-    openAdminPanel = function(){ _oadm.apply(this,arguments); if(currentUser) routerPush('admin'); };
-  }
-  // openNotifications
-  if(typeof openNotifications === 'function'){
-    var _on = openNotifications;
-    openNotifications = function(){ _on.apply(this,arguments); if(currentUser) routerPush('notifications'); };
-  }
-  // openCollectives
-  if(typeof openCollectives === 'function'){
-    var _oc = openCollectives;
-    openCollectives = function(){ _oc.apply(this,arguments); if(currentUser) routerPush('collectives'); };
-  }
-  // openBusDetail
-  if(typeof openBusDetail === 'function'){
-    var _obdet = openBusDetail;
+  // Wrapper-lər qur
+  if(fns.openBusService)   openBusService   = _wrapFn(fns.openBusService,   'bus-service');
+  if(fns.startBusService)  startBusService  = _wrapFn(fns.startBusService,  'bus-service');
+  if(fns.openTvmService)   openTvmService   = _wrapFn(fns.openTvmService,   'tvm-service');
+  if(fns.openBusReport)    openBusReport    = _wrapFn(fns.openBusReport,    'bus-report');
+  if(fns.openTvmReport)    openTvmReport    = _wrapFn(fns.openTvmReport,    'tvm-report');
+  if(fns.openBusDashboard) openBusDashboard = _wrapFn(fns.openBusDashboard, 'bus-dashboard');
+  if(fns.openBusOngoing)   openBusOngoing   = _wrapFn(fns.openBusOngoing,   'bus-ongoing');
+  if(fns.openBusRequest)   openBusRequest   = _wrapFn(fns.openBusRequest,   'bus-request');
+  if(fns.openBusBulk)      openBusBulk      = _wrapFn(fns.openBusBulk,      'bus-bulk');
+  if(fns.openAdminPanel)   openAdminPanel   = _wrapFn(fns.openAdminPanel,   'admin');
+  if(fns.openNotifications)openNotifications= _wrapFn(fns.openNotifications,'notifications');
+  if(fns.openCollectives)  openCollectives  = _wrapFn(fns.openCollectives,  'collectives');
+
+  // openBusDetail / openTvmDetail — ticketId parametri var
+  if(fns.openBusDetail){
+    var _obdOrig = fns.openBusDetail._orig || fns.openBusDetail;
     openBusDetail = function(ticketId){
-      _obdet.apply(this,arguments);
-      if(currentUser && ticketId) routerPush('bus-detail/'+ticketId);
-    };
-  }
-  // openTvmDetail
-  if(typeof openTvmDetail === 'function'){
-    var _otdet = openTvmDetail;
-    openTvmDetail = function(ticketId){
-      _otdet.apply(this,arguments);
-      if(currentUser && ticketId) routerPush('tvm-detail/'+ticketId);
-    };
-  }
-  // goHome / dashboard
-  if(typeof goHome === 'function'){
-    var _gh = goHome;
-    goHome = function(){ _gh.apply(this,arguments); if(currentUser) routerPush('dashboard'); };
-  }
-  // showDashboard (login sonrası)
-  if(typeof showDashboard === 'function'){
-    var _sd = showDashboard;
-    showDashboard = function(){
-      _sd.apply(this,arguments);
-      // Hash-dən restore et
-      var hash = routerCurrentHash();
-      if(hash && hash !== 'dashboard' && hash !== 'login'){
-        setTimeout(function(){ routerNavigate(hash, false); }, 100);
-      } else {
-        routerPush('dashboard');
+      _obdOrig.apply(this, arguments);
+      if(currentUser && ROUTER_READY && !_isNavigating && ticketId){
+        routerNavigate('bus-detail/'+ticketId, true);
       }
     };
+    openBusDetail._orig = _obdOrig;
+  }
+  if(fns.openTvmDetail){
+    var _otdOrig = fns.openTvmDetail._orig || fns.openTvmDetail;
+    openTvmDetail = function(ticketId){
+      _otdOrig.apply(this, arguments);
+      if(currentUser && ROUTER_READY && !_isNavigating && ticketId){
+        routerNavigate('tvm-detail/'+ticketId, true);
+      }
+    };
+    openTvmDetail._orig = _otdOrig;
   }
 
-  // Refresh zamanı cari hash-dən view-u restore et
-  var startHash = routerCurrentHash();
-  if(currentUser && startHash && startHash !== 'login'){
-    setTimeout(function(){ routerNavigate(startHash, false); }, 150);
-  } else if(currentUser){
-    routerReplace('dashboard');
+  // goHome → dashboard
+  if(fns.goHome){
+    var _ghOrig = fns.goHome._orig || fns.goHome;
+    goHome = function(){
+      if(currentUser && ROUTER_READY && !_isNavigating){
+        routerNavigate('dashboard', true);
+      } else {
+        _ghOrig.apply(this, arguments);
+      }
+    };
+    goHome._orig = _ghOrig;
+  }
+
+  // showDashboard — login sonrası
+  if(fns.showDashboard){
+    var _sdOrig = fns.showDashboard._orig || fns.showDashboard;
+    showDashboard = function(){
+      _sdOrig.apply(this, arguments);
+      if(ROUTER_READY){
+        var hash = _getHashFromUrl();
+        var validRoutes = ['bus-service','tvm-service','bus-report','tvm-report',
+                           'bus-dashboard','bus-ongoing','bus-request','bus-bulk',
+                           'admin','notifications','collectives'];
+        if(hash && hash !== 'dashboard' && hash !== 'login' && validRoutes.indexOf(hash.split('/')[0]) !== -1){
+          setTimeout(function(){ routerNavigate(hash, false); }, 100);
+        } else {
+          routerNavigate('dashboard', false);
+        }
+      }
+    };
+    showDashboard._orig = _sdOrig;
+  }
+
+  ROUTER_READY = true;
+
+  // İlk yükləmə: hash-dən route restore et
+  var startHash = _getHashFromUrl();
+  if(currentUser){
+    // İlk state-i history-ə yaz
+    history.replaceState({ route: startHash }, '', '#' + startHash);
+    setTimeout(function(){
+      routerNavigate(startHash, false);
+    }, 100);
   }
 }
 
-// ── Sağ klik "Open in new tab" dəstəyi ──
-// onclick olan elementlərə avtomatik href əlavə edir
+// ── Sağ klik "Open in new tab" dəstəyi (artıq HTML-də <a href> var) ──
+// onclick olan qalan elementlər üçün href əlavə et
 var ONCLICK_HASH_MAP = {
-  'openBusService':   'bus-service',
-  'startBusService':  'bus-service',
-  'openTvmService':   'tvm-service',
-  'openBusReport':    'bus-report',
-  'openTvmReport':    'tvm-report',
-  'openBusDashboard': 'bus-dashboard',
-  'openBusOngoing':   'bus-ongoing',
-  'openBusRequest':   'bus-request',
-  'openBusBulk':      'bus-bulk',
-  'openAdminPanel':   'admin',
-  'openNotifications':'notifications',
-  'openCollectives':  'collectives'
+  'openBusService':'bus-service','startBusService':'bus-service',
+  'openTvmService':'tvm-service','openBusReport':'bus-report',
+  'openTvmReport':'tvm-report','openBusDashboard':'bus-dashboard',
+  'openBusOngoing':'bus-ongoing','openBusRequest':'bus-request',
+  'openBusBulk':'bus-bulk','openAdminPanel':'admin',
+  'openNotifications':'notifications','openCollectives':'collectives'
 };
 
 function applyHrefToClickables(){
-  var allClickable = document.querySelectorAll('[onclick]');
-  allClickable.forEach(function(el){
+  document.querySelectorAll('[onclick]').forEach(function(el){
+    if(el.tagName === 'A') return; // artıq <a> olanlar keç
     var oc = el.getAttribute('onclick') || '';
     Object.keys(ONCLICK_HASH_MAP).forEach(function(fnName){
       if(oc.indexOf(fnName) !== -1){
-        var hash = ONCLICK_HASH_MAP[fnName];
-        // <a> elementə çevir ki sağ klik işləsin
-        if(el.tagName !== 'A'){
-          el.setAttribute('href', '#'+hash);
-          // Normal klikdə default href davranışını bloklayıb router işlətmə
-          // (router artıq hash dəyişikliyini tutur, ikiqat açılmasın)
-          el.addEventListener('click', function(e){
-            // Yeni tabda açmaq üçün Ctrl/Cmd + klik və ya orta klik keç
-            if(e.ctrlKey || e.metaKey || e.button === 1) return;
-            e.preventDefault();
-          }, { passive: false });
-        }
+        el.setAttribute('href', '#' + ONCLICK_HASH_MAP[fnName]);
+        el.addEventListener('click', function(e){
+          if(e.ctrlKey || e.metaKey || e.button === 1) return;
+          e.preventDefault();
+        }, { passive: false });
       }
     });
   });
 }
 
-// DOM hazır olandan sonra başlat
+// ── Başlat ──
 document.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){
     initRouter();
