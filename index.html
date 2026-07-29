@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>CTECH Service Platform</title>
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#2F6FED">
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CTECH Service">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<link rel="icon" href="favicon.png">
+
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    height:100%;
+    background:#F4F8FD;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:Arial,sans-serif;
+  }
+  .wrap {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+  }
+  .badge {
+    width:88px;
+    height:88px;
+    border-radius:22px;
+    background:linear-gradient(135deg,#4E93FA,#2F6FED);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:32px;
+    letter-spacing:1px;
+  }
+  .title {
+    font-size:15px;
+    color:#12233B;
+    font-weight:600;
+    letter-spacing:0.5px;
+  }
+  button {
+    background:linear-gradient(135deg,#4E93FA,#2F6FED);
+    color:#fff;
+    border:none;
+    padding:14px 40px;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="badge">CT</div>
+  <div class="title">CTECH Technical Service Platform</div>
+  <button onclick="location.replace('https://script.google.com/macros/s/AKfycbxi0k5hC-JTZ-Zm7_Ih-Jakptlck_OUq034wJ2WDouWTrWddMfZ07wOOCJhxLfNSE6H6A/exec')">Daxil ol</button>
+</div>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
+
+</body>
+</html>
