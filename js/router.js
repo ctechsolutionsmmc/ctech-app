@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
 // ROUTER.JS — SPA Router (pushState + hash)
 // CTECH Service Platform
-// Safari swipe-back, Android back, URL sync, scroll reset
 // ═══════════════════════════════════════════════════════════════
 
 var ROUTER_READY = false;
 var _currentRoute = 'dashboard';
 var _isNavigating = false;
+var _rawFns = {}; // hər wrap olunan funksiyanın ORİJİNAL (bir dəfə çağırılan) versiyası
 
 // ── Bütün view ID-ləri ──
 var ALL_VIEWS = [
@@ -16,24 +16,27 @@ var ALL_VIEWS = [
   'collectivesView','busDetailView','tvmDetailView'
 ];
 
-// ── Route xəritəsi ──
-// Diqqət: bu funksiyalar birbaşa qlobal adları çağırır (wrap olunub-olunmamasından asılı olmayaraq).
-// Reentrancy _isNavigating flaqı ilə qorunur, ona görə wrap olunmuş versiyanı çağırmaq təhlükəsizdir.
+// ── Route xəritəsi — HƏMİŞƏ _rawFns-dən çağırır, ikiqat icradan qorunur ──
 function routerGetMap(){
   return {
-    'dashboard':     { open: _openDashboardRaw,                                              needsAuth: true },
-    'bus-service':   { open: function(){ if(typeof openBusService==='function') openBusService(); },       needsAuth: true },
-    'tvm-service':   { open: function(){ if(typeof openTvmService==='function') openTvmService(); },        needsAuth: true },
-    'bus-report':    { open: function(){ if(typeof openBusReport==='function') openBusReport(); },          needsAuth: true },
-    'tvm-report':    { open: function(){ if(typeof openTvmReport==='function') openTvmReport(); },          needsAuth: true },
-    'bus-dashboard': { open: function(){ if(typeof openBusDashboard==='function') openBusDashboard(); },    needsAuth: true },
-    'bus-ongoing':   { open: function(){ if(typeof openBusOngoing==='function') openBusOngoing(); },        needsAuth: true },
-    'bus-request':   { open: function(){ if(typeof openBusRequest==='function') openBusRequest(); },        needsAuth: true, desktopOnly: true },
-    'bus-bulk':      { open: function(){ if(typeof openBusBulk==='function') openBusBulk(); },               needsAuth: true, desktopOnly: true },
-    'admin':         { open: function(){ if(typeof openAdminPanel==='function') openAdminPanel(); },        needsAuth: true, desktopOnly: true },
-    'notifications': { open: function(){ if(typeof openNotifications==='function') openNotifications(); },  needsAuth: true, mobileOnly: true },
-    'collectives':   { open: function(){ if(typeof openCollectives==='function') openCollectives(); },       needsAuth: true, desktopOnly: true }
+    'dashboard':     { open: _openDashboardRaw,                                       needsAuth: true },
+    'bus-service':   { open: function(){ _callRaw('startBusService'); },              needsAuth: true },
+    'tvm-service':   { open: function(){ _callRaw('openTvmService'); },               needsAuth: true },
+    'bus-report':    { open: function(){ _callRaw('openBusReport'); },                needsAuth: true },
+    'tvm-report':    { open: function(){ _callRaw('openTvmReport'); },                needsAuth: true },
+    'bus-dashboard': { open: function(){ _callRaw('openBusDashboard'); },             needsAuth: true },
+    'bus-ongoing':   { open: function(){ _callRaw('openBusOngoing'); },               needsAuth: true },
+    'bus-request':   { open: function(){ _callRaw('openBusRequest'); },               needsAuth: true, desktopOnly: true },
+    'bus-bulk':      { open: function(){ _callRaw('openBusBulk'); },                  needsAuth: true, desktopOnly: true },
+    'admin':         { open: function(){ _callRaw('openAdminPanel'); },               needsAuth: true, desktopOnly: true },
+    'notifications': { open: function(){ _callRaw('openNotifications'); },            needsAuth: true, mobileOnly: true },
+    'collectives':   { open: function(){ _callRaw('openCollectives'); },              needsAuth: true, desktopOnly: true }
   };
+}
+
+// ── Raw funksiyanı bir dəfə çağır (varsa) ──
+function _callRaw(name){
+  if(_rawFns[name]) _rawFns[name]();
 }
 
 // ── Raw dashboard açma ──
@@ -50,11 +53,6 @@ function _openDashboardRaw(){
 function _getHashFromUrl(){
   var h = window.location.hash.replace('#','').trim();
   return h || 'dashboard';
-}
-
-function _getDetailId(){
-  var parts = window.location.hash.replace('#','').split('/');
-  return parts[1] || null;
 }
 
 // ── Bütün view-ları bağla + scroll sıfırla ──
@@ -109,12 +107,12 @@ function routerNavigate(route, pushToHistory){
   routerHideAll();
 
   if(base === 'bus-detail' && detailId){
-    if(typeof openBusDetail === 'function') openBusDetail(detailId);
+    if(_rawFns['openBusDetail']) _rawFns['openBusDetail'](detailId);
     _isNavigating = false;
     return;
   }
   if(base === 'tvm-detail' && detailId){
-    if(typeof openTvmDetail === 'function') openTvmDetail(detailId);
+    if(_rawFns['openTvmDetail']) _rawFns['openTvmDetail'](detailId);
     _isNavigating = false;
     return;
   }
@@ -130,6 +128,25 @@ function routerNavigate(route, pushToHistory){
   _isNavigating = false;
 }
 
+// ── Aktiv formaya uyğun "Home cəhdi" funksiyasını tap ──
+// Bu, hər formanın öz Home düyməsinin çağırdığı EYNİ funksiyadır —
+// dirty-dirsə xəbərdarlıq göstərir, deyilsə avtomatik bağlayır.
+function _findActiveAttemptHomeFn(){
+  var mapping = [
+    { viewId:'busServiceView', fn:'attemptBusHome' },
+    { viewId:'tvmServiceView', fn:'attemptTvmHome' },
+    { viewId:'busRequestView', fn:'attemptBusRequestHome' },
+    { viewId:'busBulkView',    fn:'attemptBusBulkHome' }
+  ];
+  for(var i=0;i<mapping.length;i++){
+    var el = document.getElementById(mapping[i].viewId);
+    if(el && el.style.display !== 'none' && typeof window[mapping[i].fn] === 'function'){
+      return window[mapping[i].fn];
+    }
+  }
+  return null;
+}
+
 // ── popstate: Back/Forward + Safari swipe + Android back ──
 window.addEventListener('popstate', function(e){
   if(!ROUTER_READY || !currentUser) return;
@@ -138,50 +155,34 @@ window.addEventListener('popstate', function(e){
   if(e.state && e.state.route){
     route = e.state.route;
   } else {
-    route = _getHashFromUrl();
+    route = _currentRoute || _getHashFromUrl();
   }
+  if(!route || route === 'login') route = 'dashboard';
 
-  if(typeof isUnsavedWorkPresent === 'function' && isUnsavedWorkPresent()){
+  // Açıq formada "Home cəhdi" funksiyası varsa (bus-service, tvm-service,
+  // bus-request, bus-bulk) — geri getməni ləğv et, EYNİ funksiyanı çağır.
+  // O, dirty-dirsə xəbərdarlıq göstərəcək, deyilsə özü bağlayıb düzgün yerə keçəcək.
+  var attemptFn = _findActiveAttemptHomeFn();
+  if(attemptFn){
     history.pushState({ route: _currentRoute }, '', '#' + _currentRoute);
-    if(typeof showUnsavedWarning === 'function') showUnsavedWarning();
+    attemptFn();
     return;
   }
-
-  if(!route || route === 'login') route = 'dashboard';
 
   routerNavigate(route, false);
 });
 
-// ── Funksiya wrapper: yalnız HƏQİQİ giriş nöqtələri üçün ──
-// Qeyd: bu yalnız "user-facing" funksiyalara tətbiq olunur (kartlara basanda çağırılan),
-// daxili köməkçi funksiyalara (məs. openBusService) YOX — çünki onlar bəzən
-// gecikməli (setTimeout/fetch) daxili çağırışlarla işə düşür və səhv tarixçə yaza bilər.
-function _wrapFn(fnRef, routeHash){
-  if(typeof fnRef !== 'function') return fnRef;
-  var wrapped = function(){
-    fnRef.apply(this, arguments);
-    if(currentUser && ROUTER_READY && !_isNavigating){
-      routerNavigate(routeHash, true);
-    }
-  };
-  return wrapped;
-}
-
 // ── Router başlat ──
 function initRouter(){
   var entryPoints = {
-    // Bus Service — YALNIZ həqiqi giriş nöqtələri wrap olunur (openBusService YOX)
     startBusService:        'bus-service',
     openBusServiceForEdit:  'bus-service',
-    // TVM Service
     openTvmService:         'tvm-service',
     openTvmServiceForEdit:  'tvm-service',
-    // Hesabatlar
     openBusReport:          'bus-report',
     openTvmReport:          'tvm-report',
     openBusDashboard:       'bus-dashboard',
     openBusOngoing:         'bus-ongoing',
-    // Digər bölmələr
     openBusRequest:         'bus-request',
     openBusBulk:            'bus-bulk',
     openAdminPanel:         'admin',
@@ -189,26 +190,35 @@ function initRouter(){
     openCollectives:        'collectives'
   };
 
+  // Hər giriş nöqtəsi üçün: RAW funksiyanı yadda saxla, sonra QLOBAL adı wrap et
   Object.keys(entryPoints).forEach(function(fnName){
     if(typeof window[fnName] === 'function'){
-      window[fnName] = _wrapFn(window[fnName], entryPoints[fnName]);
+      _rawFns[fnName] = window[fnName]; // orijinal, bir dəfə çağırılan versiya
+      var routeHash = entryPoints[fnName];
+      window[fnName] = function(){
+        // Yalnız RAW funksiyanı çağır (qlobal adı YOX — ikiqat icradan qorunur)
+        _rawFns[fnName].apply(this, arguments);
+        if(currentUser && ROUTER_READY && !_isNavigating){
+          routerNavigate(routeHash, true);
+        }
+      };
     }
   });
 
   // openBusDetail / openTvmDetail — ticketId parametrli
   if(typeof openBusDetail === 'function'){
-    var _obdOrig = openBusDetail;
+    _rawFns['openBusDetail'] = openBusDetail;
     openBusDetail = function(ticketId){
-      _obdOrig.apply(this, arguments);
+      _rawFns['openBusDetail'].apply(this, arguments);
       if(currentUser && ROUTER_READY && !_isNavigating && ticketId){
         routerNavigate('bus-detail/'+ticketId, true);
       }
     };
   }
   if(typeof openTvmDetail === 'function'){
-    var _otdOrig = openTvmDetail;
+    _rawFns['openTvmDetail'] = openTvmDetail;
     openTvmDetail = function(ticketId){
-      _otdOrig.apply(this, arguments);
+      _rawFns['openTvmDetail'].apply(this, arguments);
       if(currentUser && ROUTER_READY && !_isNavigating && ticketId){
         routerNavigate('tvm-detail/'+ticketId, true);
       }
@@ -228,16 +238,13 @@ function initRouter(){
     };
   }
 
-  // ── "Bağla / X" funksiyaları — həmişə URL-i və tarixçəni dashboard-a sinxronlaşdır ──
-  // Bu funksiyalar öz DOM-larını düzgün bağlasa da, bəziləri URL/tarixçəni yeniləmir.
-  // Təhlükəsizlik qatı: raw funksiyanı çağırdıqdan sonra router-i də dashboard-a keçir.
+  // ── "Bağla / X" funksiyaları — URL-i və tarixçəni sinxronlaşdır ──
   var simpleCloseFns = ['closeCollectives','closeBusRequest','closeNotifications','closeAdminPanel'];
   simpleCloseFns.forEach(function(fnName){
     if(typeof window[fnName] === 'function'){
       var _origClose = window[fnName];
       window[fnName] = function(){
         _origClose.apply(this, arguments);
-        // Görünən view artıq dashboard olduğu üçün sadəcə URL/tarixçəni sinxronlaşdır (yenidən açma)
         if(currentUser && ROUTER_READY){
           _currentRoute = 'dashboard';
           try{ history.replaceState({ route:'dashboard' }, '', '#dashboard'); }catch(e){}
@@ -246,8 +253,6 @@ function initRouter(){
     }
   });
 
-  // bsGoBack / closeTvmService / closeBusBulk — target dashboard və ya başqa view ola bilər,
-  // raw funksiya icra olunandan sonra hansı view görünürsə, URL-i ona uyğunlaşdır
   var smartCloseFns = {
     'bsGoBack':      function(){ return (typeof bsReturnTarget!=='undefined' && bsReturnTarget==='report') ? 'bus-report' : 'dashboard'; },
     'closeTvmService': function(){ return (typeof tvmReturnTarget!=='undefined' && tvmReturnTarget==='report') ? 'tvm-report' : 'dashboard'; },
@@ -258,7 +263,7 @@ function initRouter(){
       var _origSmartClose = window[fnName];
       var targetFn = smartCloseFns[fnName];
       window[fnName] = function(){
-        var target = targetFn(); // return target CALLdan ƏVVƏL oxunmalıdır (raw fn onu sıfırlaya bilər)
+        var target = targetFn();
         _origSmartClose.apply(this, arguments);
         if(currentUser && ROUTER_READY){
           _currentRoute = target;
@@ -288,6 +293,7 @@ function initRouter(){
   }
 
   ROUTER_READY = true;
+  _currentRoute = _getHashFromUrl();
 
   var startHash = _getHashFromUrl();
   if(currentUser){
@@ -298,7 +304,7 @@ function initRouter(){
   }
 }
 
-// ── Sağ klik "Open in new tab" dəstəyi (HTML-də <a href> olmayan qalıqlar üçün) ──
+// ── Sağ klik "Open in new tab" dəstəyi ──
 var ONCLICK_HASH_MAP = {
   'openBusService':'bus-service','startBusService':'bus-service',
   'openTvmService':'tvm-service','openBusReport':'bus-report',
