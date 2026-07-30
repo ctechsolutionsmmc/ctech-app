@@ -1,0 +1,339 @@
+// ═══════════════════════════════════════════════════════════════
+// ROUTER.JS — SPA Router (pushState + hash)
+// CTECH Service Platform
+// ═══════════════════════════════════════════════════════════════
+
+var ROUTER_READY = false;
+var _currentRoute = 'dashboard';
+var _isNavigating = false;
+var _rawFns = {}; // hər wrap olunan funksiyanın ORİJİNAL (bir dəfə çağırılan) versiyası
+
+// ── Bütün view ID-ləri ──
+var ALL_VIEWS = [
+  'loginView','dashboardView','busServiceView','tvmServiceView',
+  'busReportView','tvmReportView','busDashboardView','busOngoingView',
+  'busRequestView','busBulkView','adminPanelView','notifView',
+  'collectivesView','busDetailView','tvmDetailView'
+];
+
+// ── Route xəritəsi — HƏMİŞƏ _rawFns-dən çağırır, ikiqat icradan qorunur ──
+function routerGetMap(){
+  return {
+    'dashboard':     { open: _openDashboardRaw,                                       needsAuth: true },
+    'bus-service':   { open: function(){ _callRaw('startBusService'); },              needsAuth: true },
+    'tvm-service':   { open: function(){ _callRaw('openTvmService'); },               needsAuth: true },
+    'bus-report':    { open: function(){ _callRaw('openBusReport'); },                needsAuth: true },
+    'tvm-report':    { open: function(){ _callRaw('openTvmReport'); },                needsAuth: true },
+    'bus-dashboard': { open: function(){ _callRaw('openBusDashboard'); },             needsAuth: true },
+    'bus-ongoing':   { open: function(){ _callRaw('openBusOngoing'); },               needsAuth: true },
+    'bus-request':   { open: function(){ _callRaw('openBusRequest'); },               needsAuth: true, desktopOnly: true },
+    'bus-bulk':      { open: function(){ _callRaw('openBusBulk'); },                  needsAuth: true, desktopOnly: true },
+    'admin':         { open: function(){ _callRaw('openAdminPanel'); },               needsAuth: true, desktopOnly: true },
+    'notifications': { open: function(){ _callRaw('openNotifications'); },            needsAuth: true, mobileOnly: true },
+    'collectives':   { open: function(){ _callRaw('openCollectives'); },              needsAuth: true, desktopOnly: true }
+  };
+}
+
+// ── Raw funksiyanı bir dəfə çağır (varsa) ──
+function _callRaw(name){
+  if(_rawFns[name]) _rawFns[name]();
+}
+
+// ── Raw dashboard açma ──
+function _openDashboardRaw(){
+  var dv = document.getElementById('dashboardView');
+  var lv = document.getElementById('loginView');
+  var bv = document.getElementById('busServiceView');
+  if(lv) lv.style.display = 'none';
+  if(bv) bv.style.display = 'none';
+  if(dv) dv.style.display = 'block';
+}
+
+// ── URL-dən hash oxu ──
+function _getHashFromUrl(){
+  var h = window.location.hash.replace('#','').trim();
+  return h || 'dashboard';
+}
+
+// ── Bütün view-ları bağla + scroll sıfırla ──
+function routerHideAll(){
+  ALL_VIEWS.forEach(function(id){
+    if(id === 'loginView') return;
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.display = 'none';
+    el.scrollTop = 0;
+  });
+  window.scrollTo(0,0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+// ── Əsas navigate: view-u aç, URL-i yenilə ──
+function routerNavigate(route, pushToHistory){
+  if(!ROUTER_READY || !currentUser) return;
+  if(_isNavigating) return;
+  _isNavigating = true;
+
+  var base = route.split('/')[0];
+  var detailId = route.indexOf('/') !== -1 ? route.split('/')[1] : null;
+
+  var map = routerGetMap();
+  var r = map[base];
+
+  if(r){
+    if(r.desktopOnly && window.innerWidth < 901){
+      _isNavigating = false;
+      routerNavigate('dashboard', pushToHistory);
+      return;
+    }
+    if(r.mobileOnly && window.innerWidth >= 901){
+      _isNavigating = false;
+      routerNavigate('dashboard', pushToHistory);
+      return;
+    }
+  }
+
+  var newHash = '#' + route;
+  if(window.location.hash !== newHash){
+    if(pushToHistory){
+      history.pushState({ route: route }, '', newHash);
+    } else {
+      history.replaceState({ route: route }, '', newHash);
+    }
+  }
+
+  _currentRoute = route;
+  routerHideAll();
+
+  if(base === 'bus-detail' && detailId){
+    if(_rawFns['openBusDetail']) _rawFns['openBusDetail'](detailId);
+    _isNavigating = false;
+    return;
+  }
+  if(base === 'tvm-detail' && detailId){
+    if(_rawFns['openTvmDetail']) _rawFns['openTvmDetail'](detailId);
+    _isNavigating = false;
+    return;
+  }
+
+  if(r){
+    r.open();
+  } else {
+    _openDashboardRaw();
+    _currentRoute = 'dashboard';
+    history.replaceState({ route: 'dashboard' }, '', '#dashboard');
+  }
+
+  _isNavigating = false;
+}
+
+// ── Aktiv formaya uyğun "Home cəhdi" funksiyasını tap ──
+// Bu, hər formanın öz Home düyməsinin çağırdığı EYNİ funksiyadır —
+// dirty-dirsə xəbərdarlıq göstərir, deyilsə avtomatik bağlayır.
+function _findActiveAttemptHomeFn(){
+  var mapping = [
+    { viewId:'busServiceView', fn:'attemptBusHome' },
+    { viewId:'tvmServiceView', fn:'attemptTvmHome' },
+    { viewId:'busRequestView', fn:'attemptBusRequestHome' },
+    { viewId:'busBulkView',    fn:'attemptBusBulkHome' }
+  ];
+  for(var i=0;i<mapping.length;i++){
+    var el = document.getElementById(mapping[i].viewId);
+    if(el && el.style.display !== 'none' && typeof window[mapping[i].fn] === 'function'){
+      return window[mapping[i].fn];
+    }
+  }
+  return null;
+}
+
+// ── popstate: Back/Forward + Safari swipe + Android back ──
+window.addEventListener('popstate', function(e){
+  if(!ROUTER_READY || !currentUser) return;
+
+  var route;
+  if(e.state && e.state.route){
+    route = e.state.route;
+  } else {
+    route = _currentRoute || _getHashFromUrl();
+  }
+  if(!route || route === 'login') route = 'dashboard';
+
+  // Açıq formada "Home cəhdi" funksiyası varsa (bus-service, tvm-service,
+  // bus-request, bus-bulk) — geri getməni ləğv et, EYNİ funksiyanı çağır.
+  // O, dirty-dirsə xəbərdarlıq göstərəcək, deyilsə özü bağlayıb düzgün yerə keçəcək.
+  var attemptFn = _findActiveAttemptHomeFn();
+  if(attemptFn){
+    history.pushState({ route: _currentRoute }, '', '#' + _currentRoute);
+    attemptFn();
+    return;
+  }
+
+  routerNavigate(route, false);
+});
+
+// ── Router başlat ──
+function initRouter(){
+  var entryPoints = {
+    startBusService:        'bus-service',
+    openBusServiceForEdit:  'bus-service',
+    openTvmService:         'tvm-service',
+    openTvmServiceForEdit:  'tvm-service',
+    openBusReport:          'bus-report',
+    openTvmReport:          'tvm-report',
+    openBusDashboard:       'bus-dashboard',
+    openBusOngoing:         'bus-ongoing',
+    openBusRequest:         'bus-request',
+    openBusBulk:            'bus-bulk',
+    openAdminPanel:         'admin',
+    openNotifications:      'notifications',
+    openCollectives:        'collectives'
+  };
+
+  // Hər giriş nöqtəsi üçün: RAW funksiyanı yadda saxla, sonra QLOBAL adı wrap et
+  Object.keys(entryPoints).forEach(function(fnName){
+    if(typeof window[fnName] === 'function'){
+      _rawFns[fnName] = window[fnName]; // orijinal, bir dəfə çağırılan versiya
+      var routeHash = entryPoints[fnName];
+      window[fnName] = function(){
+        // Yalnız RAW funksiyanı çağır (qlobal adı YOX — ikiqat icradan qorunur)
+        _rawFns[fnName].apply(this, arguments);
+        if(currentUser && ROUTER_READY && !_isNavigating){
+          routerNavigate(routeHash, true);
+        }
+      };
+    }
+  });
+
+  // openBusDetail / openTvmDetail — ticketId parametrli
+  if(typeof openBusDetail === 'function'){
+    _rawFns['openBusDetail'] = openBusDetail;
+    openBusDetail = function(ticketId){
+      _rawFns['openBusDetail'].apply(this, arguments);
+      if(currentUser && ROUTER_READY && !_isNavigating && ticketId){
+        routerNavigate('bus-detail/'+ticketId, true);
+      }
+    };
+  }
+  if(typeof openTvmDetail === 'function'){
+    _rawFns['openTvmDetail'] = openTvmDetail;
+    openTvmDetail = function(ticketId){
+      _rawFns['openTvmDetail'].apply(this, arguments);
+      if(currentUser && ROUTER_READY && !_isNavigating && ticketId){
+        routerNavigate('tvm-detail/'+ticketId, true);
+      }
+    };
+  }
+
+  // goHome → dashboard
+  if(typeof goHome === 'function'){
+    var _ghOrig = goHome;
+    goHome = function(){
+      if(currentUser && ROUTER_READY && !_isNavigating){
+        routerNavigate('dashboard', true);
+        if(typeof closeMenu === 'function') closeMenu();
+      } else {
+        _ghOrig.apply(this, arguments);
+      }
+    };
+  }
+
+  // ── "Bağla / X" funksiyaları — URL-i və tarixçəni sinxronlaşdır ──
+  var simpleCloseFns = ['closeCollectives','closeBusRequest','closeNotifications','closeAdminPanel'];
+  simpleCloseFns.forEach(function(fnName){
+    if(typeof window[fnName] === 'function'){
+      var _origClose = window[fnName];
+      window[fnName] = function(){
+        _origClose.apply(this, arguments);
+        if(currentUser && ROUTER_READY){
+          _currentRoute = 'dashboard';
+          try{ history.replaceState({ route:'dashboard' }, '', '#dashboard'); }catch(e){}
+        }
+      };
+    }
+  });
+
+  var smartCloseFns = {
+    'bsGoBack':      function(){ return (typeof bsReturnTarget!=='undefined' && bsReturnTarget==='report') ? 'bus-report' : 'dashboard'; },
+    'closeTvmService': function(){ return (typeof tvmReturnTarget!=='undefined' && tvmReturnTarget==='report') ? 'tvm-report' : 'dashboard'; },
+    'closeBusBulk':  function(){ return (typeof bkReturnTarget!=='undefined' && bkReturnTarget==='busService') ? 'bus-service' : 'dashboard'; }
+  };
+  Object.keys(smartCloseFns).forEach(function(fnName){
+    if(typeof window[fnName] === 'function'){
+      var _origSmartClose = window[fnName];
+      var targetFn = smartCloseFns[fnName];
+      window[fnName] = function(){
+        var target = targetFn();
+        _origSmartClose.apply(this, arguments);
+        if(currentUser && ROUTER_READY){
+          _currentRoute = target;
+          try{ history.replaceState({ route:target }, '', '#'+target); }catch(e){}
+        }
+      };
+    }
+  });
+
+  // showDashboard — login sonrası
+  if(typeof showDashboard === 'function'){
+    var _sdOrig = showDashboard;
+    showDashboard = function(){
+      _sdOrig.apply(this, arguments);
+      if(ROUTER_READY){
+        var hash = _getHashFromUrl();
+        var validRoutes = ['bus-service','tvm-service','bus-report','tvm-report',
+                           'bus-dashboard','bus-ongoing','bus-request','bus-bulk',
+                           'admin','notifications','collectives'];
+        if(hash && hash !== 'dashboard' && hash !== 'login' && validRoutes.indexOf(hash.split('/')[0]) !== -1){
+          setTimeout(function(){ routerNavigate(hash, false); }, 100);
+        } else {
+          routerNavigate('dashboard', false);
+        }
+      }
+    };
+  }
+
+  ROUTER_READY = true;
+  _currentRoute = _getHashFromUrl();
+
+  var startHash = _getHashFromUrl();
+  if(currentUser){
+    history.replaceState({ route: startHash }, '', '#' + startHash);
+    setTimeout(function(){
+      routerNavigate(startHash, false);
+    }, 100);
+  }
+}
+
+// ── Sağ klik "Open in new tab" dəstəyi ──
+var ONCLICK_HASH_MAP = {
+  'openBusService':'bus-service','startBusService':'bus-service',
+  'openTvmService':'tvm-service','openBusReport':'bus-report',
+  'openTvmReport':'tvm-report','openBusDashboard':'bus-dashboard',
+  'openBusOngoing':'bus-ongoing','openBusRequest':'bus-request',
+  'openBusBulk':'bus-bulk','openAdminPanel':'admin',
+  'openNotifications':'notifications','openCollectives':'collectives'
+};
+
+function applyHrefToClickables(){
+  document.querySelectorAll('[onclick]').forEach(function(el){
+    if(el.tagName === 'A') return;
+    var oc = el.getAttribute('onclick') || '';
+    Object.keys(ONCLICK_HASH_MAP).forEach(function(fnName){
+      if(oc.indexOf(fnName) !== -1){
+        el.setAttribute('href', '#' + ONCLICK_HASH_MAP[fnName]);
+        el.addEventListener('click', function(e){
+          if(e.ctrlKey || e.metaKey || e.button === 1) return;
+          e.preventDefault();
+        }, { passive: false });
+      }
+    });
+  });
+}
+
+// ── Başlat ──
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    initRouter();
+    applyHrefToClickables();
+  }, 0);
+});
