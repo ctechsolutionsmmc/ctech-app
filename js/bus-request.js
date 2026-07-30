@@ -12,14 +12,6 @@ var brSelected = { carrier:'', brand:'', problem:'', technicians:[] };
 var brFormDirty = false;
 var brNextTicketId = '';
 
-// Validator / SAM kart SN siyahıları — əvvəlcədən elan olunmalıdır,
-// yoxsa fetch bitməzdən əvvəl axtarış undefined üzərində .concat() çağırıb səssiz xəta verir
-var busValidatorSNList = [];
-var busSamCardSNList = [];
-var busCombinedSNSet = null;
-var busValidatorSNLoaded = false;
-var busValidatorSNLoading = false;
-
 function openBusRequest(){
   closeMenu();
   if(window.innerWidth < 901){ return; } // yalnız veb
@@ -401,7 +393,7 @@ function busSnInputHandler(el, ddId, warnId){
   var matches = busSnSearchMatches(q);
   if(dd){
     if(matches.length===0){
-      dd.innerHTML = '<div class="bs-registry-empty">Uyğun SN tapılmadı — Enter ilə yenə də əlavə edə bilərsiniz</div>';
+      dd.innerHTML = '<div class="bs-registry-empty">Uyğun SN tapılmadı</div>';
     } else {
       dd.innerHTML = matches.map(function(sn){
         return '<div class="bs-registry-item" data-sn="'+escapeHtml(sn)+'"><span class="reg-id">'+escapeHtml(sn)+'</span></div>';
@@ -424,6 +416,10 @@ function busSnInputKeydown(e, el, type){
     e.preventDefault();
     var v = el.value.trim();
     if(v){
+      if(busValidatorSNLoaded && !busSnExists(v)){
+        alert('Bu SN Validator və ya SAM Card bazasında tapılmadı.\nYalnız mövcud SN-lər əlavə edilə bilər.');
+        return;
+      }
       busSnAddChip(type, v);
       el.value = '';
       closeBusSnDD('bs_'+type+'_sn_dd');
