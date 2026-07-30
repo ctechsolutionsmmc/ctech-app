@@ -98,12 +98,12 @@ function updateOngDate(){
 }
 
 function loadOngoingData(){
-  document.getElementById('ongTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
+  document.getElementById('ongTableBody').innerHTML='<tr><td colspan="7"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:0})})
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.status!=='OK'){
-      document.getElementById('ongTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-empty">Xəta: '+(d.message||'məlumat gəlmədi')+'</div></td></tr>';
+      document.getElementById('ongTableBody').innerHTML='<tr><td colspan="7"><div class="rpt-empty">Xəta: '+(d.message||'məlumat gəlmədi')+'</div></td></tr>';
       return;
     }
     ongAllRows=(d.rows||[]).filter(function(row){
@@ -113,7 +113,7 @@ function loadOngoingData(){
     ongColumns=d.columns||[];
     applyOngoingFilters();
   }).catch(function(e){
-    document.getElementById('ongTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-empty">Şəbəkə xətası: '+e.message+'</div></td></tr>';
+    document.getElementById('ongTableBody').innerHTML='<tr><td colspan="7"><div class="rpt-empty">Şəbəkə xətası: '+e.message+'</div></td></tr>';
   });
 }
 var ongSearchDebounceTimer=null;
@@ -142,11 +142,19 @@ function setOngServiceTypeFilter(type, btn){
   if(btn) btn.classList.add('rpt-type-btn-active');
   applyOngoingFilters();
 }
+function ongStatusBadge(status){
+  var cls='dv-status-chip', color='#5C7089', bg='#F0F5FC', border='#DCE6F5';
+  if(status==='Təhkim Edildi'){ color='#1B4A8A'; bg='#E6F1FB'; border='#CFE0F7'; }
+  else if(status==='Texnik Tamamladı'){ color='#B8730A'; bg='#FFF5E6'; border='#F5D9A8'; }
+  else if(status==='Açıq'){ color='#188A4B'; bg='#E5F6ED'; border='#BFE8D2'; }
+  return '<span class="'+cls+'" style="color:'+color+';background:'+bg+';border:1px solid '+border+';">'+escapeHtml(status||'—')+'</span>';
+}
+
 function renderOngoingTable(){
   var body=document.getElementById('ongTableBody');
   document.getElementById('ongCount').textContent=ongFiltered.length+' nəticə';
   if(ongFiltered.length===0){
-    body.innerHTML='<tr><td colspan="6"><div class="rpt-empty">Davam edən servis yoxdur</div></td></tr>';
+    body.innerHTML='<tr><td colspan="7"><div class="rpt-empty">Davam edən servis yoxdur</div></td></tr>';
     document.getElementById('ongLoadMoreWrap').style.display='none';
     return;
   }
@@ -163,8 +171,9 @@ function renderOngoingTable(){
       +'<td class="rpt-td-id">'+ticketId+'</td>'
       +'<td>'+escapeHtml(row['Tarix']||'')+'</td>'
       +'<td class="rpt-td-plate">'+escapeHtml(row['D.Q.N.']||'')+'</td>'
-      +'<td>'+escapeHtml(row['BUS ID']||'')+(needsApproval?' <span class="dv-status-chip" style="margin-left:6px;">Təsdiq gözlənilir</span>':'')+'</td>'
+      +'<td>'+escapeHtml(row['BUS ID']||'')+'</td>'
       +'<td class="col-carrier" title="'+escapeHtml(row['Daşıyıcı']||'')+'">'+escapeHtml(row['Daşıyıcı']||'')+'</td>'
+      +'<td class="col-status">'+ongStatusBadge(status)+'</td>'
       +'<td class="col-act"><div class="rpt-row-actions">'
       +'<button class="rpt-icon-btn" onclick="openBusDetail(\''+safeId+'\')" aria-label="Baxış" title="Baxış"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>'
       +(editable?'<button class="rpt-icon-btn rpt-edit-btn" onclick="openBusServiceForEdit(\''+safeId+'\')" aria-label="Redaktə et" title="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>':'')
