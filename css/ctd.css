@@ -139,8 +139,8 @@
   .ctd-user-chip.open .ctd-chip-caret{ transform:rotate(180deg); }
 
   .ctd-user-dd{
-    position:absolute; top:calc(100% + 10px); right:0; min-width:210px;
-    background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px; padding:6px;
+    position:absolute; top:calc(100% + 10px); right:0; min-width:178px;
+    background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px; padding:5px;
     box-shadow:0 22px 46px rgba(12,26,48,.32); z-index:50;
     opacity:0; visibility:hidden; pointer-events:none;
     transform:translateY(-8px) scale(.97);
@@ -148,10 +148,11 @@
   }
   .ctd-user-dd.open{ opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0) scale(1); }
   .ctd-user-dd-item{
-    display:flex; align-items:center; gap:10px; width:100%; background:none; border:none;
-    padding:11px 12px; border-radius:9px; cursor:pointer; color:#1B2A3A; font-size:13px; font-weight:600;
-    font-family:'Inter',sans-serif; text-align:left; transition:background .12s ease;
+    display:flex; align-items:center; gap:8px; width:100%; background:none; border:none;
+    padding:9px 10px; border-radius:9px; cursor:pointer; color:#1B2A3A; font-size:12.5px; font-weight:600;
+    font-family:'Inter',sans-serif; text-align:left; transition:background .12s ease; white-space:nowrap;
   }
+  .ctd-user-dd-item svg{ width:13px; height:13px; flex-shrink:0; }
   .ctd-user-dd-item:hover{ background:#F0F5FC; }
   .ctd-user-dd-item.ctd-dd-signout{ color:#C23B3B; }
   .ctd-user-dd-item.ctd-dd-signout:hover{ background:#FCEEEE; }
@@ -257,4 +258,3 @@
     .ctd-stat-row{ grid-template-columns:repeat(2,1fr); }
   }
 }
-
