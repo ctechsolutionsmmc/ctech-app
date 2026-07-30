@@ -223,6 +223,9 @@
   }
   .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:rgba(255,255,255,0.3); }
   .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:#c9d2dd; }
+  #guestDashboardCards .ctd-mini-widget{
+    max-width:340px !important; background:rgba(13,27,45,0.32); border-color:rgba(255,255,255,0.22);
+  }
   .ctd-mini-icon{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .ctd-mini-icon.teal{ background:#E4F5F2; color:#0E8C7A; }
   .ctd-mini-icon.blue{ background:#EAF1FE; color:#2F6FED; }
