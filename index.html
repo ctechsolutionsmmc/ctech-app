@@ -1097,8 +1097,10 @@
           </div>
         </div>
         <div class="adm-tg-hint">
-          <strong>Bus şablonları (Yeni Müraciət/Texnik Tamamladı/Leader Təsdiqlədi):</strong><br>
-          <code>{ticketId}</code> <code>{date}</code> <code>{time}</code> <code>{requesterName}</code> <code>{requesterPhone}</code> <code>{carrier}</code> <code>{routeNumber}</code> <code>{busId}</code> <code>{dqn}</code> <code>{brandModel}</code> <code>{address}</code> <code>{problem}</code> <code>{solution}</code> <code>{deviceCategory}</code> <code>{oldSn}</code> <code>{newSn}</code> <code>{serviceStart}</code> <code>{serviceEnd}</code> <code>{serviceAddress}</code> <code>{technician1}</code> <code>{technician2}</code> <code>{teamLeader}</code><br><br>
+          <strong>Bus şablonları (Yeni Müraciət/Texnik Tamamladı/Leader Təsdiqlədi/Redaktə):</strong><br>
+          <code>{ticketId}</code> <code>{date}</code> <code>{time}</code> <code>{requesterName}</code> <code>{requesterPhone}</code> <code>{carrier}</code> <code>{routeNumber}</code> <code>{busId}</code> <code>{dqn}</code> <code>{brandModel}</code> <code>{address}</code> <code>{problem}</code> <code>{solution}</code> <code>{deviceCategory}</code> <code>{oldSn}</code> <code>{newSn}</code> <code>{serviceStart}</code> <code>{serviceEnd}</code> <code>{serviceAddress}</code> <code>{technician1}</code> <code>{technician2}</code> <code>{teamLeader}</code> <code>{status}</code><br><br>
+          <strong>Toplu İdxal şablonu:</strong><br>
+          <code>{count}</code> <code>{firstId}</code> <code>{lastId}</code> <code>{carrier}</code> <code>{date}</code> <code>{serviceStart}</code> <code>{serviceEnd}</code> <code>{category}</code> <code>{technician1}</code> <code>{technician2}</code> <code>{teamLeader}</code><br><br>
           <strong>TVM şablonu:</strong><br>
           <code>{ticketId}</code> <code>{date}</code> <code>{faultTime}</code> <code>{tvmSn}</code> <code>{location}</code> <code>{serviceLocation}</code> <code>{problem}</code> <code>{solution}</code> <code>{oldSn}</code> <code>{newSn}</code> <code>{serviceStart}</code> <code>{serviceEnd}</code> <code>{technician}</code> <code>{teamLeader}</code>
         </div>
@@ -1477,7 +1479,7 @@
     <div class="rpt-table-wrap">
       <table class="rpt-table">
         <colgroup>
-          <col class="col-id"><col class="col-date"><col class="col-plate"><col class="col-bus"><col class="col-carrier"><col class="col-act">
+          <col class="col-id"><col class="col-date"><col class="col-plate"><col class="col-bus"><col class="col-carrier"><col class="col-status"><col class="col-act">
         </colgroup>
         <thead>
           <tr>
@@ -1486,11 +1488,12 @@
             <th>D.Q.N.</th>
             <th>BUS ID</th>
             <th class="col-carrier">Daşıyıcı</th>
+            <th class="col-status">Status</th>
             <th class="col-act"></th>
           </tr>
         </thead>
         <tbody id="ongTableBody">
-          <tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Məlumatlar yüklənir...</span></div></td></tr>
+          <tr><td colspan="7"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Məlumatlar yüklənir...</span></div></td></tr>
         </tbody>
       </table>
     </div>
