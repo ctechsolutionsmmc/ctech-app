@@ -308,6 +308,18 @@ function initRouter(){
   ROUTER_READY = true;
   _currentRoute = _getHashFromUrl();
 
+  // ── Gecikmiş (stale) açılış qoruyucusu ──
+  // startBusService() daxildə 900ms gecikmə ilə openBusService()-i çağırır.
+  // Əgər bu müddətdə istifadəçi artıq başqa yerə keçibsə (məs. geri sürüşdürübsə),
+  // bu gecikmiş çağırış səssizcə formu yenidən göstərməsin.
+  if(typeof openBusService === 'function'){
+    var _rawOpenBusService = openBusService;
+    openBusService = function(){
+      if(_currentRoute !== 'bus-service') return; // artıq başqa yerdəyik, keç
+      _rawOpenBusService.apply(this, arguments);
+    };
+  }
+
   var startHash = _getHashFromUrl();
   if(currentUser){
     history.replaceState({ route: startHash }, '', '#' + startHash);
