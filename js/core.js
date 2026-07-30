@@ -304,12 +304,18 @@ if('caches' in window){
 }
 
 // ── Session yükləmə (səhifə açılanda) ──
+// DİQQƏT: setTimeout(...,0) ilə növbəti "tick"-ə keçirilir ki, bütün digər
+// scriptlər (bus-request.js və s.) artıq yüklənmiş olsun. Əks halda
+// preloadValidatorSNList() kimi digər fayllardakı funksiyalar hələ mövcud
+// olmadığı üçün səssizcə keçilir və bir daha çağırılmır.
 var _savedSession = loadSession();
 if(_savedSession && _savedSession.user && _savedSession.user.email){
   currentUser = _savedSession.user;
-  showDashboard();
-  attachIdleListeners();
-  startSessionTimer(_savedSession.expires);
+  setTimeout(function(){
+    showDashboard();
+    attachIdleListeners();
+    startSessionTimer(_savedSession.expires);
+  }, 0);
 } else if(_savedSession){
   clearSession();
 }
