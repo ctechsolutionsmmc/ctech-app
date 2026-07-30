@@ -327,6 +327,24 @@ body.dark-mode .adm-msg-history-title{ color:#E8EEF5; }
 .adm-guest-check input[type="checkbox"]:disabled{ cursor:default; opacity:.7; }
 .adm-guest-check-hint{ font-size:11.5px; color:#8CA0BC; margin-top:6px; line-height:1.4; }
 
+.adm-tg-hint{
+  font-size:12.5px; color:#5C7089; background:#F0F5FC; border:1px solid #DCE6F5;
+  border-radius:10px; padding:10px 14px; margin-bottom:16px; line-height:1.6;
+}
+.adm-tg-hint code{ background:#E6F1FB; color:#1B4A8A; padding:1px 6px; border-radius:5px; font-size:12px; }
+.adm-tg-card{
+  background:#FFFFFF; border:1px solid #E7ECF6; border-radius:14px; padding:18px;
+  margin-bottom:16px;
+}
+.adm-tg-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.adm-tg-card-title{ font-size:14.5px; font-weight:700; color:#12233B; }
+.adm-tg-textarea{
+  width:100%; border:1.5px solid #DCE6F5; border-radius:10px; padding:12px;
+  font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#12233B; resize:vertical;
+  line-height:1.6;
+}
+.adm-tg-textarea:focus{ outline:none; border-color:#4E93FA; }
+
 /* ── Admin Panel: TVM Management alt-bölmələri ── */
 .adm-subtabs{
   display:flex; gap:6px; margin-bottom:20px;
