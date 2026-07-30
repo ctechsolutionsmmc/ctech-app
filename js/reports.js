@@ -239,7 +239,7 @@ function loadReportData(){
       document.getElementById('rptTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-empty">Xəta: '+(d.message||'məlumat gəlmədi')+'</div></td></tr>';
       return;
     }
-    rptAllRows=(d.rows||[]).slice().sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
+    rptAllRows=(d.rows||[]).filter(function(row){ return (row['Status']||'').trim()==='Bağlandı'; }).sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
     rptColumns=d.columns||[];
     var hiddenCount = (d.totalCount||0) - rptAllRows.length;
     var hintEl = document.getElementById('rptOldHint');
@@ -2464,7 +2464,10 @@ function loadHomeDashStats(){
       var valueEls=[document.getElementById('dashStatOpen'),document.getElementById('dashStatToday'),document.getElementById('dashStatTech')];
       config.forEach(function(c, idx){
         if(c.metric==='bus_open'){
-          var v=rows.filter(function(r){return (r['Status']||'').trim()==='Açıq';}).length;
+          var v=rows.filter(function(r){
+            var st=(r['Status']||'').trim();
+            return st==='Açıq' || st==='Təhkim Edildi' || st==='Texnik Tamamladı';
+          }).length;
           setHomeDashSlotValue(idx, v);
         } else if(c.metric==='bus_today'){
           var v2=rows.filter(function(r){return (r['Tarix']||'').trim()===todayStr;}).length;
