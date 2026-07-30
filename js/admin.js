@@ -39,6 +39,7 @@ function switchAdminSection(key, btn){
   if(key==='leaders' && typeof loadAdminLeaders==='function') loadAdminLeaders();
   if(key==='collectives' && typeof loadAdminCollectives==='function') loadAdminCollectives();
   if(key==='messages' && typeof loadAdminMessages==='function') loadAdminMessages();
+  if(key==='tgtemplates' && typeof loadTelegramTemplates==='function') loadTelegramTemplates();
   if(key==='homedash' && typeof loadAdminHomeDashboard==='function') loadAdminHomeDashboard();
 
   // BUS Management
@@ -1656,4 +1657,42 @@ function admDeleteCollectiveMember(name) {
       loadAdminCollectives();
     });
   });
+}
+
+// ── TELEGRAM TEMPLATES ───────────────────────────────
+function loadTelegramTemplates(){
+  var wrap=document.getElementById('admTgTemplatesList');
+  wrap.innerHTML='<div class="adm-empty">Yüklənir...</div>';
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTelegramTemplates', requesterEmail: currentUser?currentUser.email:''})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status!=='OK'){ wrap.innerHTML='<div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div>'; return; }
+    wrap.innerHTML=(d.templates||[]).map(function(t){
+      var safeKey=t.key.replace(/'/g,'');
+      return '<div class="adm-tg-card">'
+        +'<div class="adm-tg-card-head">'
+        +'<div class="adm-tg-card-title">'+escapeHtml(t.label)+'</div>'
+        +'<label class="adm-guest-check"><input type="checkbox" id="admTg_active_'+safeKey+'" '+(t.active?'checked':'')+'><span>Aktiv</span></label>'
+        +'</div>'
+        +'<textarea class="adm-tg-textarea" id="admTg_text_'+safeKey+'" rows="6">'+escapeHtml(t.template)+'</textarea>'
+        +'<button class="adm-modal-save" style="margin-top:10px;" onclick="saveTelegramTemplate(\''+safeKey+'\')">Saxla</button>'
+        +'</div>';
+    }).join('');
+  })
+  .catch(function(e){ wrap.innerHTML='<div class="adm-empty">Şəbəkə xətası: '+escapeHtml(e.message)+'</div>'; });
+}
+
+function saveTelegramTemplate(key){
+  var textEl=document.getElementById('admTg_text_'+key);
+  var activeEl=document.getElementById('admTg_active_'+key);
+  var template=textEl.value;
+  var active=activeEl.checked;
+
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'updateTelegramTemplate', key:key, template:template, active:active, requesterEmail: currentUser?currentUser.email:''})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
+    alert('Şablon saxlanıldı');
+  })
+  .catch(function(e){ alert('Şəbəkə xətası: '+e.message); });
 }
