@@ -1,0 +1,155 @@
+/* ================================================================
+   CTECH SERVICE PLATFORM — DASHBOARD.CSS
+   Dashboard görünüşü: header, profile chip, saat, welcome,
+   card-big/small, banner, footer
+   Dark mode: yalnız bu faylın elementlərinə aid hissələr
+   ================================================================ */
+
+/* ===== DASHBOARD VIEW ===== */
+#dashboardView { display:none; position:relative; }
+
+/* ===== PROFILE ROW & CHIP ===== */
+.profile-row { display:flex; justify-content:flex-end; padding:14px 24px 4px; }
+.profile-chip { display:flex; align-items:center; gap:10px; background:#F7FAFD; border:1px solid #E1EAF6; border-radius:16px; padding:7px 16px 7px 7px; box-shadow:0 6px 16px rgba(30,68,130,.06); max-width:78vw; }
+.profile-avatar { width:38px; height:38px; border-radius:11px; background:linear-gradient(135deg,#4E93FA,#2F6FED); display:flex; align-items:center; justify-content:center; color:#FFFFFF; flex-shrink:0; }
+.profile-text { display:flex; flex-direction:column; min-width:0; }
+.profile-name { font-size:13px; color:#12233B; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.profile-role { font-size:11px; color:#7C93B0; font-weight:500; white-space:nowrap; }
+
+.profile-notif-btn{
+  position:relative; flex-shrink:0; margin-left:2px;
+  width:34px; height:34px; border-radius:10px; border:none;
+  background:#FFFFFF; color:#5C7089; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; box-shadow:0 2px 6px rgba(30,68,130,.08);
+}
+.profile-notif-btn:active{ transform:scale(.94); }
+.notif-badge{
+  position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px;
+  background:#E53950; color:#fff; border-radius:9px; border:2px solid #F7FAFD;
+  font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center;
+  line-height:1;
+}
+@media(min-width:901px){
+  .profile-notif-btn{ display:none !important; }
+}
+
+/* ===== HEADER ===== */
+.header { min-height:64px; background:#FFFFFF; border-bottom:1px solid #E1EAF6; display:flex; align-items:center; padding:12px 20px; padding-top:calc(12px + env(safe-area-inset-top)); }
+.header-left { flex:1; display:flex; align-items:center; justify-content:flex-start; gap:8px; padding-left:6px; }
+.menu-wrap { position:relative; display:inline-flex; }
+.header-right { flex:1; display:flex; align-items:center; justify-content:flex-end; gap:10px; }
+.icon-btn { width:46px; height:46px; border-radius:12px; border:none; background:#F0F5FC; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#12233B; transition:background .15s; flex-shrink:0; }
+.icon-btn:hover { background:#DDE9FB; }
+.icon-btn:active { transform:scale(.95); }
+.menu-panel { display:none; position:absolute; top:52px; left:50%; transform:translateX(-50%); background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px; padding:6px; gap:6px; flex-direction:column; box-shadow:0 16px 32px rgba(30,68,130,.16); z-index:30; min-width:64px; }
+.menu-panel.open { display:flex; }
+.menu-item { display:flex; flex-direction:column; align-items:center; gap:5px; background:none; border:none; border-radius:9px; padding:12px 6px; cursor:pointer; color:#12233B; transition:background .15s; }
+.menu-item:hover { background:#F0F5FC; }
+.menu-item:active { transform:scale(.97); }
+.menu-item span { font-size:10px; font-weight:600; color:#3A4A5E; white-space:nowrap; }
+
+/* ===== BRAND MINI & CLOCK ===== */
+.brand-mini { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; letter-spacing:1.5px; color:#12233B; text-transform:uppercase; white-space:nowrap; justify-self:center; }
+.brand-mini span { color:#2F6FED; }
+.clock-box { display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:15px; color:#0D1F38; background:#E8F0FC; border:1.5px solid #B8CEEE; padding:0 16px; height:46px; box-sizing:border-box; border-radius:12px; flex-shrink:0; }
+.clock-sep { color:#B9C6DA; font-weight:400; }
+.status-dot { width:7px; height:7px; border-radius:50%; background:#3FCB78; flex-shrink:0; transition:opacity 0.3s ease; }
+
+/* ===== WELCOME & CONTAINER ===== */
+.welcome { max-width:920px; margin:0 auto; padding:24px 20px 0; text-align:center; }
+.welcome-box { display:inline-block; border:1px solid #E1EAF6; background:#FFFFFF; border-radius:16px; padding:14px 28px; box-shadow:0 12px 28px rgba(30,68,130,.06); }
+.welcome-name { font-family:'Inter',sans-serif; font-weight:700; font-size:18px; color:#2F4C6E; }
+.welcome-sub { font-size:13px; color:#5C7089; margin-top:3px; }
+.container { max-width:920px; margin:0 auto; padding:28px 20px 50px; }
+
+/* ===== KART SİSTEMİ ===== */
+.primary-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+.card-big { background:#FFFFFF; border:1px solid #E1EAF6; border-radius:20px; padding:22px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; cursor:pointer; box-shadow:0 20px 45px rgba(30,68,130,.08); transition:transform .15s,box-shadow .15s; min-height:140px; }
+.card-big:hover { transform:translateY(-4px); box-shadow:0 26px 55px rgba(30,68,130,.14); }
+.card-big:active { transform:translateY(-1px) scale(.99); }
+.card-icon-big { width:64px; height:64px; border-radius:16px; display:flex; align-items:center; justify-content:center; }
+.icon-bus { background:#E6F1FB; color:#2F6FED; }
+.icon-tvm { background:#FDF1E3; color:#D97706; }
+.card-title-big { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:24px; letter-spacing:.5px; color:#12233B; }
+.card-sub-big { font-size:13px; color:#5C7089; }
+.dash-divider { display:flex; flex-direction:column; align-items:center; gap:6px; margin:26px 0 22px; }
+.dash-badge { background:#E6F1FB; color:#1B4A8A; border:1px solid #CFE0F7; padding:8px 24px; border-radius:999px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:2px; }
+.dash-connector { width:54px; height:26px; background:linear-gradient(to bottom,#CFE0F7,rgba(207,224,247,0)); clip-path:polygon(15% 0%,85% 0%,62% 100%,38% 100%); }
+.secondary-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.card-small { background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px; padding:18px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:transform .15s,box-shadow .15s; }
+.card-small:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(30,68,130,.10); }
+.card-icon-small { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.card-title-small { font-size:14px; font-weight:600; color:#12233B; }
+.card-sub-small { font-size:12px; color:#5C7089; margin-top:1px; }
+
+.banner-wrap { margin-top:28px; border-radius:20px; overflow:hidden; border:1px solid #E1EAF6; box-shadow:0 20px 45px rgba(30,68,130,.08); }
+.banner-img { width:100%; display:block; object-fit:cover; height:180px; object-position:center center; }
+.footer-note-dash { text-align:center; padding:6px 0 30px; font-size:12px; color:#8CA0BC; }
+
+@media(max-width:520px){
+  .primary-row{ grid-template-columns:1fr; }
+  .secondary-row{ grid-template-columns:1fr; }
+  .card-title-big{ font-size:21px; }
+  .brand-mini{ display:none; }
+  .banner-img{ height:120px; }
+}
+
+/* ===== WARN TOAST ===== */
+#warnToastOverlay{
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(18,35,59,.35); z-index:200;
+  align-items:flex-start; justify-content:center;
+  padding-top:12vh;
+}
+#warnToastOverlay.open{ display:flex; }
+.warn-toast-box{
+  background:#FFFFFF; border-radius:18px; padding:22px 26px; max-width:420px; width:90%;
+  box-shadow:0 24px 60px rgba(18,35,59,.28); text-align:center;
+  animation:warnToastIn .22s ease;
+}
+.warn-toast-icon{
+  width:46px; height:46px; border-radius:50%; background:#FDF1E3; color:#D97706;
+  display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;
+  margin:0 auto 12px;
+}
+.warn-toast-text{ font-size:14px; color:#33445E; line-height:1.5; margin-bottom:16px; font-family:'Inter',sans-serif; font-weight:600; }
+.warn-toast-btn{
+  background:linear-gradient(135deg,#4E93FA,#2F6FED); color:#fff; border:none;
+  padding:10px 26px; border-radius:12px; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:700;
+  cursor:pointer; box-shadow:0 10px 22px rgba(47,111,237,.28);
+}
+.warn-toast-btn:active{ transform:scale(.97); }
+
+/* ===== DARK MODE — DASHBOARD ===== */
+body.dark-mode #dashboardView { background:#0F1826; min-height:100vh; }
+body.dark-mode .header { background:#141F30; border-bottom-color:#4A6182; }
+body.dark-mode .brand-mini,
+body.dark-mode .profile-name,
+body.dark-mode .welcome-name,
+body.dark-mode .card-title-big,
+body.dark-mode .card-title-small,
+body.dark-mode .menu-item { color:#E8EEF5; }
+body.dark-mode .icon-btn { background:#1C2A3D; color:#E8EEF5; }
+body.dark-mode .icon-btn:hover { background:#25374F; }
+body.dark-mode .clock-box { background:#1C2A3D; border-color:#4A6182; color:#E8EEF5; }
+body.dark-mode .clock-sep { color:#5C7089; }
+body.dark-mode .profile-chip { background:#1C2A3D; border-color:#4A6182; }
+body.dark-mode .profile-notif-btn{ background:#1C2A3D; color:#C7D5E8; }
+body.dark-mode .notif-badge{ border-color:#0F1826; }
+body.dark-mode .profile-role,
+body.dark-mode .welcome-sub,
+body.dark-mode .card-sub-big,
+body.dark-mode .card-sub-small,
+body.dark-mode .footer-note-dash { color:#93A4BC; }
+body.dark-mode .welcome-box,
+body.dark-mode .card-big,
+body.dark-mode .card-small,
+body.dark-mode .menu-panel { background:#16212E; border-color:#4A6182; }
+body.dark-mode .dash-badge { background:#1C2A3D; border-color:#4A6182; color:#8FB4EA; }
+body.dark-mode .menu-item:hover { background:#1C2A3D; }
+body.dark-mode .menu-item span { color:#93A4BC; }
+body.dark-mode .banner-wrap { border-color:#4A6182; }
+body.dark-mode .dash-connector { background:linear-gradient(to bottom,#2A3B52,rgba(42,59,82,0)); }
+body.dark-mode .warn-toast-box{ background:#16212E; }
+body.dark-mode .warn-toast-icon{ background:#2A2214; }
+body.dark-mode .warn-toast-text{ color:#C7D5E8; }
