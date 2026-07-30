@@ -33,6 +33,7 @@ function switchAdminSection(key, btn){
   if(target) target.style.display='block';
   
   if(key==='users' && typeof loadAdminUsers==='function') loadAdminUsers();
+  if(key==='guests' && typeof loadAdminGuests==='function') loadAdminGuests();
   if(key==='tvm' && typeof loadTvmManagementData==='function') loadTvmManagementData();
   if(key==='tech' && typeof loadAdminTechnicians==='function') loadAdminTechnicians();
   if(key==='leaders' && typeof loadAdminLeaders==='function') loadAdminLeaders();
@@ -78,6 +79,7 @@ function loadAdminUsers(){
 function admRoleClass(role){
   var r=(role||'').toLowerCase();
   if(r.indexOf('admin')!==-1) return 'adm-pill-blue';
+  if(r.indexOf('guest')!==-1) return 'adm-pill-amber';
   if(r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1) return 'adm-pill-purple';
   if(r.indexOf('technician')!==-1||r.indexOf('texnik')!==-1) return 'adm-pill-green';
   return 'adm-pill-blue';
@@ -85,6 +87,7 @@ function admRoleClass(role){
 function admRoleCategory(role){
   var r=(role||'').toLowerCase();
   if(r.indexOf('admin')!==-1) return 'admin';
+  if(r.indexOf('guest')!==-1) return 'guest';
   if(r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1) return 'group leader';
   if(r.indexOf('technician')!==-1||r.indexOf('texnik')!==-1) return 'technician';
   return 'user';
@@ -328,6 +331,166 @@ function admExportUsers(){
   XLSX.utils.book_append_sheet(wb, ws, 'Users');
   var today=new Date();
   XLSX.writeFile(wb, 'Users_'+String(today.getDate()).padStart(2,'0')+'.'+String(today.getMonth()+1).padStart(2,'0')+'.'+today.getFullYear()+'.xlsx');
+}
+
+// ── GUEST ACCOUNTS ───────────────────────────────────
+var admGuestsAllRows=[], admGuestsLoaded=false, admGstCurrentPage=1, admGstPageSize=7, admGstEditingId=null;
+var admGuestsSearchDebounceTimer=null;
+function admGuestsDebouncedRender(){ clearTimeout(admGuestsSearchDebounceTimer); admGuestsSearchDebounceTimer=setTimeout(function(){ admGstCurrentPage=1; admRenderGuestsTable(); },180); }
+
+function admIsGuestRole(role){ return (role||'').toLowerCase().indexOf('guest')!==-1; }
+function admGuestType(role){ return (role||'').toLowerCase().indexOf('bakikart')!==-1 ? 'bakikart' : 'ayna'; }
+
+function loadAdminGuests(){
+  var body=document.getElementById('admGstTableBody');
+  if(body) body.innerHTML='<tr><td colspan="6"><div class="adm-empty">Yüklənir...</div></td></tr>';
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getUsersData', requesterEmail: currentUser?currentUser.email:''})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status!=='OK'){
+      if(body) body.innerHTML='<tr><td colspan="6"><div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div></td></tr>';
+      return;
+    }
+    var allUsers=d.users||[];
+    admGuestsAllRows = allUsers.filter(function(u){ return admIsGuestRole(u.role); });
+    admGuestsLoaded=true;
+
+    var totalAyna=0, totalBakikart=0;
+    admGuestsAllRows.forEach(function(u){
+      if(admGuestType(u.role)==='bakikart') totalBakikart++; else totalAyna++;
+    });
+    var elT=document.getElementById('admGstStatTotal'); if(elT) elT.textContent=admGuestsAllRows.length;
+    var elA=document.getElementById('admGstStatAyna'); if(elA) elA.textContent=totalAyna;
+    var elB=document.getElementById('admGstStatBakikart'); if(elB) elB.textContent=totalBakikart;
+
+    admGstCurrentPage=1;
+    admRenderGuestsTable();
+  })
+  .catch(function(e){
+    if(body) body.innerHTML='<tr><td colspan="6"><div class="adm-empty">Şəbəkə xətası: '+escapeHtml(e.message)+'</div></td></tr>';
+  });
+}
+
+function admGetFilteredGuests(){
+  var q=(document.getElementById('admGstSearch').value||'').toLowerCase().trim();
+  var typeF=document.getElementById('admGstTypeFilter').value;
+  var statusF=document.getElementById('admGstStatusFilter').value;
+  return admGuestsAllRows.filter(function(u){
+    if(q && u.fullName.toLowerCase().indexOf(q)===-1 && u.email.toLowerCase().indexOf(q)===-1) return false;
+    if(typeF && admGuestType(u.role)!==typeF) return false;
+    if(statusF && (u.status||'').toLowerCase()!==statusF) return false;
+    return true;
+  });
+}
+
+function admRenderGuestsTable(){
+  var filtered=admGetFilteredGuests();
+  var totalPages=Math.max(1, Math.ceil(filtered.length/admGstPageSize));
+  if(admGstCurrentPage>totalPages) admGstCurrentPage=totalPages;
+  var startIdx=(admGstCurrentPage-1)*admGstPageSize;
+  var visible=filtered.slice(startIdx, startIdx+admGstPageSize);
+
+  var body=document.getElementById('admGstTableBody');
+  if(visible.length===0){
+    body.innerHTML='<tr><td colspan="6"><div class="adm-empty">Guest hesabı tapılmadı</div></td></tr>';
+  } else {
+    body.innerHTML=visible.map(function(u){
+      var isActive=(u.status||'').toLowerCase()==='active';
+      var safeId=u.userId.replace(/'/g,'');
+      var type=admGuestType(u.role);
+      var typeLabel = type==='bakikart' ? 'Bakikart' : 'AYNA';
+      var typePill = type==='bakikart' ? 'adm-pill-purple' : 'adm-pill-amber';
+      var access = type==='bakikart' ? 'Bus + TVM' : 'Bus';
+      return '<tr>'
+        +'<td><div class="adm-name-cell"><span class="adm-avatar">'+escapeHtml(admInitials(u.fullName))+'</span>'+escapeHtml(u.fullName)+'</div></td>'
+        +'<td>'+escapeHtml(u.email)+'</td>'
+        +'<td><span class="adm-pill '+typePill+'">'+typeLabel+'</span></td>'
+        +'<td>'+access+'</td>'
+        +'<td><span class="adm-status '+(isActive?'adm-status-active':'adm-status-inactive')+'">'+escapeHtml(u.status||'—')+'</span></td>'
+        +'<td class="adm-th-act">'
+        +'<button class="adm-icon-btn" onclick="openGuestModal(\''+safeId+'\')" aria-label="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>'
+        +'<button class="adm-icon-btn adm-icon-btn-danger" onclick="openDeleteConfirm(\''+safeId+'\',\''+escapeHtml(u.fullName).replace(/'/g,'')+'\')" aria-label="Sil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>'
+        +'</td></tr>';
+    }).join('');
+  }
+
+  var infoEl=document.getElementById('admGstPageInfo');
+  if(filtered.length===0){ infoEl.textContent='Showing 0 entries'; }
+  else { infoEl.textContent='Showing '+(startIdx+1)+' to '+Math.min(startIdx+admGstPageSize,filtered.length)+' of '+filtered.length+' entries'; }
+
+  var btnsEl=document.getElementById('admGstPageBtns');
+  var html='';
+  html+='<button class="adm-page-btn" '+(admGstCurrentPage<=1?'disabled':'')+' onclick="admGstGoPage('+(admGstCurrentPage-1)+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  var startPage=Math.max(1, admGstCurrentPage-1), endPage=Math.min(totalPages, startPage+3);
+  startPage=Math.max(1, endPage-3);
+  for(var p=startPage; p<=endPage; p++){
+    html+='<button class="adm-page-btn'+(p===admGstCurrentPage?' adm-page-btn-active':'')+'" onclick="admGstGoPage('+p+')">'+p+'</button>';
+  }
+  html+='<button class="adm-page-btn" '+(admGstCurrentPage>=totalPages?'disabled':'')+' onclick="admGstGoPage('+(admGstCurrentPage+1)+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>';
+  btnsEl.innerHTML=html;
+}
+function admGstGoPage(p){ if(p<1) return; admGstCurrentPage=p; admRenderGuestsTable(); }
+
+function openGuestModal(userId){
+  admGstEditingId=userId||null;
+  document.getElementById('admGstFormError').style.display='none';
+  document.getElementById('admGstPassword').value='';
+  if(userId){
+    var u=admGuestsAllRows.find(function(x){ return x.userId===userId; });
+    document.getElementById('admGuestModalTitle').textContent='Edit Guest';
+    document.getElementById('admGstFullName').value=u?u.fullName:'';
+    document.getElementById('admGstEmail').value=u?u.email:'';
+    document.getElementById('admGstStatus').value=u?(u.status||'Active'):'Active';
+    document.getElementById('admGstPasswordLabel').textContent='Password (boş saxlasan dəyişməz)';
+    document.getElementById('admGstTvmDash').checked = u ? admGuestType(u.role)==='bakikart' : false;
+  } else {
+    document.getElementById('admGuestModalTitle').textContent='Add Guest';
+    document.getElementById('admGstFullName').value='';
+    document.getElementById('admGstEmail').value='';
+    document.getElementById('admGstStatus').value='Active';
+    document.getElementById('admGstPasswordLabel').textContent='Password *';
+    document.getElementById('admGstTvmDash').checked=false;
+  }
+  var ov=document.getElementById('admGuestModal');
+  ov.style.display='flex'; ov.classList.add('open');
+}
+function closeGuestModal(){
+  var ov=document.getElementById('admGuestModal');
+  ov.classList.remove('open'); ov.style.display='none';
+  admGstEditingId=null;
+}
+function submitGuestModal(){
+  var fullName=document.getElementById('admGstFullName').value.trim();
+  var email=document.getElementById('admGstEmail').value.trim();
+  var password=document.getElementById('admGstPassword').value;
+  var status=document.getElementById('admGstStatus').value;
+  var isBakikart=document.getElementById('admGstTvmDash').checked;
+  var role = isBakikart ? 'Guest Bakikart' : 'Guest AYNA';
+  var errEl=document.getElementById('admGstFormError');
+  errEl.style.display='none';
+
+  if(!fullName || !email){ errEl.textContent='Ad və Email məcburidir'; errEl.style.display='block'; return; }
+  if(!admGstEditingId && !password){ errEl.textContent='Yeni guest üçün şifrə məcburidir'; errEl.style.display='block'; return; }
+
+  var btn=document.getElementById('admGstSaveBtn');
+  btn.disabled=true; btn.textContent='Saxlanılır...';
+
+  var payload = admGstEditingId
+    ? { action:'updateUser', userId:admGstEditingId, data:{fullName:fullName, email:email, password:password, role:role, status:status}, requesterEmail: currentUser?currentUser.email:'' }
+    : { action:'addUser', data:{fullName:fullName, email:email, password:password, role:role, status:status}, requesterEmail: currentUser?currentUser.email:'' };
+
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    btn.disabled=false; btn.textContent='Save';
+    if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
+    closeGuestModal();
+    loadAdminGuests();
+  })
+  .catch(function(e){
+    btn.disabled=false; btn.textContent='Save';
+    errEl.textContent='Şəbəkə xətası: '+e.message; errEl.style.display='block';
+  });
 }
 
 // ── TVM MANAGEMENT ───────────────────────────────────
