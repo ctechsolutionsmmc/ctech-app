@@ -133,6 +133,7 @@ function login(){
       });
     }
     else if(result.status==='WRONG_PASSWORD'){ showLoadingFail('Şifrə yanlışdır'); }
+    else if(result.status==='LOCKED'){ showLoadingFail(result.message||'Hesabınız müvəqqəti bloklanmışdır.'); }
     else { showLoadingFail(result.debug?'Giriş rədd edildi:\n'+result.debug:'Bu hesab üçün giriş icazəsi yoxdur'); }
   })
   .catch(function(e){ showLoadingFail('Şəbəkə xətası: '+e.message); });
