@@ -195,6 +195,7 @@
 .adm-pill-blue  { background:#E6F1FB; color:#2F6FED; }
 .adm-pill-purple{ background:#EFE7FB; color:#6E3FD1; }
 .adm-pill-green { background:#E5F6ED; color:#188A4B; }
+.adm-pill-amber { background:#FFF5E6; color:#B8730A; }
 .adm-status{ display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; }
 .adm-status::before{ content:""; width:7px; height:7px; border-radius:50%; }
 .adm-status-active{ color:#188A4B; }
@@ -320,6 +321,12 @@ body.dark-mode .adm-msg-history-title{ color:#E8EEF5; }
 .adm-delete-icon.adm-unlock-icon{ background:#FFFBEB; color:#D97706; }
 .adm-delete-text{ font-size:13px; color:#8CA0BC; margin-top:6px; font-weight:600; }
 
+.adm-guest-check-row{ display:flex; gap:16px; margin-top:6px; }
+.adm-guest-check{ display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:#33445E; cursor:pointer; }
+.adm-guest-check input[type="checkbox"]{ width:17px; height:17px; accent-color:#2F6FED; cursor:pointer; }
+.adm-guest-check input[type="checkbox"]:disabled{ cursor:default; opacity:.7; }
+.adm-guest-check-hint{ font-size:11.5px; color:#8CA0BC; margin-top:6px; line-height:1.4; }
+
 /* ── Admin Panel: TVM Management alt-bölmələri ── */
 .adm-subtabs{
   display:flex; gap:6px; margin-bottom:20px;
@@ -388,3 +395,4 @@ body.dark-mode .adm-valsn-sn{ color:#C7D5E8; }
 .adm-reorder-arrow:hover{ background:#F7F9FE; color:#2F6FED; }
 .adm-reorder-arrow:disabled{ opacity:.35; cursor:default; }
 .adm-reorder-arrow:disabled:hover{ background:#FFFFFF; color:#8CA0BC; }
+
