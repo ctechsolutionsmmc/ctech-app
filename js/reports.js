@@ -106,7 +106,10 @@ function loadOngoingData(){
       document.getElementById('ongTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-empty">Xəta: '+(d.message||'məlumat gəlmədi')+'</div></td></tr>';
       return;
     }
-    ongAllRows=(d.rows||[]).filter(function(row){ return (row['Status']||'').trim()==='Açıq'; }).sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
+    ongAllRows=(d.rows||[]).filter(function(row){
+      var st=(row['Status']||'').trim();
+      return st==='Açıq' || st==='Təhkim Edildi' || st==='Texnik Tamamladı';
+    }).sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
     ongColumns=d.columns||[];
     applyOngoingFilters();
   }).catch(function(e){
@@ -148,20 +151,24 @@ function renderOngoingTable(){
     return;
   }
   var visible=ongFiltered.slice(0,ongShownCount);
+  var canApprove = getAccessLevel(currentUser.role)!=='technician';
   var html='';
   visible.forEach(function(row){
     var ticketId=escapeHtml(row['Ticket ID']||'');
     var safeId=(row['Ticket ID']||'').replace(/'/g,'');
     var editable=canEditTicket(row);
+    var status=(row['Status']||'').trim();
+    var needsApproval = canApprove && status==='Texnik Tamamladı';
     html+='<tr>'
       +'<td class="rpt-td-id">'+ticketId+'</td>'
       +'<td>'+escapeHtml(row['Tarix']||'')+'</td>'
       +'<td class="rpt-td-plate">'+escapeHtml(row['D.Q.N.']||'')+'</td>'
-      +'<td>'+escapeHtml(row['BUS ID']||'')+'</td>'
+      +'<td>'+escapeHtml(row['BUS ID']||'')+(needsApproval?' <span class="dv-status-chip" style="margin-left:6px;">Təsdiq gözlənilir</span>':'')+'</td>'
       +'<td class="col-carrier" title="'+escapeHtml(row['Daşıyıcı']||'')+'">'+escapeHtml(row['Daşıyıcı']||'')+'</td>'
       +'<td class="col-act"><div class="rpt-row-actions">'
       +'<button class="rpt-icon-btn" onclick="openBusDetail(\''+safeId+'\')" aria-label="Baxış" title="Baxış"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>'
       +(editable?'<button class="rpt-icon-btn rpt-edit-btn" onclick="openBusServiceForEdit(\''+safeId+'\')" aria-label="Redaktə et" title="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>':'')
+      +(needsApproval?'<button class="rpt-icon-btn" style="color:#188A4B;border-color:#BFE8D2;" onclick="ongApproveClose(\''+safeId+'\')" aria-label="Təsdiqlə və Bağla" title="Təsdiqlə və Bağla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button>':'')
       +'</div></td></tr>';
   });
   body.innerHTML=html;
@@ -174,6 +181,17 @@ function renderOngoingTable(){
   }
 }
 function ongShowMore(){ ongShownCount+=ongPageSize; renderOngoingTable(); }
+
+function ongApproveClose(ticketId){
+  if(!confirm('Bu ticket-i təsdiqləyib bağlamaq istədiyinizə əminsiniz?')) return;
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'approveAndCloseTicket', ticketId:ticketId, requesterEmail: currentUser?currentUser.email:''})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
+    loadOngoingData();
+  })
+  .catch(function(e){ alert('Şəbəkə xətası: '+e.message); });
+}
 function exportOngoingToExcel(){
   if(ongFiltered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
   if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
@@ -255,12 +273,14 @@ function applyFilters(){
   var techView=rptIsTechnicianView();
   rptFiltered=rptAllRows.filter(function(row){
     if(techView){
-      // Texnik yalnız ÖZÜNƏ təhkim olunmuş və hələ AÇIQ olan (davam edən) ticketləri görür
-      if((row['Status']||'').trim()!=='Açıq') return false;
+      // Texnik yalnız ÖZÜNƏ təhkim olunmuş, hələ TAMAMLANMAMIŞ (davam edən) ticketləri görür
+      var st=(row['Status']||'').trim();
+      if(st!=='Açıq' && st!=='Təhkim Edildi') return false;
       if(!rptIsAssignedToMe(row)) return false;
     } else if(rptForceOpenOnly){
-      // Qrup rəhbəri/admin "Davam edən Servis" ilə açılıbsa — yalnız Status=Açıq
-      if((row['Status']||'').trim()!=='Açıq') return false;
+      // Qrup rəhbəri/admin "Davam edən Servis" ilə açılıbsa — hələ bağlanmamış ticketlər
+      var st2=(row['Status']||'').trim();
+      if(st2!=='Açıq' && st2!=='Təhkim Edildi' && st2!=='Texnik Tamamladı') return false;
     }
     if(!rptMatchesServiceType(row)) return false;
     if(!q) return true;
