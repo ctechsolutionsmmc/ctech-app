@@ -39,6 +39,17 @@ function _callRaw(name){
   if(_rawFns[name]) _rawFns[name]();
 }
 
+// ── Yalnız URL/tarixçəni sinxronlaşdır — view-u YENİDƏN AÇMIR ──
+// Giriş nöqtəsi funksiyaları (startBusService, openBusBulk və s.) artıq
+// öz DOM-larını düzgün açıblar, buraya yalnız tarixçə yazmaq üçün gəlir.
+function _pushRouteOnly(route){
+  var newHash = '#' + route;
+  if(window.location.hash !== newHash){
+    history.pushState({ route: route }, '', newHash);
+  }
+  _currentRoute = route;
+}
+
 // ── Raw dashboard açma ──
 function _openDashboardRaw(){
   var dv = document.getElementById('dashboardView');
@@ -190,16 +201,18 @@ function initRouter(){
     openCollectives:        'collectives'
   };
 
-  // Hər giriş nöqtəsi üçün: RAW funksiyanı yadda saxla, sonra QLOBAL adı wrap et
+  // Hər giriş nöqtəsi üçün: RAW funksiyanı yadda saxla, sonra QLOBAL adı wrap et.
+  // VACIB: wrapper YALNIZ raw funksiyanı çağırır (bir dəfə) və sonra sadəcə
+  // URL/tarixçəni sinxronlaşdırır — routerNavigate-in özünü YENİDƏN açmasına
+  // ehtiyac yoxdur, çünki raw funksiya artıq DOM-u düzgün açıb.
   Object.keys(entryPoints).forEach(function(fnName){
     if(typeof window[fnName] === 'function'){
       _rawFns[fnName] = window[fnName]; // orijinal, bir dəfə çağırılan versiya
       var routeHash = entryPoints[fnName];
       window[fnName] = function(){
-        // Yalnız RAW funksiyanı çağır (qlobal adı YOX — ikiqat icradan qorunur)
-        _rawFns[fnName].apply(this, arguments);
-        if(currentUser && ROUTER_READY && !_isNavigating){
-          routerNavigate(routeHash, true);
+        _rawFns[fnName].apply(this, arguments); // YALNIZ BİR DƏFƏ
+        if(currentUser && ROUTER_READY){
+          _pushRouteOnly(routeHash); // sadəcə URL/tarixçə, TƏKRAR AÇMA YOX
         }
       };
     }
@@ -210,8 +223,8 @@ function initRouter(){
     _rawFns['openBusDetail'] = openBusDetail;
     openBusDetail = function(ticketId){
       _rawFns['openBusDetail'].apply(this, arguments);
-      if(currentUser && ROUTER_READY && !_isNavigating && ticketId){
-        routerNavigate('bus-detail/'+ticketId, true);
+      if(currentUser && ROUTER_READY && ticketId){
+        _pushRouteOnly('bus-detail/'+ticketId);
       }
     };
   }
@@ -219,8 +232,8 @@ function initRouter(){
     _rawFns['openTvmDetail'] = openTvmDetail;
     openTvmDetail = function(ticketId){
       _rawFns['openTvmDetail'].apply(this, arguments);
-      if(currentUser && ROUTER_READY && !_isNavigating && ticketId){
-        routerNavigate('tvm-detail/'+ticketId, true);
+      if(currentUser && ROUTER_READY && ticketId){
+        _pushRouteOnly('tvm-detail/'+ticketId);
       }
     };
   }
