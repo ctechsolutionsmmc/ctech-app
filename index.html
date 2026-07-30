@@ -1176,13 +1176,13 @@
   <div class="adm-modal-overlay" id="admDeleteConfirm" style="display:none;">
     <div class="adm-modal adm-modal-sm">
       <div class="adm-modal-body" style="text-align:center;padding-top:28px;">
-        <div class="adm-delete-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div>
-        <div class="adm-modal-title" style="margin-top:12px;">İstifadəçini sil?</div>
+        <div class="adm-delete-icon" id="admDeleteIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div>
+        <div class="adm-modal-title" id="admDeleteTitle" style="margin-top:12px;">İstifadəçini sil?</div>
         <div class="adm-delete-text" id="admDeleteText">Bu əməliyyat geri qaytarıla bilməz.</div>
       </div>
       <div class="adm-modal-foot">
         <button class="adm-modal-cancel" onclick="closeDeleteConfirm()">Cancel</button>
-        <button class="adm-modal-save adm-modal-save-danger" onclick="admConfirmDelete()">Delete</button>
+        <button class="adm-modal-save adm-modal-save-danger" id="admDeleteConfirmBtn" onclick="admConfirmDelete()">Delete</button>
       </div>
     </div>
   </div>
