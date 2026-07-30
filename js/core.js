@@ -225,6 +225,11 @@ function signOut(){
   closeMenu();
   clearSession();
   currentUser=null;
+  // Refresh-flash önləyici sinifi sil (yoxsa loginView !important ilə gizli qalır)
+  document.documentElement.classList.remove('has-session');
+  // CTD dropdown açıq qalıbsa bağla
+  var ctdDD = document.getElementById('ctdUserDropdown');
+  if(ctdDD) ctdDD.classList.remove('open');
   // Remember Me sıfırla
   var rm=document.getElementById('rememberMe');
   if(rm) rm.checked=false;
@@ -234,10 +239,30 @@ function signOut(){
   var btn=document.getElementById('loginBtn');
   btn.disabled=false;
   btn.innerHTML='Daxil ol';
-  // Bütün view-ları bağla, login-i aç
-  document.getElementById('dashboardView').style.display='none';
-  document.getElementById('busServiceView').style.display='none';
-  document.getElementById('loginView').style.display='';
+  // Bütün view-ları bağla (router varsa hamısını, yoxdursa əsasları)
+  if(typeof routerHideAll === 'function'){
+    routerHideAll();
+  } else {
+    document.getElementById('dashboardView').style.display='none';
+    document.getElementById('busServiceView').style.display='none';
+  }
+  // Login-i MÜTLƏQ göstər — CSS-in default cascade-inə güvənmə, sərt təyin et
+  // (mobil ≤900px üçün 'block', desktop üçün 'flex' — login.css-dəki media query ilə eyni)
+  var lv = document.getElementById('loginView');
+  lv.style.display = (window.innerWidth <= 900) ? 'block' : 'flex';
+  // URL-i təmizlə
+  try{ history.replaceState({ route:'login' }, '', window.location.pathname); }catch(e){}
+  if(typeof _currentRoute !== 'undefined') _currentRoute = 'dashboard';
+  if(typeof ROUTER_READY !== 'undefined') ROUTER_READY = false; // hər hansı gecikmiş routerNavigate çağırışının qarşısını al
+
+  // Bir tick sonra YENİDƏN yoxla — hər hansı gecikmiş kod loginView-u gizlətsə, geri qaytar
+  setTimeout(function(){
+    var lv2 = document.getElementById('loginView');
+    if(lv2 && getComputedStyle(lv2).display === 'none'){
+      lv2.style.display = (window.innerWidth <= 900) ? 'block' : 'flex';
+    }
+    if(typeof ROUTER_READY !== 'undefined') ROUTER_READY = true;
+  }, 250);
 }
 
 function moduleAlert(n){ alert(n+' modulu tezliklə hazır olacaq'); }
