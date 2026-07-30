@@ -139,7 +139,7 @@ function admRenderUsersTable(){
         +'<td><div class="adm-name-cell"><span class="adm-avatar">'+escapeHtml(admInitials(u.fullName))+'</span>'+escapeHtml(u.fullName)+'</div></td>'
         +'<td>'+escapeHtml(u.email)+'</td>'
         +'<td><span class="adm-pill '+admRoleClass(u.role)+'">'+escapeHtml(u.role||'—')+'</span></td>'
-        +'<td><span class="adm-status '+(isActive?'adm-status-active':'adm-status-inactive')+'">'+escapeHtml(u.status||'—')+'</span>'+lockedBadge+'</td>'
+        +'<td><div class="adm-status-cell"><span class="adm-status '+(isActive?'adm-status-active':'adm-status-inactive')+'">'+escapeHtml(u.status||'—')+'</span>'+lockedBadge+'</div></td>'
         +'<td class="adm-th-act">'
         +(u.isLocked?'<button class="adm-icon-btn adm-icon-btn-unlock" onclick="admUnlockUser(\''+safeId+'\')" aria-label="Blokdan çıxar" title="Blokdan çıxar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></button>':'')
         +'<button class="adm-icon-btn" onclick="openUserModal(\''+safeId+'\')" aria-label="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>'
@@ -288,6 +288,10 @@ function admUnlockUser(userId){
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
+        // Dərhal lokal state-i yenilə (server refetch-i gözləmədən UI-da əks olunsun)
+        if(u){ u.isLocked=false; u.failedAttempts=0; u.lockedUntil=''; }
+        admRenderUsersTable();
+        // Server-dən təzə məlumatla təsdiqlə
         loadAdminUsers();
       });
     },
