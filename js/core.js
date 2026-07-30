@@ -184,6 +184,7 @@ function applyAccessLevel(){
 
   // ── GUEST (AYNA / Bakikart) — sadə, məhdud görünüş ──
   if(level==='guest'){
+    var ctdHeroG=document.getElementById('ctdHero'); if(ctdHeroG) ctdHeroG.classList.add('guest-hero');
     var elDashSec=document.getElementById('dashboardsSection'); if(elDashSec) elDashSec.style.display='none';
     document.getElementById('reportsSection').style.display='none';
     document.getElementById('adminMenuItem').style.display='none';
@@ -216,6 +217,7 @@ function applyAccessLevel(){
 
   document.getElementById('dashboardsSection').style.display=(level==='technician')?'none':'block';
   document.getElementById('reportsSection').style.display='block';
+  var ctdHeroN=document.getElementById('ctdHero'); if(ctdHeroN) ctdHeroN.classList.remove('guest-hero');
   document.getElementById('adminMenuItem').style.display=isLeaderOrAdmin?'flex':'none';
   var brBtn=document.getElementById('busRequestQuickBtn');
   if(brBtn){
