@@ -175,11 +175,45 @@ function showDashboard(){
   if(!clockStarted){ clockStarted=true; updateClock(); setInterval(updateClock,1000); }
 }
 
-function getAccessLevel(role){ var r=(role||'').toLowerCase(); if(r.indexOf('admin')!==-1)return'admin'; if(r.indexOf('team')!==-1||r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1)return'leader'; return'technician'; }
+function getAccessLevel(role){ var r=(role||'').toLowerCase(); if(r.indexOf('admin')!==-1)return'admin'; if(r.indexOf('guest')!==-1)return'guest'; if(r.indexOf('team')!==-1||r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1)return'leader'; return'technician'; }
+function isGuestBakikart(role){ return (role||'').toLowerCase().indexOf('bakikart')!==-1; }
 
 function applyAccessLevel(){
   var level=getAccessLevel(currentUser.role);
   var isLeaderOrAdmin=(level==='leader'||level==='admin');
+
+  // ── GUEST (AYNA / Bakikart) — sadə, məhdud görünüş ──
+  if(level==='guest'){
+    var elDashSec=document.getElementById('dashboardsSection'); if(elDashSec) elDashSec.style.display='none';
+    document.getElementById('reportsSection').style.display='none';
+    document.getElementById('adminMenuItem').style.display='none';
+    var brBtnG=document.getElementById('busRequestQuickBtn'); if(brBtnG) brBtnG.style.display='none';
+    var ctdAdminBtnG=document.getElementById('ctdAdminBtn'); if(ctdAdminBtnG) ctdAdminBtnG.style.display='none';
+    var ctdBrBtnG=document.getElementById('ctdBrBtn'); if(ctdBrBtnG) ctdBrBtnG.style.display='none';
+    var ctdBulkBtnG=document.getElementById('ctdBulkBtn'); if(ctdBulkBtnG) ctdBulkBtnG.style.display='none';
+
+    // Normal bölmələri tam gizlət
+    var wrapEl=document.getElementById('ctdContentTopWrap'); if(wrapEl) wrapEl.style.display='none';
+    var banner2El=document.getElementById('ctdBanner2Section'); if(banner2El) banner2El.style.display='none';
+    var contEl=document.getElementById('dashboardContainer'); if(contEl) contEl.style.display='none';
+    var footEl=document.getElementById('ctdFooter'); if(footEl) footEl.style.display='none';
+
+    // "Heyət haqqında" və "Tətbiq haqqında" gizlət
+    var collBtnG=document.getElementById('ctdCollectivesBtn'); if(collBtnG) collBtnG.style.display='none';
+    var aboutBtnG=document.getElementById('ctdAboutBtn'); if(aboutBtnG) aboutBtnG.style.display='none';
+    var aboutSepG=document.getElementById('ctdAboutSep'); if(aboutSepG) aboutSepG.style.display='none';
+
+    // Alt yazını sadələşdir
+    var subW=document.getElementById('ctdSubwelcome'); if(subW) subW.textContent='Servislərin ümumi vəziyyəti aşağıda göstərilir.';
+
+    // Guest kart bölməsini göstər
+    var guestCards=document.getElementById('guestDashboardCards'); if(guestCards) guestCards.style.display='block';
+    var guestTvmCard=document.getElementById('guestTvmDashboardCard');
+    if(guestTvmCard) guestTvmCard.style.display = isGuestBakikart(currentUser.role) ? 'flex' : 'none';
+
+    return;
+  }
+
   document.getElementById('dashboardsSection').style.display=(level==='technician')?'none':'block';
   document.getElementById('reportsSection').style.display='block';
   document.getElementById('adminMenuItem').style.display=isLeaderOrAdmin?'flex':'none';
