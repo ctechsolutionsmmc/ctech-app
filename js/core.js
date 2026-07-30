@@ -179,18 +179,18 @@ function getAccessLevel(role){ var r=(role||'').toLowerCase(); if(r.indexOf('adm
 
 function applyAccessLevel(){
   var level=getAccessLevel(currentUser.role);
+  var isLeaderOrAdmin=(level==='leader'||level==='admin');
   document.getElementById('dashboardsSection').style.display=(level==='technician')?'none':'block';
   document.getElementById('reportsSection').style.display='block';
-  document.getElementById('adminMenuItem').style.display=(level==='admin')?'flex':'none';
+  document.getElementById('adminMenuItem').style.display=isLeaderOrAdmin?'flex':'none';
   var brBtn=document.getElementById('busRequestQuickBtn');
-  var isLeaderOrAdmin=(level==='leader'||level==='admin');
   if(brBtn){
     var showBr=isLeaderOrAdmin && window.innerWidth>=901;
     brBtn.style.display = showBr ? 'inline-flex' : 'none';
     if(showBr && typeof brLoadAssignableTechnicians==='function') brLoadAssignableTechnicians();
   }
   var ctdAdminBtn=document.getElementById('ctdAdminBtn');
-  if(ctdAdminBtn) ctdAdminBtn.style.display=(level==='admin')?'flex':'none';
+  if(ctdAdminBtn) ctdAdminBtn.style.display=isLeaderOrAdmin?'flex':'none';
   var ctdBrBtn=document.getElementById('ctdBrBtn');
   if(ctdBrBtn){
     ctdBrBtn.style.display=isLeaderOrAdmin?'flex':'none';
