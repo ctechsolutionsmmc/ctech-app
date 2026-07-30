@@ -175,12 +175,13 @@ body.dark-mode .rpt-type-btn-active{ background:#1C2A3D; color:#8FB4EA; }
   border-right:2px solid #D7E3F5;
 }
 
-.rpt-table col.col-id      { width:20%; }
-.rpt-table col.col-date    { width:15%; }
-.rpt-table col.col-plate   { width:17%; }
-.rpt-table col.col-bus     { width:11%; }
-.rpt-table col.col-carrier { width:22%; }
-.rpt-table col.col-act     { width:15%; }
+.rpt-table col.col-id      { width:14%; }
+.rpt-table col.col-date    { width:10%; }
+.rpt-table col.col-plate   { width:13%; }
+.rpt-table col.col-bus     { width:9%; }
+.rpt-table col.col-carrier { width:18%; }
+.rpt-table col.col-status  { width:14%; }
+.rpt-table col.col-act     { width:22%; }
 
 .rpt-table thead th {
   position:sticky;
