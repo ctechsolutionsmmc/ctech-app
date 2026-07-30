@@ -212,6 +212,19 @@ td.adm-th-act{ display:flex; justify-content:flex-end; gap:8px; }
 .adm-icon-btn svg{ width:14px; height:14px; }
 .adm-icon-btn:hover{ background:#F7F9FE; color:#2F6FED; border-color:#C9D8F2; }
 .adm-icon-btn-danger:hover{ color:#DC2626; border-color:#F6C9C9; background:#FEF2F2; }
+.adm-icon-btn-unlock{ color:#D97706; border-color:#FBE3B8; }
+.adm-icon-btn-unlock:hover{ color:#D97706; background:#FFFBEB; border-color:#F5C978; }
+
+.adm-locked-badge{
+  margin-top:4px; font-size:11px; font-weight:700; color:#DC2626;
+  background:#FEF2F2; border:1px solid #F6C9C9; border-radius:8px;
+  padding:2px 8px; display:inline-block;
+}
+.adm-failed-badge{
+  margin-top:4px; font-size:11px; font-weight:700; color:#D97706;
+  background:#FFFBEB; border:1px solid #FBE3B8; border-radius:8px;
+  padding:2px 8px; display:inline-block;
+}
 
 .adm-pagination{
   display:flex; align-items:center; justify-content:space-between;
@@ -297,10 +310,13 @@ body.dark-mode .adm-msg-history-title{ color:#E8EEF5; }
 .adm-modal-save:hover{ background:#2660D6; }
 .adm-modal-save-danger{ background:#DC2626; }
 .adm-modal-save-danger:hover{ background:#C31414; }
+.adm-modal-save-unlock{ background:#D97706; }
+.adm-modal-save-unlock:hover{ background:#B8630A; }
 .adm-delete-icon{
   width:52px; height:52px; border-radius:50%; background:#FEF2F2; color:#DC2626;
   display:flex; align-items:center; justify-content:center; margin:0 auto;
 }
+.adm-delete-icon.adm-unlock-icon{ background:#FFFBEB; color:#D97706; }
 .adm-delete-text{ font-size:13px; color:#8CA0BC; margin-top:6px; font-weight:600; }
 
 /* ── Admin Panel: TVM Management alt-bölmələri ── */
@@ -371,4 +387,3 @@ body.dark-mode .adm-valsn-sn{ color:#C7D5E8; }
 .adm-reorder-arrow:hover{ background:#F7F9FE; color:#2F6FED; }
 .adm-reorder-arrow:disabled{ opacity:.35; cursor:default; }
 .adm-reorder-arrow:disabled:hover{ background:#FFFFFF; color:#8CA0BC; }
-
