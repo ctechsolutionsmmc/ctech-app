@@ -194,7 +194,7 @@
           </div>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px;opacity:.7;"><path d="M6 9l6 6 6-6"/></svg>
           <div class="ctd-user-dd" id="ctdUserDropdown">
-<button class="ctd-user-dd-item" onclick="event.stopPropagation(); showAbout();">
+<button class="ctd-user-dd-item" id="ctdAboutBtn" onclick="event.stopPropagation(); showAbout();">
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
     <circle cx="12" cy="12" r="9"/>
     <path d="M12 11v6"/>
@@ -203,7 +203,7 @@
   Tətbiq haqqında
 </button>
 
-<div class="ctd-user-dd-sep"></div>
+<div class="ctd-user-dd-sep" id="ctdAboutSep"></div>
 
 <a class="ctd-user-dd-item"
         id="ctdAdminBtn"
@@ -233,7 +233,7 @@
     </div>
     <div class="ctd-hero-inner">
       <div class="ctd-welcome">Xoş gəlmisiniz, <span id="ctdWelcomeName">-</span></div>
-      <div class="ctd-subwelcome">Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.</div>
+      <div class="ctd-subwelcome" id="ctdSubwelcome">Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.</div>
 
       <div class="ctd-stat-row">
         <div class="ctd-stat-card">
@@ -280,7 +280,29 @@
     </div>
   </div>
 
-  <div class="ctd-content-top-wrap">
+  <!-- ═══ YALNIZ GUEST (AYNA / Bakikart) ÜÇÜN — sadə dashboard kartları ═══ -->
+  <div id="guestDashboardCards" style="display:none;">
+    <a class="ctd-mini-widget" id="guestTvmDashboardCard" href="#tvm-dashboard" onclick="moduleAlert('Dashboard-TVM');return false;" style="display:none;max-width:520px;margin:0 auto 14px;">
+      <div class="ctd-mini-icon blue">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+      </div>
+      <div>
+        <div class="ctd-mini-title">TVM dashboard</div>
+        <div class="ctd-mini-desc">Statistika və hesabatlar</div>
+      </div>
+    </a>
+    <a class="ctd-mini-widget" href="#bus-dashboard" onclick="openBusDashboard();return false;" style="max-width:520px;margin:0 auto;">
+      <div class="ctd-mini-icon teal">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+      </div>
+      <div>
+        <div class="ctd-mini-title">Bus dashboard</div>
+        <div class="ctd-mini-desc">Statistika və hesabatlar</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="ctd-content-top-wrap" id="ctdContentTopWrap">
     <div class="ctd-content-top">
       <div class="ctd-section-label"><span>BUS VƏ ƏMƏLİYYATLAR</span></div>
       <div class="ctd-content-grid">
@@ -340,7 +362,7 @@
     </div>
   </div>
 
-  <div class="ctd-banner2-section">
+  <div class="ctd-banner2-section" id="ctdBanner2Section">
     <div class="ctd-banner2-bg"></div>
     <div class="ctd-banner2-scrim"></div>
     <div class="ctd-banner2-top-fade"></div>
@@ -376,10 +398,10 @@
     </div>
   </div>
 
-  <footer class="ctd-footer">© 2026 CTECH SOLUTIONS MMC. Bütün hüquqlar qorunur.</footer>
+  <footer class="ctd-footer" id="ctdFooter">© 2026 CTECH SOLUTIONS MMC. Bütün hüquqlar qorunur.</footer>
 
 
-  <div class="container">
+  <div class="container" id="dashboardContainer">
     <div class="primary-row">
       <a class="card-big" href="#bus-service" onclick="startBusService();return false;">
         <div class="card-icon-big icon-bus">
@@ -536,6 +558,10 @@
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>User Management</span>
       </button>
+      <button class="adm-nav-item" data-section="guests" onclick="switchAdminSection('guests',this)">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>Guest Accounts</span>
+      </button>
       <button class="adm-nav-item" data-section="bus" onclick="switchAdminSection('bus',this)">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6v6M16 6v6M2 12h19.6M18 18h3v-6.6a2 2 0 0 0-.6-1.4l-3-3A2 2 0 0 0 16 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
         <span>BUS Management</span>
@@ -612,6 +638,8 @@
             <option value="group leader">Group Leader</option>
             <option value="technician">Technician</option>
             <option value="user">User</option>
+            <option value="guest ayna">Guest AYNA</option>
+            <option value="guest bakikart">Guest Bakikart</option>
           </select>
           <select class="adm-filter-select" id="admUsrStatusFilter" onchange="admRenderUsersTable()">
             <option value="">All Status</option>
@@ -636,7 +664,62 @@
         </div>
       </div>
 
-      <!-- ═══ BUS MANAGEMENT ═══ -->
+      <!-- ═══ GUEST ACCOUNTS ═══ -->
+      <div class="adm-section" id="admSection-guests" style="display:none;">
+        <div class="adm-section-head">
+          <div>
+            <div class="adm-breadcrumb">Admin Panel <span>›</span> Guest Accounts</div>
+            <div class="adm-title">Guest Accounts</div>
+          </div>
+          <button class="adm-add-btn" onclick="openGuestModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add Guest</button>
+        </div>
+
+        <div class="adm-stats-row">
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></div>
+            <div><div class="adm-stat-label">Total Guests</div><div class="adm-stat-value" id="admGstStatTotal">—</div><div class="adm-stat-sub">Bütün guest hesabları</div></div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-teal"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+            <div><div class="adm-stat-label">AYNA</div><div class="adm-stat-value" id="admGstStatAyna">—</div><div class="adm-stat-sub">Yalnız Bus Dashboard</div></div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-c-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+            <div><div class="adm-stat-label">Bakikart</div><div class="adm-stat-value" id="admGstStatBakikart">—</div><div class="adm-stat-sub">Bus + TVM Dashboard</div></div>
+          </div>
+        </div>
+
+        <div class="adm-toolbar">
+          <div class="adm-search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" id="admGstSearch" placeholder="Search guest..." oninput="admGuestsDebouncedRender()">
+          </div>
+          <select class="adm-filter-select" id="admGstTypeFilter" onchange="admRenderGuestsTable()">
+            <option value="">All Types</option>
+            <option value="ayna">AYNA</option>
+            <option value="bakikart">Bakikart</option>
+          </select>
+          <select class="adm-filter-select" id="admGstStatusFilter" onchange="admRenderGuestsTable()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead><tr><th>Full Name</th><th>Email</th><th>Type</th><th>Dashboard Access</th><th>Status</th><th class="adm-th-act">Actions</th></tr></thead>
+            <tbody id="admGstTableBody">
+              <tr><td colspan="6"><div class="adm-empty">Yüklənir...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="adm-pagination">
+          <div class="adm-page-info" id="admGstPageInfo">—</div>
+          <div class="adm-page-btns" id="admGstPageBtns"></div>
+        </div>
+      </div>
       <div class="adm-section" id="admSection-bus" style="display:none;">
         <div class="adm-section-head">
           <div>
@@ -1049,6 +1132,8 @@
               <option value="Group Leader">Group Leader</option>
               <option value="Technician" selected>Technician</option>
               <option value="User">User</option>
+              <option value="Guest AYNA">Guest AYNA</option>
+              <option value="Guest Bakikart">Guest Bakikart</option>
             </select>
           </div>
           <div class="adm-form-field">
@@ -1064,6 +1149,56 @@
       <div class="adm-modal-foot">
         <button class="adm-modal-cancel" onclick="closeUserModal()">Cancel</button>
         <button class="adm-modal-save" id="admUsrSaveBtn" onclick="submitUserModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guest Account Add/Edit modal -->
+  <div class="adm-modal-overlay" id="admGuestModal" style="display:none;">
+    <div class="adm-modal">
+      <div class="adm-modal-head">
+        <div class="adm-modal-title" id="admGuestModalTitle">Add Guest</div>
+        <button class="adm-modal-close" onclick="closeGuestModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="adm-modal-body">
+        <div class="adm-form-field">
+          <label>Full Name *</label>
+          <input type="text" id="admGstFullName" placeholder="Məs: Bakikart Guest">
+        </div>
+        <div class="adm-form-field">
+          <label>Email *</label>
+          <input type="email" id="admGstEmail" placeholder="Məs: guest@ctech.az">
+        </div>
+        <div class="adm-form-field">
+          <label id="admGstPasswordLabel">Password *</label>
+          <input type="text" id="admGstPassword" placeholder="Şifrə">
+        </div>
+        <div class="adm-form-field">
+          <label>Status *</label>
+          <select id="admGstStatus">
+            <option value="Active" selected>Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="adm-form-field">
+          <label>Dashboard-da görünəcək bölmələr *</label>
+          <div class="adm-guest-check-row">
+            <label class="adm-guest-check">
+              <input type="checkbox" id="admGstBusDash" checked disabled>
+              <span>Bus Dashboard</span>
+            </label>
+            <label class="adm-guest-check">
+              <input type="checkbox" id="admGstTvmDash">
+              <span>TVM Dashboard</span>
+            </label>
+          </div>
+          <div class="adm-guest-check-hint">Bus Dashboard bütün guest hesablar üçün məcburidir. TVM Dashboard əlavə edilərsə hesab "Bakikart" tipinə keçir.</div>
+        </div>
+        <div class="adm-form-error" id="admGstFormError" style="display:none;"></div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-modal-cancel" onclick="closeGuestModal()">Cancel</button>
+        <button class="adm-modal-save" id="admGstSaveBtn" onclick="submitGuestModal()">Save</button>
       </div>
     </div>
   </div>
