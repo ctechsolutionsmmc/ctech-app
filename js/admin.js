@@ -122,12 +122,26 @@ function admRenderUsersTable(){
     body.innerHTML=visible.map(function(u){
       var isActive=(u.status||'').toLowerCase()==='active';
       var safeId=u.userId.replace(/'/g,'');
+      var lockedBadge='';
+      if(u.isLocked){
+        var untilTxt='';
+        if(u.lockedUntil){
+          try{
+            var d=new Date(u.lockedUntil);
+            untilTxt=' — '+d.toLocaleDateString('az-AZ')+' '+d.toLocaleTimeString('az-AZ',{hour:'2-digit',minute:'2-digit'})+'-ə qədər';
+          }catch(e){}
+        }
+        lockedBadge='<div class="adm-locked-badge" title="Yanlış cəhdlər: '+(u.failedAttempts||0)+'/4">🔒 Bloklu'+untilTxt+'</div>';
+      } else if(u.failedAttempts>0){
+        lockedBadge='<div class="adm-failed-badge">Yanlış cəhd: '+u.failedAttempts+'/4</div>';
+      }
       return '<tr>'
         +'<td><div class="adm-name-cell"><span class="adm-avatar">'+escapeHtml(admInitials(u.fullName))+'</span>'+escapeHtml(u.fullName)+'</div></td>'
         +'<td>'+escapeHtml(u.email)+'</td>'
         +'<td><span class="adm-pill '+admRoleClass(u.role)+'">'+escapeHtml(u.role||'—')+'</span></td>'
-        +'<td><span class="adm-status '+(isActive?'adm-status-active':'adm-status-inactive')+'">'+escapeHtml(u.status||'—')+'</span></td>'
+        +'<td><span class="adm-status '+(isActive?'adm-status-active':'adm-status-inactive')+'">'+escapeHtml(u.status||'—')+'</span>'+lockedBadge+'</td>'
         +'<td class="adm-th-act">'
+        +(u.isLocked?'<button class="adm-icon-btn adm-icon-btn-unlock" onclick="admUnlockUser(\''+safeId+'\')" aria-label="Blokdan çıxar" title="Blokdan çıxar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></button>':'')
         +'<button class="adm-icon-btn" onclick="openUserModal(\''+safeId+'\')" aria-label="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>'
         +'<button class="adm-icon-btn adm-icon-btn-danger" onclick="openDeleteConfirm(\''+safeId+'\',\''+escapeHtml(u.fullName).replace(/'/g,'')+'\')" aria-label="Sil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>'
         +'</td></tr>';
@@ -239,10 +253,19 @@ function submitUserModal(){
 }
 
 var admDeleteConfirmAction=null;
-function admOpenDeleteConfirm(text, actionFn){
+function admOpenDeleteConfirm(text, actionFn, opts){
+  opts = opts || {};
   admDeleteConfirmAction=actionFn;
   document.getElementById('admDeleteText').textContent=text;
-  var ov=document.getElementById('admDeleteConfirm');
+  document.getElementById('admDeleteTitle').textContent = opts.title || 'İstifadəçini sil?';
+  var btn = document.getElementById('admDeleteConfirmBtn');
+  btn.textContent = opts.buttonLabel || 'Delete';
+  btn.className = 'adm-modal-save ' + (opts.buttonClass || 'adm-modal-save-danger');
+  var iconEl = document.getElementById('admDeleteIcon');
+  iconEl.className = 'adm-delete-icon' + (opts.iconClass ? ' '+opts.iconClass : '');
+  if(opts.iconSvg) iconEl.innerHTML = opts.iconSvg;
+  else iconEl.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+  var ov = document.getElementById('admDeleteConfirm');
   ov.style.display='flex'; ov.classList.add('open');
 }
 function openDeleteConfirm(userId, name){
@@ -254,6 +277,28 @@ function openDeleteConfirm(userId, name){
       loadAdminUsers();
     });
   });
+}
+function admUnlockUser(userId){
+  var u=admUsersAllRows.find(function(x){ return x.userId===userId; });
+  var name=u?u.fullName:userId;
+  admOpenDeleteConfirm(
+    '"'+name+'" istifadəçisinin hesabını blokdan çıxarmaq istədiyinizə əminsiniz?',
+    function(){
+      return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'unlockUser', userId:userId, requesterEmail: currentUser?currentUser.email:''})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
+        loadAdminUsers();
+      });
+    },
+    {
+      title: 'Hesabı blokdan çıxar?',
+      buttonLabel: 'Unlock',
+      buttonClass: 'adm-modal-save-unlock',
+      iconClass: 'adm-unlock-icon',
+      iconSvg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>'
+    }
+  );
 }
 function closeDeleteConfirm(){
   var ov=document.getElementById('admDeleteConfirm');
