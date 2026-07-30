@@ -218,6 +218,18 @@ function applyAccessLevel(){
   document.getElementById('dashboardsSection').style.display=(level==='technician')?'none':'block';
   document.getElementById('reportsSection').style.display='block';
   var ctdHeroN=document.getElementById('ctdHero'); if(ctdHeroN) ctdHeroN.classList.remove('guest-hero');
+
+  // ── Guest görünüşündən qalan hər şeyi sıfırla (əvvəlki sessiyada guest test edilibsə) ──
+  var wrapElN=document.getElementById('ctdContentTopWrap'); if(wrapElN) wrapElN.style.display='';
+  var banner2ElN=document.getElementById('ctdBanner2Section'); if(banner2ElN) banner2ElN.style.display='';
+  var contElN=document.getElementById('dashboardContainer'); if(contElN) contElN.style.display='';
+  var footElN=document.getElementById('ctdFooter'); if(footElN) footElN.style.display='';
+  var aboutBtnN=document.getElementById('ctdAboutBtn'); if(aboutBtnN) aboutBtnN.style.display='';
+  var aboutSepN=document.getElementById('ctdAboutSep'); if(aboutSepN) aboutSepN.style.display='';
+  var collBtnN=document.getElementById('ctdCollectivesBtn'); if(collBtnN) collBtnN.style.display='';
+  var subWN=document.getElementById('ctdSubwelcome'); if(subWN) subWN.textContent='Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.';
+  var guestCardsN=document.getElementById('guestDashboardCards'); if(guestCardsN) guestCardsN.style.display='none';
+
   document.getElementById('adminMenuItem').style.display=isLeaderOrAdmin?'flex':'none';
   var brBtn=document.getElementById('busRequestQuickBtn');
   if(brBtn){
