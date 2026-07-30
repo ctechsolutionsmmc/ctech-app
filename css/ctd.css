@@ -51,7 +51,8 @@
   .ctd-hero{ position:relative; padding-top:6px; padding-bottom:210px; overflow:hidden; background:#0d2035; }
   .ctd-hero.guest-hero{ min-height:100vh; padding-bottom:0; }
   .ctd-hero-bg{ position:absolute; inset:0; background-image:url('../dash-hero.webp'); background-size:cover; background-position:center 40%; background-repeat:no-repeat; }
-  .ctd-hero.guest-hero .ctd-hero-bg{ background-image:url('../guest-hero-bg.webp'); }
+  .ctd-hero.guest-hero .ctd-hero-bg{ background-image:url('../guest-hero-bg.webp'); background-position:center center; }
+  .ctd-hero.guest-hero .ctd-hero-scrim{ background:linear-gradient(100deg, rgba(10,26,46,0.55) 0%, rgba(10,26,46,0.32) 25%, rgba(15,42,71,0.08) 45%, rgba(15,42,71,0) 65%); }
   #guestDashboardCards{ position:absolute; left:0; right:0; bottom:70px; z-index:3; padding:0 40px; }
   .ctd-hero-scrim{ position:absolute; inset:0; background:linear-gradient(100deg, rgba(10,26,46,0.94) 0%, rgba(10,26,46,0.78) 30%, rgba(15,42,71,0.35) 58%, rgba(15,42,71,0.12) 100%); }
   .ctd-hero-blur{
