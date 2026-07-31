@@ -196,6 +196,7 @@ function initRouter(){
     openBusReport:          'bus-report',
     openTvmReport:          'tvm-report',
     openBusDashboard:       'bus-dashboard',
+    openTvmDashboard:       'tvm-dashboard',
     openBusOngoing:         'bus-ongoing',
     openBusRequest:         'bus-request',
     openBusBulk:            'bus-bulk',
@@ -265,7 +266,7 @@ function initRouter(){
   } catch(e){ console.error('[ROUTER] goHome wrap xətası:', e); }
 
   // ── "Bağla / X" funksiyaları — URL-i və tarixçəni sinxronlaşdır ──
-  var simpleCloseFns = ['closeCollectives','closeBusRequest','closeNotifications','closeAdminPanel'];
+  var simpleCloseFns = ['closeCollectives','closeBusRequest','closeNotifications','closeAdminPanel','closeTvmDashboard'];
   simpleCloseFns.forEach(function(fnName){
     try{
       if(typeof window[fnName] === 'function'){
