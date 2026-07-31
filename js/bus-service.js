@@ -170,7 +170,7 @@ function setTimeInputValue(id,hhmm){ var el=document.getElementById(id); if(el&&
 function getTimeValue(){ return getTimeInputValue('bs_time_lbl'); }
 function fillAllDDs(data){ bsFormData=data; }
 
-var bsEditMode=false, bsEditTicketId=null, bsReturnTarget='dashboard', bsCompletionMode=false;
+var bsEditMode=false, bsEditTicketId=null, bsReturnTarget='dashboard', bsCompletionMode=false, bsLeaderCloseMode=false;
 
 function startBusService(){
   var ov=document.getElementById('busOpenOverlay');
@@ -198,6 +198,7 @@ function resetBusFormFields(){
   ['bs_time_lbl','bs_start_lbl','bs_end_lbl'].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=''; });
   bsFormDirty=false;
   bsCompletionMode=false;
+  bsLeaderCloseMode=false;
   if(typeof bsLockStage1Fields==='function') bsLockStage1Fields(false);
   bsSelected={carrier:'',brand:'',problem:'',solution:[],equipment:'',location:'',tech1:'',tech2:'',leader:'',oldSn:[],newSn:[]};
   Object.keys(ddMeta).forEach(function(k){
@@ -396,15 +397,17 @@ function submitBusService(){
   var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
   var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');
   ov.style.display='flex'; ov.classList.add('open'); sp.style.display='block'; ic.style.display='none';
-  tx.textContent=bsCompletionMode?'Tamamlanır...':(bsEditMode?'Yadda saxlanılır...':'Göndərilir...');
-  var payload = bsCompletionMode
+  tx.textContent=bsLeaderCloseMode?'Təsdiqlənir...':(bsCompletionMode?'Tamamlanır...':(bsEditMode?'Yadda saxlanılır...':'Göndərilir...'));
+  var payload = bsLeaderCloseMode
+    ? {action:'leaderCompleteAndCloseTicket',ticketId:bsEditTicketId,data:data,requesterEmail:currentUser?currentUser.email:''}
+    : bsCompletionMode
     ? {action:'completeTechnicianTicket',ticketId:bsEditTicketId,data:data,userEmail:currentUser?currentUser.email:''}
     : (bsEditMode?{action:'updateBusService',ticketId:bsEditTicketId,data:data,userEmail:currentUser?currentUser.email:''}:{action:'submitBusService',data:data,userEmail:currentUser?currentUser.email:''});
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
   .then(function(r){return r.json();})
   .then(function(result){
     sp.style.display='none'; ic.style.display='flex';
-    if(result.status==='OK'){ tx.textContent=bsEditMode?('Yadda saxlanıldı! '+result.ticketId):('Göndərildi! '+result.ticketId); }
+    if(result.status==='OK'){ tx.textContent=bsLeaderCloseMode?('Təsdiqləndi və bağlandı! '+result.ticketId):(bsEditMode?('Yadda saxlanıldı! '+result.ticketId):('Göndərildi! '+result.ticketId)); }
     else { tx.textContent='Xəta baş verdi'; }
     setTimeout(function(){ ov.classList.remove('open'); ov.style.display='none'; if(result.status==='OK'){ bsFormDirty=false; if(!bsEditMode)clearBsDraft(); var wasEdit=bsEditMode; bsGoBack(); if(wasEdit)loadReportData(); } },1800);
   }).catch(function(){ sp.style.display='none'; tx.textContent='Şəbəkə xətası'; setTimeout(function(){ov.classList.remove('open');ov.style.display='none';},1500); });
@@ -454,6 +457,50 @@ function openTechComplete(ticketId){
 // Stage-1 sahələr (Müraciət/Avtobus məlumatları + Problem) — texnik tamamlama rejimində
 // dəyişdirilə bilməz, yalnız baxış üçün göstərilir. Solution/SN/Servis vaxtı-yeri/Texnik/Rəhbər redaktə olunandır.
 var BS_STAGE1_LOCKABLE_IDS=['bs_date','bs_time_lbl','bs_requester','bs_phone','bs_plate','bs_busid','bs_route','bs_carrier_btn','bs_brand_btn','bs_problem_btn'];
+// Leader/Admin "Davam Edən Servislər"dən açır — texnikdən fərqli olaraq
+// BÜTÜN sahələr redaktə oluna bilir (səhv düzəltmək üçün), submit edəndə
+// ticket birbaşa TAMAMLANIR və bağlanır (leaderCompleteAndCloseTicket).
+function openLeaderComplete(ticketId){
+  var ov=document.getElementById('busOpenOverlay'); ov.style.display='flex';
+  var ensureFormData=(bsFormData&&bsFormData.carriers)?Promise.resolve(bsFormData):
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK'){bsFormData=d;} return bsFormData; });
+  ensureFormData.then(function(){
+    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getServiceById',ticketId:ticketId})}).then(function(r){return r.json();});
+  }).then(function(d){
+    ov.style.display='none';
+    if(d.status!=='OK'){ alert(d.message||'Ticket yüklənə bilmədi'); return; }
+    bsEditMode=true; bsEditTicketId=ticketId; bsReturnTarget='report';
+    resetBusFormFields();
+    bsLeaderCloseMode=true;
+    document.getElementById('dashboardView').style.display='none';
+    document.getElementById('busReportView').style.display='none';
+    document.getElementById('busServiceView').style.display='block';
+    document.getElementById('busServiceView').scrollTop=0;
+    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#188A4B;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">TƏSDİQLƏ VƏ BAĞLA: '+d.ticketId+'</span>';
+    var btn=document.getElementById('bsSubmitBtn'); if(btn)btn.textContent='Təsdiqlə və Bağla';
+    document.getElementById('bs_date').value=d.report_date_raw||'';
+    document.getElementById('bs_requester').value=d.requester_name||'';
+    document.getElementById('bs_phone').value=d.requester_phone||'';
+    document.getElementById('bs_route').value=d.route_number||'';
+    document.getElementById('bs_busid').value=d.bus_id||'';
+    document.getElementById('bs_plate').value=d.license_plate||'';
+    bsSelected.oldSn = d.old_sn ? String(d.old_sn).split(' | ').map(function(s){return s.trim();}).filter(Boolean) : [];
+    bsSelected.newSn = d.new_sn ? String(d.new_sn).split(' | ').map(function(s){return s.trim();}).filter(Boolean) : [];
+    if(typeof busSnRenderChips==='function'){ busSnRenderChips('old'); busSnRenderChips('new'); }
+    document.getElementById('bs_note').value=d.note||'';
+    document.getElementById('bs_location_note').value=d.service_location_note||'';
+    setTimeLabel('main',d.report_time); setTimeLabel('start',d.service_start_time); setTimeLabel('end',d.service_end_time);
+    setDDValue('carrier',d.carrier); setDDValue('brand',d.brand_model); setDDValue('equipment',d.changed_device_type);
+    setDDValue('problem',d.problem); setDDValue('location',d.service_location);
+    setDDValue('tech1',d.technician_1); if(d.technician_2)setDDValue('tech2',d.technician_2); setDDValue('leader',d.team_leader);
+    bsSelected.solution=Array.isArray(d.solution)?d.solution.slice():[];
+    updateMultiLabel('solution'); updateSolutionChips();
+    document.getElementById('bs_location_note_wrap').style.display=(d.service_location||'').toLowerCase().indexOf('digər')!==-1?'block':'none';
+    bsFormDirty=false;
+    // DİQQƏT: Leader/Admin üçün Stage-1 sahələr KİLİDLƏNMİR — bütün formu redaktə edə bilər
+  }).catch(function(){ ov.style.display='none'; alert('Şəbəkə xətası: ticket yüklənə bilmədi'); });
+}
+
 function bsLockStage1Fields(lock){
   BS_STAGE1_LOCKABLE_IDS.forEach(function(id){
     var el=document.getElementById(id);
