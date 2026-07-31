@@ -161,26 +161,29 @@ function _findActiveAttemptHomeFn(){
 // ── popstate: Back/Forward + Safari swipe + Android back ──
 window.addEventListener('popstate', function(e){
   if(!ROUTER_READY || !currentUser) return;
+  try{
+    var route;
+    if(e.state && e.state.route){
+      route = e.state.route;
+    } else {
+      route = _currentRoute || _getHashFromUrl();
+    }
+    if(!route || route === 'login') route = 'dashboard';
 
-  var route;
-  if(e.state && e.state.route){
-    route = e.state.route;
-  } else {
-    route = _currentRoute || _getHashFromUrl();
+    // Açıq formada "Home cəhdi" funksiyası varsa (bus-service, tvm-service,
+    // bus-request, bus-bulk) — geri getməni ləğv et, EYNİ funksiyanı çağır.
+    // O, dirty-dirsə xəbərdarlıq göstərəcək, deyilsə özü bağlayıb düzgün yerə keçəcək.
+    var attemptFn = _findActiveAttemptHomeFn();
+    if(attemptFn){
+      history.pushState({ route: _currentRoute }, '', '#' + _currentRoute);
+      attemptFn();
+      return;
+    }
+
+    routerNavigate(route, false);
+  } catch(err){
+    console.error('[ROUTER] popstate xətası:', err);
   }
-  if(!route || route === 'login') route = 'dashboard';
-
-  // Açıq formada "Home cəhdi" funksiyası varsa (bus-service, tvm-service,
-  // bus-request, bus-bulk) — geri getməni ləğv et, EYNİ funksiyanı çağır.
-  // O, dirty-dirsə xəbərdarlıq göstərəcək, deyilsə özü bağlayıb düzgün yerə keçəcək.
-  var attemptFn = _findActiveAttemptHomeFn();
-  if(attemptFn){
-    history.pushState({ route: _currentRoute }, '', '#' + _currentRoute);
-    attemptFn();
-    return;
-  }
-
-  routerNavigate(route, false);
 });
 
 // ── Router başlat ──
@@ -206,104 +209,122 @@ function initRouter(){
   // URL/tarixçəni sinxronlaşdırır — routerNavigate-in özünü YENİDƏN açmasına
   // ehtiyac yoxdur, çünki raw funksiya artıq DOM-u düzgün açıb.
   Object.keys(entryPoints).forEach(function(fnName){
-    if(typeof window[fnName] === 'function'){
-      _rawFns[fnName] = window[fnName]; // orijinal, bir dəfə çağırılan versiya
-      var routeHash = entryPoints[fnName];
-      window[fnName] = function(){
-        _rawFns[fnName].apply(this, arguments); // YALNIZ BİR DƏFƏ
-        if(currentUser && ROUTER_READY){
-          _pushRouteOnly(routeHash); // sadəcə URL/tarixçə, TƏKRAR AÇMA YOX
-        }
-      };
+    try{
+      if(typeof window[fnName] === 'function'){
+        _rawFns[fnName] = window[fnName]; // orijinal, bir dəfə çağırılan versiya
+        var routeHash = entryPoints[fnName];
+        window[fnName] = function(){
+          _rawFns[fnName].apply(this, arguments); // YALNIZ BİR DƏFƏ
+          if(currentUser && ROUTER_READY){
+            _pushRouteOnly(routeHash); // sadəcə URL/tarixçə, TƏKRAR AÇMA YOX
+          }
+        };
+      }
+    } catch(e){
+      console.error('[ROUTER] '+fnName+' wrap xətası:', e);
     }
   });
 
   // openBusDetail / openTvmDetail — ticketId parametrli
-  if(typeof openBusDetail === 'function'){
-    _rawFns['openBusDetail'] = openBusDetail;
-    openBusDetail = function(ticketId){
-      _rawFns['openBusDetail'].apply(this, arguments);
-      if(currentUser && ROUTER_READY && ticketId){
-        _pushRouteOnly('bus-detail/'+ticketId);
-      }
-    };
-  }
-  if(typeof openTvmDetail === 'function'){
-    _rawFns['openTvmDetail'] = openTvmDetail;
-    openTvmDetail = function(ticketId){
-      _rawFns['openTvmDetail'].apply(this, arguments);
-      if(currentUser && ROUTER_READY && ticketId){
-        _pushRouteOnly('tvm-detail/'+ticketId);
-      }
-    };
-  }
+  try{
+    if(typeof openBusDetail === 'function'){
+      _rawFns['openBusDetail'] = openBusDetail;
+      openBusDetail = function(ticketId){
+        _rawFns['openBusDetail'].apply(this, arguments);
+        if(currentUser && ROUTER_READY && ticketId){
+          _pushRouteOnly('bus-detail/'+ticketId);
+        }
+      };
+    }
+  } catch(e){ console.error('[ROUTER] openBusDetail wrap xətası:', e); }
+  try{
+    if(typeof openTvmDetail === 'function'){
+      _rawFns['openTvmDetail'] = openTvmDetail;
+      openTvmDetail = function(ticketId){
+        _rawFns['openTvmDetail'].apply(this, arguments);
+        if(currentUser && ROUTER_READY && ticketId){
+          _pushRouteOnly('tvm-detail/'+ticketId);
+        }
+      };
+    }
+  } catch(e){ console.error('[ROUTER] openTvmDetail wrap xətası:', e); }
 
   // goHome → dashboard
-  if(typeof goHome === 'function'){
-    var _ghOrig = goHome;
-    goHome = function(){
-      if(currentUser && ROUTER_READY && !_isNavigating){
-        routerNavigate('dashboard', true);
-        if(typeof closeMenu === 'function') closeMenu();
-      } else {
-        _ghOrig.apply(this, arguments);
-      }
-    };
-  }
+  try{
+    if(typeof goHome === 'function'){
+      var _ghOrig = goHome;
+      goHome = function(){
+        if(currentUser && ROUTER_READY && !_isNavigating){
+          routerNavigate('dashboard', true);
+          if(typeof closeMenu === 'function') closeMenu();
+        } else {
+          _ghOrig.apply(this, arguments);
+        }
+      };
+    }
+  } catch(e){ console.error('[ROUTER] goHome wrap xətası:', e); }
 
   // ── "Bağla / X" funksiyaları — URL-i və tarixçəni sinxronlaşdır ──
   var simpleCloseFns = ['closeCollectives','closeBusRequest','closeNotifications','closeAdminPanel'];
   simpleCloseFns.forEach(function(fnName){
-    if(typeof window[fnName] === 'function'){
-      var _origClose = window[fnName];
-      window[fnName] = function(){
-        _origClose.apply(this, arguments);
-        if(currentUser && ROUTER_READY){
-          _currentRoute = 'dashboard';
-          try{ history.replaceState({ route:'dashboard' }, '', '#dashboard'); }catch(e){}
-        }
-      };
-    }
+    try{
+      if(typeof window[fnName] === 'function'){
+        var _origClose = window[fnName];
+        window[fnName] = function(){
+          _origClose.apply(this, arguments);
+          if(currentUser && ROUTER_READY){
+            _currentRoute = 'dashboard';
+            try{ history.replaceState({ route:'dashboard' }, '', '#dashboard'); }catch(e2){}
+          }
+        };
+      }
+    } catch(e){ console.error('[ROUTER] '+fnName+' close-wrap xətası:', e); }
   });
 
   var smartCloseFns = {
     'bsGoBack':      function(){ return (typeof bsReturnTarget!=='undefined' && bsReturnTarget==='report') ? 'bus-report' : 'dashboard'; },
     'closeTvmService': function(){ return (typeof tvmReturnTarget!=='undefined' && tvmReturnTarget==='report') ? 'tvm-report' : 'dashboard'; },
-    'closeBusBulk':  function(){ return (typeof bkReturnTarget!=='undefined' && bkReturnTarget==='busService') ? 'bus-service' : 'dashboard'; }
+    'closeBusBulk':  function(){ return (typeof bkReturnTarget!=='undefined' && bkReturnTarget==='busService') ? 'bus-service' : 'dashboard'; },
+    'closeBusDetail': function(){ return 'bus-report'; },
+    'closeTvmDetail': function(){ return 'tvm-report'; }
   };
   Object.keys(smartCloseFns).forEach(function(fnName){
-    if(typeof window[fnName] === 'function'){
-      var _origSmartClose = window[fnName];
-      var targetFn = smartCloseFns[fnName];
-      window[fnName] = function(){
-        var target = targetFn();
-        _origSmartClose.apply(this, arguments);
-        if(currentUser && ROUTER_READY){
-          _currentRoute = target;
-          try{ history.replaceState({ route:target }, '', '#'+target); }catch(e){}
-        }
-      };
-    }
+    try{
+      if(typeof window[fnName] === 'function'){
+        var _origSmartClose = window[fnName];
+        var targetFn = smartCloseFns[fnName];
+        window[fnName] = function(){
+          var target = targetFn();
+          _origSmartClose.apply(this, arguments);
+          if(currentUser && ROUTER_READY){
+            _currentRoute = target;
+            try{ history.replaceState({ route:target }, '', '#'+target); }catch(e2){}
+          }
+        };
+      }
+    } catch(e){ console.error('[ROUTER] '+fnName+' smart-close-wrap xətası:', e); }
   });
 
   // showDashboard — login sonrası
-  if(typeof showDashboard === 'function'){
-    var _sdOrig = showDashboard;
-    showDashboard = function(){
-      _sdOrig.apply(this, arguments);
-      if(ROUTER_READY){
-        var hash = _getHashFromUrl();
-        var validRoutes = ['bus-service','tvm-service','bus-report','tvm-report',
-                           'bus-dashboard','bus-ongoing','bus-request','bus-bulk',
-                           'admin','notifications','collectives'];
-        if(hash && hash !== 'dashboard' && hash !== 'login' && validRoutes.indexOf(hash.split('/')[0]) !== -1){
-          setTimeout(function(){ routerNavigate(hash, false); }, 100);
-        } else {
-          routerNavigate('dashboard', false);
+  try{
+    if(typeof showDashboard === 'function'){
+      var _sdOrig = showDashboard;
+      showDashboard = function(){
+        _sdOrig.apply(this, arguments);
+        if(ROUTER_READY){
+          var hash = _getHashFromUrl();
+          var validRoutes = ['bus-service','tvm-service','bus-report','tvm-report',
+                             'bus-dashboard','bus-ongoing','bus-request','bus-bulk',
+                             'admin','notifications','collectives'];
+          if(hash && hash !== 'dashboard' && hash !== 'login' && validRoutes.indexOf(hash.split('/')[0]) !== -1){
+            setTimeout(function(){ routerNavigate(hash, false); }, 100);
+          } else {
+            routerNavigate('dashboard', false);
+          }
         }
-      }
-    };
-  }
+      };
+    }
+  } catch(e){ console.error('[ROUTER] showDashboard wrap xətası:', e); }
 
   ROUTER_READY = true;
   _currentRoute = _getHashFromUrl();
@@ -312,13 +333,15 @@ function initRouter(){
   // startBusService() daxildə 900ms gecikmə ilə openBusService()-i çağırır.
   // Əgər bu müddətdə istifadəçi artıq başqa yerə keçibsə (məs. geri sürüşdürübsə),
   // bu gecikmiş çağırış səssizcə formu yenidən göstərməsin.
-  if(typeof openBusService === 'function'){
-    var _rawOpenBusService = openBusService;
-    openBusService = function(){
-      if(_currentRoute !== 'bus-service') return; // artıq başqa yerdəyik, keç
-      _rawOpenBusService.apply(this, arguments);
-    };
-  }
+  try{
+    if(typeof openBusService === 'function'){
+      var _rawOpenBusService = openBusService;
+      openBusService = function(){
+        if(_currentRoute !== 'bus-service') return; // artıq başqa yerdəyik, keç
+        _rawOpenBusService.apply(this, arguments);
+      };
+    }
+  } catch(e){ console.error('[ROUTER] openBusService guard xətası:', e); }
 
   var startHash = _getHashFromUrl();
   if(currentUser){
@@ -358,7 +381,18 @@ function applyHrefToClickables(){
 // ── Başlat ──
 document.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){
-    initRouter();
-    applyHrefToClickables();
+    try{
+      initRouter();
+      applyHrefToClickables();
+      console.log('%c[ROUTER] Uğurla başladı', 'color:#3FCB78;font-weight:bold;');
+    } catch(err){
+      console.error('[ROUTER] XƏTA — initRouter() uğursuz oldu:', err);
+      console.error('[ROUTER] Stack:', err.stack);
+      // Görünən xəbərdarlıq — səssiz uğursuzluq olmasın
+      var errBox = document.createElement('div');
+      errBox.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#DC2626;color:#fff;padding:12px 16px;font-family:monospace;font-size:12px;z-index:99999;text-align:center;';
+      errBox.textContent = 'Router xətası: ' + err.message + ' (F12 → Console-da ətraflı bax)';
+      document.body.appendChild(errBox);
+    }
   }, 0);
 });
