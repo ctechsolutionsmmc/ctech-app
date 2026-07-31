@@ -108,7 +108,7 @@ function loadOngoingData(){
     }
     ongAllRows=(d.rows||[]).filter(function(row){
       var st=(row['Status']||'').trim();
-      return st==='Açıq' || st==='Təhkim Edildi' || st==='Texnik Tamamladı';
+      return st==='Təhkim Edildi' || st==='Texnik Tamamladı';
     }).sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
     ongColumns=d.columns||[];
     applyOngoingFilters();
@@ -164,9 +164,8 @@ function renderOngoingTable(){
   visible.forEach(function(row){
     var ticketId=escapeHtml(row['Ticket ID']||'');
     var safeId=(row['Ticket ID']||'').replace(/'/g,'');
-    var editable=canEditTicket(row);
     var status=(row['Status']||'').trim();
-    var needsApproval = canApprove && status==='Texnik Tamamladı';
+    var canComplete = canApprove; // Leader/Admin — istənilən aktiv statusda tamamlayıb bağlaya bilir
     html+='<tr>'
       +'<td class="rpt-td-id">'+ticketId+'</td>'
       +'<td>'+escapeHtml(row['Tarix']||'')+'</td>'
@@ -176,8 +175,7 @@ function renderOngoingTable(){
       +'<td class="col-status">'+ongStatusBadge(status)+'</td>'
       +'<td class="col-act"><div class="rpt-row-actions">'
       +'<button class="rpt-icon-btn" onclick="openBusDetail(\''+safeId+'\')" aria-label="Baxış" title="Baxış"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>'
-      +(editable?'<button class="rpt-icon-btn rpt-edit-btn" onclick="openBusServiceForEdit(\''+safeId+'\')" aria-label="Redaktə et" title="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>':'')
-      +(needsApproval?'<button class="rpt-icon-btn" style="color:#188A4B;border-color:#BFE8D2;" onclick="ongApproveClose(\''+safeId+'\')" aria-label="Təsdiqlə və Bağla" title="Təsdiqlə və Bağla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></button>':'')
+      +(canComplete?'<button class="rpt-icon-btn" style="color:#188A4B;border-color:#BFE8D2;" onclick="openLeaderComplete(\''+safeId+'\')" aria-label="Təsdiqlə və Bağla" title="Təsdiqlə və Bağla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>':'')
       +'</div></td></tr>';
   });
   body.innerHTML=html;
@@ -282,14 +280,9 @@ function applyFilters(){
   var techView=rptIsTechnicianView();
   rptFiltered=rptAllRows.filter(function(row){
     if(techView){
-      // Texnik yalnız ÖZÜNƏ təhkim olunmuş, hələ TAMAMLANMAMIŞ (davam edən) ticketləri görür
-      var st=(row['Status']||'').trim();
-      if(st!=='Açıq' && st!=='Təhkim Edildi') return false;
+      // rptAllRows onsuz da yalnız "Bağlandı" ticket-lərdir (tarixçə) —
+      // texnik burada yalnız ÖZÜNƏ təhkim olunmuş bağlanmış ticket-ləri görür
       if(!rptIsAssignedToMe(row)) return false;
-    } else if(rptForceOpenOnly){
-      // Qrup rəhbəri/admin "Davam edən Servis" ilə açılıbsa — hələ bağlanmamış ticketlər
-      var st2=(row['Status']||'').trim();
-      if(st2!=='Açıq' && st2!=='Təhkim Edildi' && st2!=='Texnik Tamamladı') return false;
     }
     if(!rptMatchesServiceType(row)) return false;
     if(!q) return true;
@@ -2517,7 +2510,7 @@ function loadHomeDashStats(){
         if(c.metric==='bus_open'){
           var v=rows.filter(function(r){
             var st=(r['Status']||'').trim();
-            return st==='Açıq' || st==='Təhkim Edildi' || st==='Texnik Tamamladı';
+            return st==='Təhkim Edildi' || st==='Texnik Tamamladı';
           }).length;
           setHomeDashSlotValue(idx, v);
         } else if(c.metric==='bus_today'){
