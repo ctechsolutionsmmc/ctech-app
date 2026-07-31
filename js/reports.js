@@ -363,7 +363,36 @@ var DV_FIELD_MAP=[
 function openBusDetail(ticketId){
   var row=rptAllRows.find(function(r){ return r['Ticket ID']===ticketId; });
   if(!row&&typeof ongAllRows!=='undefined') row=ongAllRows.find(function(r){ return r['Ticket ID']===ticketId; });
-  if(!row){ alert('Ticket tapılmadı'); return; }
+
+  if(row){
+    _renderBusDetail(ticketId, row);
+    return;
+  }
+
+  // Lokal keşdə tapılmadı (məs. səhifə birbaşa bu linklə açılıb) —
+  // backend-dən TAM siyahını çəkib bir daha axtar.
+  document.getElementById('dvTicketTitle').textContent=ticketId;
+  document.getElementById('dvBody').innerHTML='<div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Məlumatlar yüklənir...</span></div>';
+  document.getElementById('busReportView').style.display='none';
+  document.getElementById('busDetailView').style.display='flex';
+
+  // Report view-un öz datasını da fon rejimində yüklə ki, "Geri" düyməsi boş cədvələ aparmasın
+  if(rptAllRows.length===0 && typeof loadReportData==='function') loadReportData();
+
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData'})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status!=='OK'){ document.getElementById('dvBody').innerHTML='<div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div>'; return; }
+    var foundRow=(d.rows||[]).find(function(r){ return r['Ticket ID']===ticketId; });
+    if(!foundRow){ document.getElementById('dvBody').innerHTML='<div class="adm-empty">Ticket tapılmadı: '+escapeHtml(ticketId)+'</div>'; return; }
+    _renderBusDetail(ticketId, foundRow);
+  })
+  .catch(function(e){
+    document.getElementById('dvBody').innerHTML='<div class="adm-empty">Şəbəkə xətası: '+escapeHtml(e.message)+'</div>';
+  });
+}
+
+function _renderBusDetail(ticketId, row){
   document.getElementById('dvTicketTitle').textContent=ticketId;
   var html='';
   DV_FIELD_MAP.forEach(function(sec){
@@ -535,7 +564,29 @@ var TVM_DV_FIELD_MAP=[
 ];
 function openTvmDetail(ticketId){
   var row=tvmRptAllRows.find(function(r){ return r['Ticket ID']===ticketId; });
-  if(!row){ alert('Ticket tapılmadı'); return; }
+  if(row){ _renderTvmDetail(ticketId, row); return; }
+
+  document.getElementById('tvmDvTicketTitle').textContent=ticketId;
+  document.getElementById('tvmDvBody').innerHTML='<div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Məlumatlar yüklənir...</span></div>';
+  document.getElementById('tvmReportView').style.display='none';
+  document.getElementById('tvmDetailView').style.display='flex';
+
+  if(tvmRptAllRows.length===0 && typeof loadTvmReportData==='function') loadTvmReportData();
+
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData'})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status!=='OK'){ document.getElementById('tvmDvBody').innerHTML='<div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div>'; return; }
+    var foundRow=(d.rows||[]).find(function(r){ return r['Ticket ID']===ticketId; });
+    if(!foundRow){ document.getElementById('tvmDvBody').innerHTML='<div class="adm-empty">Ticket tapılmadı: '+escapeHtml(ticketId)+'</div>'; return; }
+    _renderTvmDetail(ticketId, foundRow);
+  })
+  .catch(function(e){
+    document.getElementById('tvmDvBody').innerHTML='<div class="adm-empty">Şəbəkə xətası: '+escapeHtml(e.message)+'</div>';
+  });
+}
+
+function _renderTvmDetail(ticketId, row){
   document.getElementById('tvmDvTicketTitle').textContent=ticketId;
   var html='';
   TVM_DV_FIELD_MAP.forEach(function(sec){
