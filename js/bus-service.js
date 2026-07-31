@@ -469,11 +469,11 @@ function openLeaderComplete(ticketId){
   }).then(function(d){
     ov.style.display='none';
     if(d.status!=='OK'){ alert(d.message||'Ticket yüklənə bilmədi'); return; }
-    bsEditMode=true; bsEditTicketId=ticketId; bsReturnTarget='report';
+    bsEditMode=true; bsEditTicketId=ticketId; bsReturnTarget='ongoing';
     resetBusFormFields();
     bsLeaderCloseMode=true;
     document.getElementById('dashboardView').style.display='none';
-    document.getElementById('busReportView').style.display='none';
+    document.getElementById('busOngoingView').style.display='none';
     document.getElementById('busServiceView').style.display='block';
     document.getElementById('busServiceView').scrollTop=0;
     document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#188A4B;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">TƏSDİQLƏ VƏ BAĞLA: '+d.ticketId+'</span>';
@@ -536,6 +536,10 @@ function confirmExit(){
 function bsGoBack(){
   closeAllDD(); document.getElementById('busServiceView').style.display='none';
   if(bsReturnTarget==='report'){document.getElementById('busReportView').style.display='flex';}
+  else if(bsReturnTarget==='ongoing'){
+    document.getElementById('busOngoingView').style.display='flex';
+    if(typeof loadOngoingData==='function') loadOngoingData();
+  }
   else{document.getElementById('dashboardView').style.display='block';}
   bsEditMode=false; bsEditTicketId=null; bsReturnTarget='dashboard';
 }
