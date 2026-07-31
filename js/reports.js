@@ -2491,6 +2491,12 @@ function submitDashboardConfig(){
 // ── DASHBOARD: stat kartlarının real datası ──
 function loadHomeDashStats(){
   if(window.innerWidth < 901) return; // yalnız desktop görünüşdə lazımdır
+  var dashVisible = document.getElementById('dashboardView') && document.getElementById('dashboardView').style.display !== 'none';
+  var badge = document.getElementById('dashStatsRefreshBadge');
+  if(dashVisible && badge){
+    badge.style.display = 'flex';
+    setTimeout(function(){ badge.style.display = 'none'; }, 2500);
+  }
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
   .then(function(r){return r.json();})
   .then(function(d){
