@@ -2624,7 +2624,8 @@ function tvmAvgResolutionMinutes(rows){
   rows.forEach(function(r){
     var s=tvmParseHM(r['Başlanğıc']), e=tvmParseHM(r['Bitiş']);
     if(s===null||e===null) return;
-    var diff=e-s; if(diff<0) diff+=24*60;
+    var diff=e-s;
+    if(diff<0) return; // Bitiş < Başlanğıc — çox güman məlumat səhvidir, hesablamaya qatma
     total+=diff; n++;
   });
   return n>0 ? Math.round(total/n) : 0;
