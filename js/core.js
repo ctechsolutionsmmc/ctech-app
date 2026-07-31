@@ -230,7 +230,7 @@ function applyAccessLevel(){
   var subWN=document.getElementById('ctdSubwelcome'); if(subWN) subWN.textContent='Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.';
   var guestCardsN=document.getElementById('guestDashboardCards'); if(guestCardsN) guestCardsN.style.display='none';
 
-  document.getElementById('adminMenuItem').style.display=isLeaderOrAdmin?'flex':'none';
+  document.getElementById('adminMenuItem').style.display=(isLeaderOrAdmin && window.innerWidth>=901)?'flex':'none';
   var brBtn=document.getElementById('busRequestQuickBtn');
   if(brBtn){
     var showBr=isLeaderOrAdmin && window.innerWidth>=901;
