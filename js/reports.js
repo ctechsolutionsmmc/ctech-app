@@ -2548,3 +2548,380 @@ function setHomeDashSlotValue(idx, val){
   if(idx<3 && document.getElementById(ids[idx])) document.getElementById(ids[idx]).textContent=val;
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// TVM DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+var tvmDashAllRows=[], tvmDashPeriod='24h', tvmDashCustomRange=null, tvmDashFormData=null;
+var tvmDashActiveChips={}, tvmDashSubfilterState={}, tvmDashTextFilters={};
+
+var TVM_DONUT_COLORS=['#378ADD','#1D9E75','#D85A30','#D4537E','#BA7517','#888780'];
+
+function tvmRowDate(row){
+  var d=row['Tarix']||'';
+  var t=row['Bildirilmə Saatı']||'00:00';
+  var dp=d.split('.');
+  if(dp.length!==3) return null;
+  var tp=t.split(':');
+  return new Date(+dp[2], +dp[1]-1, +dp[0], +(tp[0]||0), +(tp[1]||0));
+}
+
+var TVM_DASH_CATS=[
+  {key:'Problem', type:'multi', getOptions:function(){ return (tvmDashFormData&&tvmDashFormData.tvmFaults)||[]; }},
+  {key:'Həll', type:'multi', getOptions:function(){ return (tvmDashFormData&&tvmDashFormData.tvmSolutions)||[]; }},
+  {key:'Texnik', type:'multi', getOptions:function(){ return (tvmDashFormData&&tvmDashFormData.technicians)||[]; }},
+  {key:'Qrup Rəhbəri', type:'multi', getOptions:function(){ return (tvmDashFormData&&tvmDashFormData.tvmLeaders)||[]; }},
+  {key:'Lokasiya Tipi', type:'multi', getOptions:function(){ return ['Metro','Digər']; }},
+  {key:'TVM SN', type:'text'}
+];
+
+function tvmDashSelectedOptions(key){
+  return Object.keys(tvmDashSubfilterState).filter(function(k){ return k.indexOf(key+'|')===0 && tvmDashSubfilterState[k]; }).map(function(k){ return k.slice(key.length+1); });
+}
+function tvmDashHasActiveOptions(key){ return tvmDashSelectedOptions(key).length>0; }
+function tvmDashMatchMulti(val,key){ if(!val) return false; return tvmDashSelectedOptions(key).indexOf(val)!==-1; }
+function tvmLocType(row){ return (row['Servis Lokasiyası']||'').trim()==='Metro' ? 'Metro' : 'Digər'; }
+
+function tvmDashGetFilteredRows(){
+  var range=tvmDashCustomRange||dashComputeRange(tvmDashPeriod);
+  return tvmDashAllRows.filter(function(row){
+    if(range.start&&range.end){ var rd=tvmRowDate(row); if(!rd||rd<range.start||rd>range.end) return false; }
+    if(tvmDashHasActiveOptions('Problem')&&!tvmDashMatchMulti(row['Problem'],'Problem')) return false;
+    if(tvmDashHasActiveOptions('Həll')&&!tvmDashMatchMulti(row['Həll'],'Həll')) return false;
+    if(tvmDashHasActiveOptions('Texnik')&&!tvmDashMatchMulti(row['Texnik'],'Texnik')) return false;
+    if(tvmDashHasActiveOptions('Qrup Rəhbəri')&&!tvmDashMatchMulti(row['Qrup rəhbəri'],'Qrup Rəhbəri')) return false;
+    if(tvmDashHasActiveOptions('Lokasiya Tipi')&&!tvmDashMatchMulti(tvmLocType(row),'Lokasiya Tipi')) return false;
+    if(tvmDashTextFilters['TVM SN']&&(row['TVM SN']||'').toLowerCase().indexOf(tvmDashTextFilters['TVM SN'].toLowerCase())===-1) return false;
+    return true;
+  });
+}
+
+function tvmDashCount(rows, field){
+  var map={};
+  rows.forEach(function(r){ var v=(r[field]||'').trim(); if(!v) return; map[v]=(map[v]||0)+1; });
+  return Object.keys(map).map(function(k){ return {name:k, count:map[k]}; }).sort(function(a,b){ return b.count-a.count; });
+}
+function tvmDashCountLocation(rows){ return tvmDashCount(rows, 'TVM Lokasiya'); }
+function tvmDashCountTech(rows){ return tvmDashCount(rows, 'Texnik'); }
+function tvmCountRecurringDevices(rows){
+  var map={};
+  rows.forEach(function(r){
+    var sn=r['TVM SN']; if(!sn) return;
+    if(!map[sn]) map[sn]={location:r['TVM Lokasiya'], count:0};
+    map[sn].count++;
+  });
+  return Object.keys(map).map(function(sn){ return {sn:sn, location:map[sn].location, count:map[sn].count}; }).filter(function(x){ return x.count>=3; }).sort(function(a,b){ return b.count-a.count; });
+}
+function tvmParseHM(t){ if(!t) return null; var p=String(t).split(':'); if(p.length<2) return null; return (+p[0])*60+(+p[1]); }
+function tvmAvgResolutionMinutes(rows){
+  var total=0, n=0;
+  rows.forEach(function(r){
+    var s=tvmParseHM(r['Başlanğıc']), e=tvmParseHM(r['Bitiş']);
+    if(s===null||e===null) return;
+    var diff=e-s; if(diff<0) diff+=24*60;
+    total+=diff; n++;
+  });
+  return n>0 ? Math.round(total/n) : 0;
+}
+
+function tvmRenderDonutPanel(containerId, items, total){
+  var el=document.getElementById(containerId);
+  if(!el) return;
+  if(total===0 || items.length===0){ el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  var top5=items.slice(0,5);
+  var restCount=items.slice(5).reduce(function(s,it){ return s+it.count; },0);
+  var chartItems=top5.slice();
+  if(restCount>0) chartItems.push({name:'Digər', count:restCount});
+
+  var listHtml=top5.map(function(it){
+    return '<div class="tvm-donut-row"><span>'+escapeHtml(it.name)+'</span><b>'+it.count+'</b></div>';
+  }).join('');
+
+  var r=42,cx=56,cy=56,circ=2*Math.PI*r,offset=0,segs='';
+  chartItems.forEach(function(it,i){
+    var len=(it.count/total)*circ;
+    segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="16" stroke-dasharray="0 '+circ.toFixed(1)+'" stroke-dashoffset="'+(-offset).toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')" class="tvm-donut-seg" data-len="'+len.toFixed(1)+'" data-total="'+circ.toFixed(1)+'" style="transition:stroke-dasharray 1s cubic-bezier(.2,.7,.3,1) '+(i*0.07)+'s;"/>';
+    offset+=len;
+  });
+  var legend=chartItems.map(function(it,i){
+    var pct=Math.round(it.count/total*100);
+    return '<div class="tvm-donut-legend-item"><span class="tvm-donut-legend-dot" style="background:'+TVM_DONUT_COLORS[i]+';"></span><span>'+escapeHtml(it.name)+'</span><span class="tvm-donut-legend-pct">'+pct+'%</span></div>';
+  }).join('');
+
+  el.innerHTML='<div class="tvm-donut-list">'+listHtml+'</div>'+
+    '<div class="tvm-donut-visual"><svg viewBox="0 0 112 112" width="84" height="84">'+segs+'</svg><div>'+legend+'</div></div>';
+
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.querySelectorAll('.tvm-donut-seg').forEach(function(seg){
+        seg.setAttribute('stroke-dasharray', seg.dataset.len+' '+seg.dataset.total);
+      });
+    });
+  });
+}
+
+function tvmRenderLocSplit(rows){
+  var el=document.getElementById('tvmLocSplit');
+  if(!el) return;
+  var metro=rows.filter(function(r){ return tvmLocType(r)==='Metro'; }).length;
+  var other=rows.length-metro;
+  var total=rows.length||1;
+  var mp=Math.round(metro/total*100), op=100-mp;
+  el.innerHTML=
+    '<div class="tvm-loc-card"><div class="tvm-loc-card-top"><span>Metro</span><b>'+metro+' · '+mp+'%</b></div><div class="tvm-loc-bar-track"><div class="tvm-loc-bar-fill" data-w="'+mp+'" style="background:#378ADD;"></div></div></div>'+
+    '<div class="tvm-loc-card"><div class="tvm-loc-card-top"><span>Digər</span><b>'+other+' · '+op+'%</b></div><div class="tvm-loc-bar-track"><div class="tvm-loc-bar-fill" data-w="'+op+'" style="background:#1D9E75;"></div></div></div>';
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.querySelectorAll('.tvm-loc-bar-fill').forEach(function(bar){ bar.style.width=bar.dataset.w+'%'; });
+    });
+  });
+}
+
+function tvmRenderTechList(rows){
+  var el=document.getElementById('tvmTechList');
+  if(!el) return;
+  var top=tvmDashCountTech(rows).slice(0,5);
+  if(top.length===0){ el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  el.innerHTML=top.map(function(it){ return '<div class="tvm-donut-row"><span>'+escapeHtml(it.name)+'</span><b>'+it.count+'</b></div>'; }).join('');
+}
+
+function tvmRenderRecurring(rows){
+  var el=document.getElementById('tvmRecurringPanel');
+  if(!el) return;
+  var items=tvmCountRecurringDevices(rows);
+  if(items.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün heç bir TVM cihazı 3 və ya daha çox servis almayıb.</div>'; return; }
+  el.innerHTML='<div class="dash-ranklist-wrap"><table class="dash-ranklist"><thead><tr><th class="dr-num-col"></th><th>TVM SN · Lokasiya</th><th class="dr-count-col">Servis sayı</th></tr></thead><tbody>'+
+    items.slice(0,15).map(function(it,i){
+      return '<tr><td><span style="background:#FEECEC;color:#A32D2D;">'+(i+1)+'</span></td><td>'+escapeHtml(it.sn)+' · '+escapeHtml(it.location||'—')+'</td><td><span class="dash-rank-count-val" style="color:#A32D2D;">'+it.count+'</span></td></tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+function tvmDashComputeAndRender(){
+  var filtered=tvmDashGetFilteredRows();
+  document.getElementById('tvmDashTotal').textContent=filtered.length;
+  document.getElementById('tvmDashAvgTime').textContent=tvmAvgResolutionMinutes(filtered)+' dəq';
+  var deviceChanges=filtered.filter(function(r){ return r['Köhnə SN']&&r['Yeni SN']; }).length;
+  document.getElementById('tvmDashDeviceChanges').textContent=deviceChanges;
+
+  tvmRenderLocSplit(filtered);
+  tvmRenderDonutPanel('tvmProblemsPanel', tvmDashCount(filtered,'Problem'), filtered.length);
+  tvmRenderDonutPanel('tvmSolutionsPanel', tvmDashCount(filtered,'Həll'), filtered.length);
+  tvmRenderDonutPanel('tvmLocationsPanel', tvmDashCountLocation(filtered), filtered.length);
+  tvmRenderTechList(filtered);
+  tvmRenderRecurring(filtered);
+}
+
+function updateTvmDashTabsUI(){
+  document.querySelectorAll('#tvmDashTabs .dash-tab').forEach(function(t){
+    t.classList.toggle('active', t.getAttribute('data-period')===tvmDashPeriod && !tvmDashCustomRange);
+  });
+}
+
+function loadTvmDashData(){
+  document.getElementById('dashLoading').style.display='flex';
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData'})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    document.getElementById('dashLoading').style.display='none';
+    if(d.status!=='OK') return;
+    tvmDashAllRows=(d.rows||[]).slice().sort(function(a,b){ var da=tvmRowDate(a),db=tvmRowDate(b); return (db?db.getTime():0)-(da?da.getTime():0); });
+    tvmDashComputeAndRender();
+  })
+  .catch(function(){ document.getElementById('dashLoading').style.display='none'; });
+}
+
+function openTvmDashboard(){
+  document.getElementById('dashboardView').style.display='none';
+  document.getElementById('tvmDashboardView').style.display='block';
+  tvmDashCustomRange=null;
+  tvmDashPeriod='24h';
+  tvmDashActiveChips={}; tvmDashSubfilterState={}; tvmDashTextFilters={};
+  updateTvmDashTabsUI();
+  loadTvmDashData();
+  if(!tvmDashFormData){
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmFormData'})})
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d.status==='OK') tvmDashFormData=d; });
+  }
+}
+function closeTvmDashboard(){
+  document.getElementById('tvmDashboardView').style.display='none';
+  document.getElementById('dashboardView').style.display='block';
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var tabs=document.querySelectorAll('#tvmDashTabs .dash-tab');
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tvmDashPeriod=t.getAttribute('data-period');
+      tvmDashCustomRange=null;
+      updateTvmDashTabsUI();
+      tvmDashComputeAndRender();
+    });
+  });
+});
+
+function tvmSearchTech(){
+  var q=document.getElementById('tvmTechSearchInput').value.trim();
+  var out=document.getElementById('tvmTechSearchResult');
+  if(!q){ out.textContent='Ad daxil edin.'; return; }
+  var filtered=tvmDashGetFilteredRows();
+  var counts=tvmDashCountTech(filtered);
+  var match=counts.find(function(it){ return it.name.toLowerCase().indexOf(q.toLowerCase())!==-1; });
+  out.textContent=match ? (match.name+' — seçilmiş dövrdə '+match.count+' TVM ticket-i') : 'Uyğun texnik tapılmadı (seçilmiş dövrdə).';
+}
+
+function exportTvmDashboardExcel(){
+  var rows=tvmDashGetFilteredRows();
+  if(rows.length===0){ alert('Export üçün məlumat yoxdur'); return; }
+  var cols=['Ticket ID','Tarix','Bildirilmə Saatı','TVM SN','TVM Lokasiya','Problem','Həll','Köhnə SN','Yeni SN','Başlanğıc','Bitiş','Servis Lokasiyası','Texnik','Qrup rəhbəri'];
+  var wsData=[cols];
+  rows.forEach(function(row){ wsData.push(cols.map(function(c){ return row[c]||''; })); });
+  var ws=XLSX.utils.aoa_to_sheet(wsData);
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'TVM Dashboard');
+  XLSX.writeFile(wb, 'tvm_dashboard.xlsx');
+}
+
+// ── TVM Dashboard təqvim modalı ──────────────────────────────
+function openTvmDashModal(){ ensureTvmDashFormDataThenBuildChips(); document.getElementById('tvmDashModal').classList.add('open'); }
+function closeTvmDashModal(){
+  document.getElementById('tvmDashModal').classList.remove('open');
+  document.getElementById('tvmDashModalFilterBody').style.display='flex';
+  document.getElementById('tvmDashModalResults').classList.remove('open');
+  document.getElementById('tvmDashResetBtnEl').style.display='';
+  document.getElementById('tvmDashModalTitle').textContent='Tarix aralığı və filtrlər';
+  document.getElementById('tvmDashSearchWarn').style.display='none';
+}
+function ensureTvmDashFormDataThenBuildChips(){
+  if(tvmDashFormData){ buildTvmDashChips(); }
+  else {
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmFormData'})}).then(function(r){ return r.json(); }).then(function(d){ if(d.status==='OK') tvmDashFormData=d; buildTvmDashChips(); });
+  }
+}
+function buildTvmDashChips(){
+  var row=document.getElementById('tvmDashChipRow');
+  row.innerHTML='';
+  TVM_DASH_CATS.forEach(function(cat){
+    var c=document.createElement('div');
+    c.className='dash-chip'+(tvmDashActiveChips[cat.key]?' active':'');
+    c.textContent=cat.key;
+    c.onclick=function(){
+      tvmDashActiveChips[cat.key]=!tvmDashActiveChips[cat.key];
+      buildTvmDashChips();
+      renderTvmDashSubfilters();
+    };
+    row.appendChild(c);
+  });
+  renderTvmDashSubfilters();
+}
+function renderTvmDashSubfilters(){
+  var wrap=document.getElementById('tvmDashSubfilters');
+  wrap.innerHTML='';
+  TVM_DASH_CATS.forEach(function(cat){
+    if(!tvmDashActiveChips[cat.key]) return;
+    var box=document.createElement('div');
+    box.className='dash-subfilter';
+    var title=document.createElement('div');
+    title.className='dash-subfilter-title';
+    title.textContent=cat.key;
+    box.appendChild(title);
+    if(cat.type==='multi'){
+      var opts=document.createElement('div');
+      opts.className='dash-subfilter-opts';
+      (cat.getOptions()||[]).forEach(function(opt){
+        var o=document.createElement('div');
+        var key=cat.key+'|'+opt;
+        o.className='dash-opt-chip'+(tvmDashSubfilterState[key]?' sel':'');
+        o.textContent=opt.length>28?opt.slice(0,28)+'…':opt;
+        o.title=opt;
+        o.onclick=function(){ tvmDashSubfilterState[key]=!tvmDashSubfilterState[key]; o.classList.toggle('sel'); };
+        opts.appendChild(o);
+      });
+      box.appendChild(opts);
+    } else if(cat.type==='text'){
+      var inp=document.createElement('input');
+      inp.type='text';
+      inp.placeholder='Axtar...';
+      inp.value=tvmDashTextFilters[cat.key]||'';
+      inp.oninput=function(){ tvmDashTextFilters[cat.key]=this.value; };
+      box.appendChild(inp);
+    }
+    wrap.appendChild(box);
+  });
+}
+function resetTvmDashFilters(){
+  tvmDashActiveChips={}; tvmDashSubfilterState={}; tvmDashTextFilters={};
+  tvmDcalRangeStart=null; tvmDcalRangeEnd=null;
+  buildTvmDashChips();
+  renderTvmDcal();
+  document.getElementById('tvmDashModalFilterBody').style.display='flex';
+  document.getElementById('tvmDashModalResults').classList.remove('open');
+  document.getElementById('tvmDashModalTitle').textContent='Tarix aralığı və filtrlər';
+  document.getElementById('tvmDashSearchWarn').style.display='none';
+  tvmDashCustomRange=null;
+  tvmDashPeriod='24h';
+  updateTvmDashTabsUI();
+  tvmDashComputeAndRender();
+}
+
+var tvmDcalYear, tvmDcalMonth, tvmDcalRangeStart=null, tvmDcalRangeEnd=null;
+function initTvmDcal(){ var now=bakuNowDate(); tvmDcalYear=now.getFullYear(); tvmDcalMonth=now.getMonth(); renderTvmDcal(); }
+function tvmDcalNav(dir){ tvmDcalMonth+=dir; if(tvmDcalMonth<0){ tvmDcalMonth=11; tvmDcalYear--; } if(tvmDcalMonth>11){ tvmDcalMonth=0; tvmDcalYear++; } renderTvmDcal(); }
+function renderTvmDcal(){
+  var labelEl=document.getElementById('tvmDcalLabel');
+  var grid=document.getElementById('tvmDcalGrid');
+  if(!labelEl || !grid) return;
+  labelEl.textContent=DCAL_MONTHS[tvmDcalMonth]+' '+tvmDcalYear;
+  grid.innerHTML='';
+  DCAL_DOWS.forEach(function(d){ var el=document.createElement('div'); el.className='dcal-dow'; el.textContent=d; grid.appendChild(el); });
+  var firstDay=new Date(tvmDcalYear, tvmDcalMonth, 1);
+  var startOffset=(firstDay.getDay()+6)%7;
+  var daysInMonth=new Date(tvmDcalYear, tvmDcalMonth+1, 0).getDate();
+  var daysInPrev=new Date(tvmDcalYear, tvmDcalMonth, 0).getDate();
+  for(var i=0; i<startOffset; i++){ var el=document.createElement('div'); el.className='dcal-day muted'; el.textContent=daysInPrev-startOffset+i+1; grid.appendChild(el); }
+  for(var d=1; d<=daysInMonth; d++){
+    (function(day){
+      var el=document.createElement('div');
+      el.className='dcal-day';
+      el.textContent=day;
+      var thisDate=new Date(tvmDcalYear, tvmDcalMonth, day);
+      if(tvmDcalRangeStart&&sameDayDc(thisDate, tvmDcalRangeStart)) el.classList.add('range-start');
+      if(tvmDcalRangeEnd&&sameDayDc(thisDate, tvmDcalRangeEnd)) el.classList.add('range-end');
+      if(tvmDcalRangeStart&&tvmDcalRangeEnd&&thisDate>tvmDcalRangeStart&&thisDate<tvmDcalRangeEnd) el.classList.add('in-range');
+      el.onclick=function(){ pickTvmDcalDate(thisDate); };
+      grid.appendChild(el);
+    })(d);
+  }
+  updateTvmDcalTxt();
+}
+function pickTvmDcalDate(d){
+  if(!tvmDcalRangeStart||(tvmDcalRangeStart&&tvmDcalRangeEnd)){ tvmDcalRangeStart=d; tvmDcalRangeEnd=null; }
+  else { if(d<tvmDcalRangeStart){ tvmDcalRangeEnd=tvmDcalRangeStart; tvmDcalRangeStart=d; } else { tvmDcalRangeEnd=d; } }
+  renderTvmDcal();
+  var warnEl=document.getElementById('tvmDashSearchWarn');
+  if(warnEl) warnEl.style.display='none';
+}
+function updateTvmDcalTxt(){
+  var t=document.getElementById('tvmDcalSelectedTxt');
+  if(!t) return;
+  if(tvmDcalRangeStart&&tvmDcalRangeEnd) t.textContent=fmtDc(tvmDcalRangeStart)+' → '+fmtDc(tvmDcalRangeEnd);
+  else if(tvmDcalRangeStart) t.textContent=fmtDc(tvmDcalRangeStart)+' seçildi — bitiş tarixini seçin';
+  else t.textContent='Başlanğıc tarixi seçin';
+}
+initTvmDcal();
+
+function runTvmDashSearch(){
+  var hasRange=tvmDcalRangeStart&&tvmDcalRangeEnd;
+  var hasActiveCat=Object.keys(tvmDashActiveChips).some(function(k){ return tvmDashActiveChips[k]; });
+  if(!hasRange&&!hasActiveCat){ document.getElementById('tvmDashSearchWarn').style.display='flex'; return; }
+  document.getElementById('tvmDashSearchWarn').style.display='none';
+  if(hasRange){
+    tvmDashCustomRange={
+      start:new Date(tvmDcalRangeStart.getFullYear(), tvmDcalRangeStart.getMonth(), tvmDcalRangeStart.getDate(), 0, 0, 0),
+      end:new Date(tvmDcalRangeEnd.getFullYear(), tvmDcalRangeEnd.getMonth(), tvmDcalRangeEnd.getDate(), 23, 59, 59)
+    };
+    updateTvmDashTabsUI();
+  }
+  closeTvmDashModal();
+  tvmDashComputeAndRender();
+}
