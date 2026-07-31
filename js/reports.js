@@ -2580,14 +2580,15 @@ function tvmDashSelectedOptions(key){
 }
 function tvmDashHasActiveOptions(key){ return tvmDashSelectedOptions(key).length>0; }
 function tvmDashMatchMulti(val,key){ if(!val) return false; return tvmDashSelectedOptions(key).indexOf(val)!==-1; }
+function tvmDashMatchSplit(val,key){ if(!val) return false; var sel=tvmDashSelectedOptions(key); return val.split('|').some(function(p){ return sel.indexOf(p.trim())!==-1; }); }
 function tvmLocType(row){ return (row['Servis Lokasiyası']||'').trim()==='Metro' ? 'Metro' : 'Digər'; }
 
 function tvmDashGetFilteredRows(){
   var range=tvmDashCustomRange||dashComputeRange(tvmDashPeriod);
   return tvmDashAllRows.filter(function(row){
     if(range.start&&range.end){ var rd=tvmRowDate(row); if(!rd||rd<range.start||rd>range.end) return false; }
-    if(tvmDashHasActiveOptions('Problem')&&!tvmDashMatchMulti(row['Problem'],'Problem')) return false;
-    if(tvmDashHasActiveOptions('Həll')&&!tvmDashMatchMulti(row['Həll'],'Həll')) return false;
+    if(tvmDashHasActiveOptions('Problem')&&!tvmDashMatchSplit(row['Problem'],'Problem')) return false;
+    if(tvmDashHasActiveOptions('Həll')&&!tvmDashMatchSplit(row['Həll'],'Həll')) return false;
     if(tvmDashHasActiveOptions('Texnik')&&!tvmDashMatchMulti(row['Texnik'],'Texnik')) return false;
     if(tvmDashHasActiveOptions('Qrup Rəhbəri')&&!tvmDashMatchMulti(row['Qrup rəhbəri'],'Qrup Rəhbəri')) return false;
     if(tvmDashHasActiveOptions('Lokasiya Tipi')&&!tvmDashMatchMulti(tvmLocType(row),'Lokasiya Tipi')) return false;
@@ -2596,9 +2597,14 @@ function tvmDashGetFilteredRows(){
   });
 }
 
-function tvmDashCount(rows, field){
+function tvmDashCount(rows, field, splitMulti){
   var map={};
-  rows.forEach(function(r){ var v=(r[field]||'').trim(); if(!v) return; map[v]=(map[v]||0)+1; });
+  rows.forEach(function(r){
+    var v=r[field];
+    if(!v) return;
+    var vals=splitMulti?v.split('|'):[v];
+    vals.forEach(function(vv){ vv=(vv||'').trim(); if(!vv) return; map[vv]=(map[vv]||0)+1; });
+  });
   return Object.keys(map).map(function(k){ return {name:k, count:map[k]}; }).sort(function(a,b){ return b.count-a.count; });
 }
 function tvmDashCountLocation(rows){ return tvmDashCount(rows, 'TVM Lokasiya'); }
@@ -2704,8 +2710,12 @@ function tvmDashComputeAndRender(){
   document.getElementById('tvmDashDeviceChanges').textContent=deviceChanges;
 
   tvmRenderLocSplit(filtered);
-  tvmRenderDonutPanel('tvmProblemsPanel', tvmDashCount(filtered,'Problem'), filtered.length);
-  tvmRenderDonutPanel('tvmSolutionsPanel', tvmDashCount(filtered,'Həll'), filtered.length);
+  var problemItems=tvmDashCount(filtered,'Problem',true);
+  var solutionItems=tvmDashCount(filtered,'Həll',true);
+  var problemTotal=problemItems.reduce(function(s,it){ return s+it.count; },0);
+  var solutionTotal=solutionItems.reduce(function(s,it){ return s+it.count; },0);
+  tvmRenderDonutPanel('tvmProblemsPanel', problemItems, problemTotal);
+  tvmRenderDonutPanel('tvmSolutionsPanel', solutionItems, solutionTotal);
   tvmRenderDonutPanel('tvmLocationsPanel', tvmDashCountLocation(filtered), filtered.length);
   tvmRenderTechList(filtered);
   tvmRenderRecurring(filtered);
@@ -2767,7 +2777,17 @@ function tvmSearchTech(){
   var filtered=tvmDashGetFilteredRows();
   var counts=tvmDashCountTech(filtered);
   var match=counts.find(function(it){ return it.name.toLowerCase().indexOf(q.toLowerCase())!==-1; });
-  out.textContent=match ? (match.name+' — seçilmiş dövrdə '+match.count+' TVM ticket-i') : 'Uyğun texnik tapılmadı (seçilmiş dövrdə).';
+  if(match){
+    out.textContent=match.name+' — seçilmiş dövrdə '+match.count+' TVM ticket-i';
+    return;
+  }
+  var allCounts=tvmDashCountTech(tvmDashAllRows);
+  var allMatch=allCounts.find(function(it){ return it.name.toLowerCase().indexOf(q.toLowerCase())!==-1; });
+  if(allMatch){
+    out.textContent=allMatch.name+' — seçilmiş dövrdə heç bir ticket yoxdur (bütün tarixçədə: '+allMatch.count+')';
+  } else {
+    out.textContent='Uyğun texnik tapılmadı.';
+  }
 }
 
 function exportTvmDashboardExcel(){
