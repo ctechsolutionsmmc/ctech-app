@@ -2640,11 +2640,14 @@ function tvmRenderDonutPanel(containerId, items, total){
   var chartItems=top5.slice();
   if(restCount>0) chartItems.push({name:'Digər', count:restCount});
 
-  var listHtml=top5.map(function(it){
-    return '<div class="tvm-donut-row-sm"><span>'+escapeHtml(it.name)+'</span><b>'+it.count+'</b></div>';
+  var listHtml=top5.map(function(it,i){
+    return '<div class="tvm-donut-row-sm" style="border-left-color:'+TVM_DONUT_COLORS[i]+';">'+
+      '<div class="tvm-donut-rank" style="background:'+TVM_DONUT_COLORS[i]+';">'+(i+1)+'</div>'+
+      '<div class="tvm-donut-row-name">'+escapeHtml(it.name)+'</div>'+
+      '<div class="tvm-donut-row-count">'+it.count+'</div></div>';
   }).join('');
 
-  var W=380,H=280,cx=150,cy=140,R=88,strokeW=28,circ=2*Math.PI*R;
+  var W=400,H=290,cx=155,cy=145,R=90,strokeW=30,circ=2*Math.PI*R;
   var offset=0, segs='', labels='';
 
   chartItems.forEach(function(it,i){
@@ -2654,17 +2657,17 @@ function tvmRenderDonutPanel(containerId, items, total){
     var midFrac=(offset+len/2)/circ;
     var angleRad=(midFrac*360-90)*Math.PI/180;
     var x1=cx+R*Math.cos(angleRad), y1=cy+R*Math.sin(angleRad);
-    var x2=cx+(R+16)*Math.cos(angleRad), y2=cy+(R+16)*Math.sin(angleRad);
+    var x2=cx+(R+18)*Math.cos(angleRad), y2=cy+(R+18)*Math.sin(angleRad);
     var isRight=Math.cos(angleRad)>=0;
-    var x3=x2+(isRight?24:-24), y3=y2;
+    var x3=x2+(isRight?28:-28), y3=y2;
     var anchor=isRight?'start':'end';
-    var nm=it.name.length>20?it.name.slice(0,20)+'…':it.name;
-    var tx=(x3+(isRight?4:-4)).toFixed(1);
+    var nm=it.name.length>18?it.name.slice(0,18)+'…':it.name;
+    var tx=(x3+(isRight?5:-5)).toFixed(1);
 
-    labels+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.4"/>'+
-      '<line x1="'+x2.toFixed(1)+'" y1="'+y2.toFixed(1)+'" x2="'+x3.toFixed(1)+'" y2="'+y3.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.4"/>'+
-      '<text x="'+tx+'" y="'+(y3-4).toFixed(1)+'" text-anchor="'+anchor+'" font-size="10.5" font-weight="700" fill="#12233B">'+escapeHtml(nm)+'</text>'+
-      '<text x="'+tx+'" y="'+(y3+9).toFixed(1)+'" text-anchor="'+anchor+'" font-size="10" fill="#5C7089">'+it.count+' · '+pct+'%</text>';
+    labels+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.6"/>'+
+      '<line x1="'+x2.toFixed(1)+'" y1="'+y2.toFixed(1)+'" x2="'+x3.toFixed(1)+'" y2="'+y3.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.6"/>'+
+      '<text x="'+tx+'" y="'+(y3-5).toFixed(1)+'" text-anchor="'+anchor+'" font-size="13" font-weight="700" fill="#12233B">'+escapeHtml(nm)+'</text>'+
+      '<text x="'+tx+'" y="'+(y3+11).toFixed(1)+'" text-anchor="'+anchor+'" font-size="12" font-weight="600" fill="#5C7089">'+it.count+' · '+pct+'%</text>';
     offset+=len;
   });
 
@@ -2702,7 +2705,45 @@ function tvmRenderTechList(rows){
   if(!el) return;
   var top=tvmDashCountTech(rows).slice(0,5);
   if(top.length===0){ el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
-  el.innerHTML=top.map(function(it){ return '<div class="tvm-donut-row"><span>'+escapeHtml(it.name)+'</span><b>'+it.count+'</b></div>'; }).join('');
+  el.innerHTML=top.map(function(it,i){
+    return '<div class="tvm-donut-row-sm" style="border-left-color:'+TVM_DONUT_COLORS[i]+';">'+
+      '<div class="tvm-donut-rank" style="background:'+TVM_DONUT_COLORS[i]+';">'+(i+1)+'</div>'+
+      '<div class="tvm-donut-row-name">'+escapeHtml(it.name)+'</div>'+
+      '<div class="tvm-donut-row-count">'+it.count+'</div></div>';
+  }).join('');
+}
+
+var tvmAllLocationsOpen=false;
+function tvmToggleAllLocations(){
+  tvmAllLocationsOpen=!tvmAllLocationsOpen;
+  var panel=document.getElementById('tvmAllLocationsPanel');
+  var btn=document.getElementById('tvmShowAllLocBtn');
+  if(tvmAllLocationsOpen){
+    panel.style.display='block';
+    btn.textContent='Gizlət';
+    tvmRenderAllLocations(tvmDashGetFilteredRows());
+  } else {
+    panel.style.display='none';
+    btn.textContent='Hamısını göstər';
+  }
+}
+function tvmRenderAllLocations(rows){
+  var el=document.getElementById('tvmAllLocationsPanel');
+  if(!el) return;
+  var items=tvmDashCountLocation(rows);
+  var total=rows.length||1;
+  if(items.length===0){ el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  el.innerHTML=items.map(function(it){
+    var pct=Math.round(it.count/total*100);
+    return '<div class="tvm-all-loc-row"><div class="tvm-all-loc-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(it.name)+'</div>'+
+      '<div class="tvm-all-loc-bar-track"><div class="tvm-all-loc-bar-fill" data-w="'+pct+'"></div></div>'+
+      '<div class="tvm-all-loc-pct">'+it.count+' · '+pct+'%</div></div>';
+  }).join('');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.querySelectorAll('.tvm-all-loc-bar-fill').forEach(function(bar){ bar.style.width=bar.dataset.w+'%'; });
+    });
+  });
 }
 
 function tvmRenderRecurring(rows){
@@ -2733,6 +2774,7 @@ function tvmDashComputeAndRender(){
   tvmRenderDonutPanel('tvmLocationsPanel', tvmDashCountLocation(filtered), filtered.length);
   tvmRenderTechList(filtered);
   tvmRenderRecurring(filtered);
+  if(tvmAllLocationsOpen) tvmRenderAllLocations(filtered);
 }
 
 function updateTvmDashTabsUI(){
