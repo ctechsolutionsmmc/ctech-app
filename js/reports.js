@@ -2641,22 +2641,35 @@ function tvmRenderDonutPanel(containerId, items, total){
   if(restCount>0) chartItems.push({name:'Digər', count:restCount});
 
   var listHtml=top5.map(function(it){
-    return '<div class="tvm-donut-row"><span>'+escapeHtml(it.name)+'</span><b>'+it.count+'</b></div>';
+    return '<div class="tvm-donut-row-sm"><span>'+escapeHtml(it.name)+'</span><b>'+it.count+'</b></div>';
   }).join('');
 
-  var r=42,cx=56,cy=56,circ=2*Math.PI*r,offset=0,segs='';
+  var W=380,H=280,cx=150,cy=140,R=88,strokeW=28,circ=2*Math.PI*R;
+  var offset=0, segs='', labels='';
+
   chartItems.forEach(function(it,i){
-    var len=(it.count/total)*circ;
-    segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="16" stroke-dasharray="0 '+circ.toFixed(1)+'" stroke-dashoffset="'+(-offset).toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')" class="tvm-donut-seg" data-len="'+len.toFixed(1)+'" data-total="'+circ.toFixed(1)+'" style="transition:stroke-dasharray 1s cubic-bezier(.2,.7,.3,1) '+(i*0.07)+'s;"/>';
+    var frac=it.count/total, len=frac*circ, pct=Math.round(frac*100);
+    segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="'+strokeW+'" stroke-dasharray="0 '+circ.toFixed(1)+'" stroke-dashoffset="'+(-offset).toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')" class="tvm-donut-seg" data-len="'+len.toFixed(1)+'" data-total="'+circ.toFixed(1)+'" style="transition:stroke-dasharray 1s cubic-bezier(.2,.7,.3,1) '+(i*0.07)+'s;"/>';
+
+    var midFrac=(offset+len/2)/circ;
+    var angleRad=(midFrac*360-90)*Math.PI/180;
+    var x1=cx+R*Math.cos(angleRad), y1=cy+R*Math.sin(angleRad);
+    var x2=cx+(R+16)*Math.cos(angleRad), y2=cy+(R+16)*Math.sin(angleRad);
+    var isRight=Math.cos(angleRad)>=0;
+    var x3=x2+(isRight?24:-24), y3=y2;
+    var anchor=isRight?'start':'end';
+    var nm=it.name.length>20?it.name.slice(0,20)+'…':it.name;
+    var tx=(x3+(isRight?4:-4)).toFixed(1);
+
+    labels+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.4"/>'+
+      '<line x1="'+x2.toFixed(1)+'" y1="'+y2.toFixed(1)+'" x2="'+x3.toFixed(1)+'" y2="'+y3.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.4"/>'+
+      '<text x="'+tx+'" y="'+(y3-4).toFixed(1)+'" text-anchor="'+anchor+'" font-size="10.5" font-weight="700" fill="#12233B">'+escapeHtml(nm)+'</text>'+
+      '<text x="'+tx+'" y="'+(y3+9).toFixed(1)+'" text-anchor="'+anchor+'" font-size="10" fill="#5C7089">'+it.count+' · '+pct+'%</text>';
     offset+=len;
   });
-  var legend=chartItems.map(function(it,i){
-    var pct=Math.round(it.count/total*100);
-    return '<div class="tvm-donut-legend-item"><span class="tvm-donut-legend-dot" style="background:'+TVM_DONUT_COLORS[i]+';"></span><span>'+escapeHtml(it.name)+'</span><span class="tvm-donut-legend-pct">'+pct+'%</span></div>';
-  }).join('');
 
-  el.innerHTML='<div class="tvm-donut-list">'+listHtml+'</div>'+
-    '<div class="tvm-donut-visual"><svg viewBox="0 0 112 112" width="84" height="84">'+segs+'</svg><div>'+legend+'</div></div>';
+  el.innerHTML='<div class="tvm-donut-list-sm">'+listHtml+'</div>'+
+    '<div class="tvm-donut-visual-big"><svg viewBox="0 0 '+W+' '+H+'" width="100%">'+segs+labels+'</svg></div>';
 
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
