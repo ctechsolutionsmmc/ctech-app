@@ -19,6 +19,7 @@ var busSamCardSNList = [];
 var busCombinedSNSet = null;
 var busValidatorSNLoaded = false;
 var busValidatorSNLoading = false;
+var busValidatorSNLoadingPromise = null;
 
 function openBusRequest(){
   closeMenu();
@@ -306,10 +307,10 @@ function submitBusRequest(){
 }
 
 function preloadValidatorSNList(force){
-  if(busValidatorSNLoading) return;
-  if(busValidatorSNLoaded && !force) return;
+  if(busValidatorSNLoading) return busValidatorSNLoadingPromise;
+  if(busValidatorSNLoaded && !force) return Promise.resolve();
   busValidatorSNLoading = true;
-  Promise.all([
+  busValidatorSNLoadingPromise = Promise.all([
     fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getValidatorSNList', requesterEmail: currentUser?currentUser.email:''})}).then(function(r){return r.json();}),
     fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getSamCardSNList', requesterEmail: currentUser?currentUser.email:''})}).then(function(r){return r.json();})
   ]).then(function(results){
@@ -320,6 +321,7 @@ function preloadValidatorSNList(force){
     busCombinedSNSet = new Set(combined.map(function(s){ return s.toUpperCase(); }));
     busValidatorSNLoaded = true;
   }).catch(function(){ busValidatorSNLoading = false; });
+  return busValidatorSNLoadingPromise;
 }
 
 function busSnExists(sn){
@@ -398,6 +400,17 @@ function busSnInputHandler(el, ddId, warnId){
   bsFormDirty = true;
   if(!q){ if(dd) dd.style.display='none'; return; }
   var type = ddId.indexOf('old')!==-1 ? 'old' : 'new';
+
+  // Data hələ yüklənməyibsə — yüklə, bitəndə (əgər istifadəçi hələ eyni mətni
+  // yazırsa) axtarışı avtomatik təkrarla. Boş dayanıb gözləmə.
+  if(!busValidatorSNLoaded){
+    if(dd){ dd.innerHTML = '<div class="bs-registry-empty">Yüklənir...</div>'; dd.style.display='block'; }
+    preloadValidatorSNList().then(function(){
+      if(el.value.trim() === q) busSnInputHandler(el, ddId, warnId);
+    });
+    return;
+  }
+
   var matches = busSnSearchMatches(q);
   if(dd){
     if(matches.length===0){
