@@ -25,6 +25,7 @@ function routerGetMap(){
     'bus-report':    { open: function(){ _callRaw('openBusReport'); },                needsAuth: true },
     'tvm-report':    { open: function(){ _callRaw('openTvmReport'); },                needsAuth: true },
     'bus-dashboard': { open: function(){ _callRaw('openBusDashboard'); },             needsAuth: true },
+    'tvm-dashboard': { open: function(){ if(_rawFns['openTvmDashboard']) _rawFns['openTvmDashboard'](); else if(typeof openTvmDashboard==='function') openTvmDashboard(); }, needsAuth: true },
     'bus-ongoing':   { open: function(){ _callRaw('openBusOngoing'); },               needsAuth: true },
     'bus-request':   { open: function(){ _callRaw('openBusRequest'); },               needsAuth: true, desktopOnly: true },
     'bus-bulk':      { open: function(){ _callRaw('openBusBulk'); },                  needsAuth: true, desktopOnly: true },
