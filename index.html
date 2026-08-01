@@ -1841,34 +1841,34 @@
       <div class="tvmd-section-label">Lokasiya tipi</div>
       <div class="tvmd-loc-row" id="tvmLocSplit"></div>
 
-      <!-- PROBLEMLƏR — Sol panel + donut + sağda MTTR widget -->
+      <!-- PROBLEMLƏR — tam eni -->
       <div class="tvmd-section-label">Ən çox rast gəlinən problemlər</div>
-      <div class="tvmd-problems-row">
-        <div class="tvmd-donut-card" id="tvmProblemsPanel"></div>
-        <div class="tvmd-side-widgets">
-          <div class="tvmd-side-widget">
-            <div class="tvmd-sw-icon tvmd-ic-teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-            <div class="tvmd-sw-body">
-              <div class="tvmd-sw-label">MTTR</div>
-              <div class="tvmd-sw-value" id="tvmSideMTTR">—</div>
-              <div class="tvmd-sw-trend" id="tvmSideMTTRTrend"></div>
-            </div>
+      <div class="tvmd-donut-card" id="tvmProblemsPanel"></div>
+
+      <!-- MTTR / SLA / Aktiv texnik — metrika kartlar sırası altında ayrıca -->
+      <div class="tvmd-kpi-row">
+        <div class="tvmd-kpi-card">
+          <div class="tvmd-kpi-icon tvmd-ic-teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="tvmd-kpi-body">
+            <div class="tvmd-kpi-label">MTTR</div>
+            <div class="tvmd-kpi-value" id="tvmSideMTTR">—</div>
+            <div class="tvmd-kpi-trend" id="tvmSideMTTRTrend"></div>
           </div>
-          <div class="tvmd-side-widget">
-            <div class="tvmd-sw-icon tvmd-ic-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-            <div class="tvmd-sw-body">
-              <div class="tvmd-sw-label">SLA Uyğunluğu</div>
-              <div class="tvmd-sw-value" id="tvmSideSLA">—</div>
-              <div class="tvmd-sw-trend" id="tvmSideSLATrend"></div>
-            </div>
+        </div>
+        <div class="tvmd-kpi-card">
+          <div class="tvmd-kpi-icon tvmd-ic-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="tvmd-kpi-body">
+            <div class="tvmd-kpi-label">SLA Uyğunluğu</div>
+            <div class="tvmd-kpi-value" id="tvmSideSLA">—</div>
+            <div class="tvmd-kpi-trend" id="tvmSideSLATrend"></div>
           </div>
-          <div class="tvmd-side-widget">
-            <div class="tvmd-sw-icon tvmd-ic-orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg></div>
-            <div class="tvmd-sw-body">
-              <div class="tvmd-sw-label">Aktiv texnik</div>
-              <div class="tvmd-sw-value" id="tvmSideActiveTech">—</div>
-              <div class="tvmd-sw-trend" id="tvmSideActiveTechTrend"></div>
-            </div>
+        </div>
+        <div class="tvmd-kpi-card">
+          <div class="tvmd-kpi-icon tvmd-ic-orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg></div>
+          <div class="tvmd-kpi-body">
+            <div class="tvmd-kpi-label">Aktiv texnik</div>
+            <div class="tvmd-kpi-value" id="tvmSideActiveTech">—</div>
+            <div class="tvmd-kpi-trend" id="tvmSideActiveTechTrend"></div>
           </div>
         </div>
       </div>
