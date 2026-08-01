@@ -705,11 +705,11 @@ body.dark-mode .tvmd-metric-card{ background:rgba(22,33,46,0.82); border-color:#
 body.dark-mode .tvmd-metric-label{ color:#6B84A0; }
 .tvmd-metric-value{ font-size:30px; font-weight:800; color:#12233B; line-height:1; font-family:'Rajdhani',sans-serif; }
 body.dark-mode .tvmd-metric-value{ color:#E8EEF5; }
-.tvmd-metric-trend{ font-size:11.5px; font-weight:600; color:#8CA0BC; min-height:16px; }
+.tvmd-metric-trend{ font-size:10.5px; font-weight:600; color:#8CA0BC; min-height:15px; line-height:1.3; }
 .tvmd-metric-trend.up{ color:#188A4B; }
 .tvmd-metric-trend.down{ color:#D97706; }
-.tvmd-sparkline-wrap{ margin-top:6px; }
-.tvmd-sparkline{ width:100%; height:36px; display:block; }
+.tvmd-sparkline-wrap{ margin-top:8px; height:36px; }
+.tvmd-sparkline{ width:100%; height:36px; display:block; border-radius:4px; }
 
 /* Filtr kartı */
 .tvmd-filter-card{ cursor:pointer; border:2px dashed #A8C6EC; justify-content:center; gap:10px; }
@@ -766,22 +766,20 @@ body.dark-mode .tvm-loc-bar-track{ background:#1C2A3D; }
 body.dark-mode .tvmd-donut-card{ background:rgba(22,33,46,0.82); border-color:#2A4A72; }
 
 /* Donut panel içi — Sol siyahı | Donut | Sağ legend */
-/* Donut panel: sol siyahi | donut+diger btn | [diger panel] */
+/* Donut panel: sol siyahi | donut SVG (orta, boyuk) | [diger panel] */
 .tvm-donut-panel-new{
   display:grid;
-  grid-template-columns:minmax(200px,250px) 1fr auto;
+  grid-template-columns:minmax(210px,260px) 1fr auto;
   align-items:stretch;
-  min-height:240px;
+  min-height:260px;
   overflow:hidden;
 }
-@media (max-width:900px){
-  .tvm-donut-panel-new{ grid-template-columns:1fr; }
-}
+@media (max-width:900px){ .tvm-donut-panel-new{ grid-template-columns:1fr; } }
 
 /* Donut + Diger btn orta sutun */
 .tvmd-donut-mid{
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  padding:20px 16px; gap:10px;
+  padding:16px 8px; gap:8px; flex:1;
 }
 
 /* Kohnə donut center uygunluq */
@@ -790,42 +788,65 @@ body.dark-mode .tvmd-donut-card{ background:rgba(22,33,46,0.82); border-color:#2
   padding:14px 6px;
 }
 
-/* "Diger" acilan panel - sag tərəf */
+/* "Diger" acilan panel - sag tərəf, estetik */
 .tvmd-diger-side{
-  flex-direction:column; gap:0;
+  display:flex; flex-direction:column; gap:0;
   border-left:1.5px solid #C9DAF3;
-  min-width:200px; max-width:260px;
-  overflow-y:auto; max-height:300px;
-  background:rgba(247,250,254,0.7);
-  padding:0;
+  min-width:220px; max-width:280px;
+  overflow-y:auto; max-height:320px;
+  background:linear-gradient(160deg,rgba(240,246,255,0.95),rgba(247,250,254,0.98));
+  -webkit-overflow-scrolling:touch;
 }
-body.dark-mode .tvmd-diger-side{ background:rgba(15,24,38,0.5); border-color:#2A4A72; }
+body.dark-mode .tvmd-diger-side{ background:rgba(15,24,38,0.6); border-color:#2A4A72; }
 .tvmd-diger-side-title{
-  font-size:11px; font-weight:800; color:#8CA0BC; letter-spacing:.5px;
-  text-transform:uppercase; padding:14px 16px 8px;
-  border-bottom:1px solid #EEF3FB; position:sticky; top:0;
-  background:rgba(247,250,254,0.95);
+  font-size:10px; font-weight:800; color:#2F6FED; letter-spacing:.8px;
+  text-transform:uppercase; padding:12px 14px 6px;
+  border-bottom:1px solid #DCE9FB; position:sticky; top:0;
+  background:rgba(240,246,255,0.98);
+  backdrop-filter:blur(8px);
 }
-body.dark-mode .tvmd-diger-side-title{ background:rgba(15,24,38,0.95); border-color:#1C2A3D; }
+body.dark-mode .tvmd-diger-side-title{ background:rgba(15,24,38,0.98); border-color:#1C2A3D; color:#5B8FD6; }
 .tvmd-diger-row{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:9px 16px; border-bottom:1px solid #F3F6FB; gap:8px;
+  display:flex; align-items:center; gap:8px;
+  padding:8px 14px; border-bottom:1px solid rgba(220,233,251,0.5);
+  transition:background .1s;
 }
 .tvmd-diger-row:last-child{ border-bottom:none; }
-body.dark-mode .tvmd-diger-row{ border-color:#1C2A3D; }
+.tvmd-diger-row:hover{ background:rgba(230,241,251,0.6); }
+body.dark-mode .tvmd-diger-row{ border-color:rgba(28,42,61,0.5); }
+body.dark-mode .tvmd-diger-row:hover{ background:rgba(28,42,61,0.4); }
+.tvmd-diger-rank{
+  width:18px; height:18px; border-radius:50%; background:#EEF3FB;
+  color:#5C7089; font-size:9.5px; font-weight:800;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+body.dark-mode .tvmd-diger-rank{ background:#1C2A3D; color:#6B84A0; }
 .tvmd-diger-name{
-  font-size:12px; font-weight:600; color:#33445E;
+  font-size:11.5px; font-weight:600; color:#33445E;
   flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 body.dark-mode .tvmd-diger-name{ color:#C7D5E8; }
-.tvmd-diger-badge{
-  font-size:11px; font-weight:700; color:#8CA0BC;
-  background:#EEF3FB; border-radius:10px; padding:2px 8px;
-  white-space:nowrap; flex-shrink:0;
+.tvmd-diger-stats{
+  display:flex; align-items:center; gap:5px; flex-shrink:0;
 }
-body.dark-mode .tvmd-diger-badge{ background:#1C2A3D; color:#7A90AB; }
+.tvmd-diger-count{
+  font-size:11px; font-weight:800; color:#12233B; min-width:14px; text-align:right;
+}
+body.dark-mode .tvmd-diger-count{ color:#E8EEF5; }
+.tvmd-diger-bar-track{
+  width:36px; height:4px; background:#DCE9FB; border-radius:2px; overflow:hidden;
+}
+body.dark-mode .tvmd-diger-bar-track{ background:#1C2A3D; }
+.tvmd-diger-bar-fill{
+  height:100%; background:linear-gradient(90deg,#5BA4F5,#2F6FED); border-radius:2px;
+  transition:width .8s cubic-bezier(.2,.7,.3,1);
+}
+.tvmd-diger-pct{
+  font-size:10px; font-weight:700; color:#8CA0BC; min-width:24px; text-align:right;
+}
+body.dark-mode .tvmd-diger-pct{ color:#5C7089; }
 .tvmd-diger-empty{
-  font-size:12px; color:#8CA0BC; padding:16px; text-align:center;
+  font-size:12px; color:#8CA0BC; padding:20px; text-align:center;
 }
 
 /* "Diger" düyməsi */
@@ -918,8 +939,8 @@ body.dark-mode .tvmd-kpi-value{ color:#E8EEF5; }
 .tvmd-kpi-trend.up{ color:#188A4B; }
 .tvmd-kpi-trend.down{ color:#D97706; }
 .tvm-donut-row-sm{
-  display:grid; grid-template-columns:28px 1fr auto auto; gap:8px;
-  align-items:center; padding:10px 16px; border-bottom:1px solid #F0F5FC;
+  display:grid; grid-template-columns:26px 28px 1fr auto; gap:6px;
+  align-items:center; padding:9px 14px; border-bottom:1px solid #F0F5FC;
   border-left:4px solid transparent;
 }
 body.dark-mode .tvm-donut-row-sm{ border-bottom-color:#1C2A3D; }
@@ -940,6 +961,11 @@ body.dark-mode .tvm-donut-row-count{ color:#E8EEF5; }
 .tvm-donut-row-pct{ font-size:12px; color:#8CA0BC; font-weight:600; flex-shrink:0; width:36px; text-align:right; }
 .tvm-donut-visual-big{ display:flex; align-items:center; justify-content:center; padding:16px 8px; }
 .tvm-donut-visual-big svg{ max-width:180px; width:100%; }
+.tvm-donut-row-icon{
+  width:26px; height:26px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
 .tvm-donut-empty{ padding:32px; text-align:center; font-size:13px; color:#8CA0BC; }
 .tvmd-showall-link-sm{
   display:inline-flex; align-items:center; gap:5px;
@@ -1122,4 +1148,3 @@ body.dark-mode .tvmd-tech-search-result{ border-color:#2A3B52; color:#8CA0BC; }
   .tvmd-container{ padding:16px 14px 40px; }
   .tvmd-header{ padding:12px 14px; }
 }
-
