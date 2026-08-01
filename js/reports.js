@@ -2634,45 +2634,66 @@ function tvmAvgResolutionMinutes(rows){
 function tvmRenderDonutPanel(containerId, items, total){
   var el=document.getElementById(containerId);
   if(!el) return;
-  if(total===0 || items.length===0){ el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  if(total===0 || items.length===0){
+    el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>';
+    return;
+  }
   var top5=items.slice(0,5);
   var restCount=items.slice(5).reduce(function(s,it){ return s+it.count; },0);
   var chartItems=top5.slice();
   if(restCount>0) chartItems.push({name:'Digər', count:restCount});
 
+  // Sol siyahı — nömrə + ad + say + faiz (4 sütun cədvəl görünüşü)
   var listHtml=top5.map(function(it,i){
-    return '<div class="tvm-donut-row-sm" style="border-left-color:'+TVM_DONUT_COLORS[i]+';">'+
-      '<div class="tvm-donut-rank" style="background:'+TVM_DONUT_COLORS[i]+';">'+(i+1)+'</div>'+
-      '<div class="tvm-donut-row-name">'+escapeHtml(it.name)+'</div>'+
-      '<div class="tvm-donut-row-count">'+it.count+'</div></div>';
+    var pct=Math.round(it.count/total*100);
+    return '<div class="tvm-donut-row-sm" style="border-left-color:'+TVM_DONUT_COLORS[i]+';">'
+      +'<div class="tvm-donut-rank" style="background:'+TVM_DONUT_COLORS[i]+';">'+(i+1)+'</div>'
+      +'<div class="tvm-donut-row-name">'+escapeHtml(it.name)+'</div>'
+      +'<div class="tvm-donut-row-count">'+it.count+'</div>'
+      +'<div class="tvm-donut-row-pct">'+pct+'%</div>'
+      +'</div>';
   }).join('');
 
-  var W=400,H=290,cx=155,cy=145,R=90,strokeW=30,circ=2*Math.PI*R;
+  // Donut SVG — ortada ümumi say + etiket
+  var W=340, H=280, cx=170, cy=140, R=88, strokeW=36, circ=2*Math.PI*R;
   var offset=0, segs='', labels='';
 
   chartItems.forEach(function(it,i){
     var frac=it.count/total, len=frac*circ, pct=Math.round(frac*100);
-    segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="'+strokeW+'" stroke-dasharray="0 '+circ.toFixed(1)+'" stroke-dashoffset="'+(-offset).toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')" class="tvm-donut-seg" data-len="'+len.toFixed(1)+'" data-total="'+circ.toFixed(1)+'" style="transition:stroke-dasharray 1s cubic-bezier(.2,.7,.3,1) '+(i*0.07)+'s;"/>';
+    segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none"'
+      +' stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="'+strokeW+'"'
+      +' stroke-dasharray="0 '+circ.toFixed(1)+'"'
+      +' stroke-dashoffset="'+(-offset).toFixed(1)+'"'
+      +' transform="rotate(-90 '+cx+' '+cy+')"'
+      +' class="tvm-donut-seg" data-len="'+len.toFixed(1)+'" data-total="'+circ.toFixed(1)+'"'
+      +' style="transition:stroke-dasharray 1s cubic-bezier(.2,.7,.3,1) '+(i*0.08)+'s;"/>';
 
+    // Etiketlər
     var midFrac=(offset+len/2)/circ;
     var angleRad=(midFrac*360-90)*Math.PI/180;
-    var x1=cx+R*Math.cos(angleRad), y1=cy+R*Math.sin(angleRad);
-    var x2=cx+(R+18)*Math.cos(angleRad), y2=cy+(R+18)*Math.sin(angleRad);
+    var lx=cx+(R+20)*Math.cos(angleRad), ly=cy+(R+20)*Math.sin(angleRad);
     var isRight=Math.cos(angleRad)>=0;
-    var x3=x2+(isRight?28:-28), y3=y2;
+    var lx2=cx+(R+44)*Math.cos(angleRad), ly2=cy+(R+44)*Math.sin(angleRad);
+    var ex=isRight?lx2+20:lx2-20;
     var anchor=isRight?'start':'end';
-    var nm=it.name.length>18?it.name.slice(0,18)+'…':it.name;
-    var tx=(x3+(isRight?5:-5)).toFixed(1);
-
-    labels+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.6"/>'+
-      '<line x1="'+x2.toFixed(1)+'" y1="'+y2.toFixed(1)+'" x2="'+x3.toFixed(1)+'" y2="'+y3.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.6"/>'+
-      '<text x="'+tx+'" y="'+(y3-5).toFixed(1)+'" text-anchor="'+anchor+'" font-size="13" font-weight="700" fill="#12233B">'+escapeHtml(nm)+'</text>'+
-      '<text x="'+tx+'" y="'+(y3+11).toFixed(1)+'" text-anchor="'+anchor+'" font-size="12" font-weight="600" fill="#5C7089">'+it.count+' · '+pct+'%</text>';
+    var nm=it.name.length>16?it.name.slice(0,16)+'…':it.name;
+    if(pct>=5){
+      labels+='<line x1="'+lx.toFixed(1)+'" y1="'+ly.toFixed(1)+'" x2="'+lx2.toFixed(1)+'" y2="'+ly2.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.4"/>'
+        +'<line x1="'+lx2.toFixed(1)+'" y1="'+ly2.toFixed(1)+'" x2="'+ex.toFixed(1)+'" y2="'+ly2.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.4"/>'
+        +'<text x="'+(ex+(isRight?4:-4)).toFixed(1)+'" y="'+(ly2-3).toFixed(1)+'" text-anchor="'+anchor+'" font-size="11.5" font-weight="700" fill="#12233B" font-family="Inter,sans-serif">'+escapeHtml(nm)+'</text>'
+        +'<text x="'+(ex+(isRight?4:-4)).toFixed(1)+'" y="'+(ly2+11).toFixed(1)+'" text-anchor="'+anchor+'" font-size="11" font-weight="600" fill="#5C7089" font-family="Inter,sans-serif">'+it.count+' · '+pct+'%</text>';
+    }
     offset+=len;
   });
 
-  el.innerHTML='<div class="tvm-donut-list-sm">'+listHtml+'</div>'+
-    '<div class="tvm-donut-visual-big"><svg viewBox="0 0 '+W+' '+H+'" width="100%">'+segs+labels+'</svg></div>';
+  // Ortada ümumi say
+  var centerText='<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="28" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif">'+total+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="10.5" font-weight="600" fill="#8CA0BC" font-family="Inter,sans-serif">Ümumi</text>';
+
+  el.innerHTML='<div class="tvm-donut-panel">'
+    +'<div class="tvm-donut-list-sm">'+listHtml+'</div>'
+    +'<div class="tvm-donut-visual-big"><svg viewBox="0 0 '+W+' '+H+'" width="100%">'+segs+centerText+labels+'</svg></div>'
+    +'</div>';
 
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
@@ -2690,9 +2711,11 @@ function tvmRenderLocSplit(rows){
   var other=rows.length-metro;
   var total=rows.length||1;
   var mp=Math.round(metro/total*100), op=100-mp;
+  var metroIcon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 9h10M7 12h10M7 15h4"/></svg>';
+  var otherIcon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
   el.innerHTML=
-    '<div class="tvm-loc-card"><div class="tvm-loc-card-top"><span>Metro</span><b>'+metro+' · '+mp+'%</b></div><div class="tvm-loc-bar-track"><div class="tvm-loc-bar-fill" data-w="'+mp+'" style="background:#378ADD;"></div></div></div>'+
-    '<div class="tvm-loc-card"><div class="tvm-loc-card-top"><span>Digər</span><b>'+other+' · '+op+'%</b></div><div class="tvm-loc-bar-track"><div class="tvm-loc-bar-fill" data-w="'+op+'" style="background:#1D9E75;"></div></div></div>';
+    '<div class="tvm-loc-card"><div class="tvm-loc-card-icon" style="background:#E6F1FB;color:#2F6FED;">'+metroIcon+'</div><div class="tvm-loc-card-body"><div class="tvm-loc-card-top"><span>Metro</span><b>'+metro+' · '+mp+'%</b></div><div class="tvm-loc-bar-track"><div class="tvm-loc-bar-fill" data-w="'+mp+'" style="background:#378ADD;"></div></div></div></div>'+
+    '<div class="tvm-loc-card"><div class="tvm-loc-card-icon" style="background:#E0F5F0;color:#0E8C7A;">'+otherIcon+'</div><div class="tvm-loc-card-body"><div class="tvm-loc-card-top"><span>Digər</span><b>'+other+' · '+op+'%</b></div><div class="tvm-loc-bar-track"><div class="tvm-loc-bar-fill" data-w="'+op+'" style="background:#1D9E75;"></div></div></div></div>';
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
       el.querySelectorAll('.tvm-loc-bar-fill').forEach(function(bar){ bar.style.width=bar.dataset.w+'%'; });
@@ -2701,15 +2724,40 @@ function tvmRenderLocSplit(rows){
 }
 
 function tvmRenderTechList(rows){
+  // Köhnə #tvmTechList elementi gizli saxlanılır (JS uyğunluğu)
   var el=document.getElementById('tvmTechList');
-  if(!el) return;
-  var top=tvmDashCountTech(rows).slice(0,5);
-  if(top.length===0){ el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
-  el.innerHTML=top.map(function(it,i){
-    return '<div class="tvm-donut-row-sm" style="border-left-color:'+TVM_DONUT_COLORS[i]+';">'+
-      '<div class="tvm-donut-rank" style="background:'+TVM_DONUT_COLORS[i]+';">'+(i+1)+'</div>'+
-      '<div class="tvm-donut-row-name">'+escapeHtml(it.name)+'</div>'+
-      '<div class="tvm-donut-row-count">'+it.count+'</div></div>';
+  if(el) el.innerHTML='';
+
+  // Yeni cədvəl #tvmTechTableBody-ə render edilir
+  var tbody=document.getElementById('tvmTechTableBody');
+  if(!tbody) return;
+
+  var techCounts=tvmDashCountTech(rows);
+  var top=techCounts.slice(0,5);
+  if(top.length===0){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#8CA0BC;padding:20px;">Bu dövr üçün qeydə alınmayıb.</td></tr>';
+    return;
+  }
+
+  // Hər texnik üçün həll etdiyi sayı da hesabla (sadəcə count — bütün servislər həll sayılır)
+  var avgAll=tvmAvgResolutionMinutes(rows);
+
+  tbody.innerHTML=top.map(function(it){
+    // Bu texnikin ticketlərini filter et
+    var techRows=rows.filter(function(r){ return (r['Texnik']||'').trim()===it.name.trim(); });
+    var solved=techRows.length; // həll edən = texnikin bütün ticketləri
+    var avgMin=tvmAvgResolutionMinutes(techRows);
+    var avgTxt=avgMin>0?(avgMin+' dəq'):'—';
+    // SLA: orta müddəti 30 dəqiqədən az olanlar 100%, 30-60 arası 67%, 60+ 50%
+    var slaPct=avgMin<=0?100:(avgMin<=30?100:(avgMin<=60?67:50));
+    var slaColor=slaPct>=90?'#3FCB78':(slaPct>=65?'#D97706':'#E24B4A');
+    return '<tr>'
+      +'<td><span class="tvmd-tech-name">'+escapeHtml(it.name)+'</span></td>'
+      +'<td><span class="tvmd-tech-num">'+it.count+'</span></td>'
+      +'<td><span class="tvmd-tech-num">'+solved+'</span></td>'
+      +'<td>'+avgTxt+'</td>'
+      +'<td><div class="tvmd-sla-bar-wrap"><div class="tvmd-sla-bar-track"><div class="tvmd-sla-bar-fill" style="width:'+slaPct+'%;background:'+slaColor+';"></div></div><span class="tvmd-sla-pct">'+slaPct+'%</span></div></td>'
+      +'</tr>';
   }).join('');
 }
 
@@ -2759,11 +2807,42 @@ function tvmRenderRecurring(rows){
 
 function tvmDashComputeAndRender(){
   var filtered=tvmDashGetFilteredRows();
+
+  // Metrika kartlar
   document.getElementById('tvmDashTotal').textContent=filtered.length;
-  document.getElementById('tvmDashAvgTime').textContent=tvmAvgResolutionMinutes(filtered)+' dəq';
+  var avgMin=tvmAvgResolutionMinutes(filtered);
+  document.getElementById('tvmDashAvgTime').textContent=avgMin>0?(avgMin+' dəq'):'0 dəq';
   var deviceChanges=filtered.filter(function(r){ return r['Köhnə SN']&&r['Yeni SN']; }).length;
   document.getElementById('tvmDashDeviceChanges').textContent=deviceChanges;
 
+  // Tarix aralığı mətni
+  var dateRangeEl=document.getElementById('tvmDashDateRangeTxt');
+  if(dateRangeEl){
+    if(tvmDashCustomRange&&tvmDashCustomRange.start&&tvmDashCustomRange.end){
+      function fmtD(d){ return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); }
+      dateRangeEl.textContent=fmtD(tvmDashCustomRange.start)+' - '+fmtD(tvmDashCustomRange.end);
+    } else {
+      var periodMap={'24h':'Son 24 saat','week':'Son 1 həftə','month':'Son 1 ay','all':'Bütün dövr'};
+      dateRangeEl.textContent=periodMap[tvmDashPeriod]||'Bütün dövr';
+    }
+  }
+
+  // Sağ widget-lar (MTTR, SLA, Aktiv texnik)
+  var mttrEl=document.getElementById('tvmSideMTTR');
+  if(mttrEl) mttrEl.textContent=avgMin>0?(avgMin+' dəq'):'—';
+
+  // SLA: avg <= 30 dəq = 100%, <= 60 = 80%, > 60 = 60%
+  var slaVal=filtered.length===0?'—':(avgMin<=0?'100%':(avgMin<=30?'100%':(avgMin<=60?'80%':'60%')));
+  var slaEl=document.getElementById('tvmSideSLA');
+  if(slaEl) slaEl.textContent=slaVal;
+
+  // Aktiv texnik (unikal texnik sayı)
+  var techSet={};
+  filtered.forEach(function(r){ if(r['Texnik']&&r['Texnik'].trim()) techSet[r['Texnik'].trim()]=true; });
+  var activeTechEl=document.getElementById('tvmSideActiveTech');
+  if(activeTechEl) activeTechEl.textContent=Object.keys(techSet).length;
+
+  // Panellər
   tvmRenderLocSplit(filtered);
   var problemItems=tvmDashCount(filtered,'Problem',true);
   var solutionItems=tvmDashCount(filtered,'Həll',true);
@@ -2778,7 +2857,7 @@ function tvmDashComputeAndRender(){
 }
 
 function updateTvmDashTabsUI(){
-  document.querySelectorAll('#tvmDashTabs .dash-tab').forEach(function(t){
+  document.querySelectorAll('#tvmDashTabs .tvmd-tab').forEach(function(t){
     t.classList.toggle('active', t.getAttribute('data-period')===tvmDashPeriod && !tvmDashCustomRange);
   });
 }
@@ -2815,7 +2894,7 @@ function closeTvmDashboard(){
   document.getElementById('dashboardView').style.display='block';
 }
 document.addEventListener('DOMContentLoaded', function(){
-  var tabs=document.querySelectorAll('#tvmDashTabs .dash-tab');
+  var tabs=document.querySelectorAll('#tvmDashTabs .tvmd-tab');
   tabs.forEach(function(t){
     t.addEventListener('click', function(){
       tvmDashPeriod=t.getAttribute('data-period');
