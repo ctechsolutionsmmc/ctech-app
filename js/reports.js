@@ -441,6 +441,7 @@ function openTvmReport(){
   document.getElementById('dashboardView').style.display='none';
   var view=document.getElementById('tvmReportView');
   view.style.display='flex';
+  view.scrollTop=0;
   document.getElementById('tvmRptGlobalSearch').value='';
   tvmRptDaysBack=90;
   var tvmDaysSel=document.getElementById('tvmRptDaysBackSelect'); if(tvmDaysSel) tvmDaysSel.value='90';
@@ -456,8 +457,13 @@ function openTvmReport(){
 function closeTvmReport(){
   if(tvmRptAutoRefresh){ clearInterval(tvmRptAutoRefresh); tvmRptAutoRefresh=null; }
   if(tvmRptDateInterval){ clearInterval(tvmRptDateInterval); tvmRptDateInterval=null; }
-  document.getElementById('tvmReportView').style.display='none';
-  document.getElementById('dashboardView').style.display='block';
+  if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
+    routerNavigate('dashboard', true);
+  } else {
+    document.getElementById('tvmReportView').style.display='none';
+    document.getElementById('dashboardView').style.display='block';
+    window.scrollTo(0,0);
+  }
 }
 function tvmRptSortKey(row){
   var d=row['Tarix']||'';
@@ -881,6 +887,10 @@ function loadDashData(){
 }
 function updateDashTabsUI(){ document.querySelectorAll('#dashTabs .dash-tab').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-period')===dashPeriod); }); }
 function openBusDashboard(){
+  if(window.innerWidth < 901){
+    if(typeof routerNavigate === 'function') routerNavigate('dashboard', true);
+    return;
+  }
   document.getElementById('dashboardView').style.display='none';
   var bdv=document.getElementById('busDashboardView');
   bdv.style.display='flex';
@@ -3146,6 +3156,10 @@ function loadTvmDashData(){
 }
 
 function openTvmDashboard(){
+  if(window.innerWidth < 901){
+    if(typeof routerNavigate === 'function') routerNavigate('dashboard', true);
+    return;
+  }
   document.getElementById('dashboardView').style.display='none';
   var tv=document.getElementById('tvmDashboardView');
   tv.style.display='flex';
