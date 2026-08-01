@@ -109,7 +109,13 @@ function routerNavigate(route, pushToHistory){
   // Ağır görünüşlərdən çıxarkən (TVM Dashboard, Toplu idxal və s.):
   // yükləmə vidjetini göstər, sonra keçidi et — Home düyməsi VƏ brauzerin
   // Geri düyməsi bu funksiyaya gətirən hər iki yol eyni məntiqdən keçir.
-  var _LOADING_EXIT_VIEWS = { 'tvmDashboardView':'tvm-dashboard', 'busBulkView':'bus-bulk' };
+  var _LOADING_EXIT_VIEWS = {
+    'tvmDashboardView':'tvm-dashboard',
+    'busBulkView':'bus-bulk',
+    'busOngoingView':'bus-ongoing',
+    'busDashboardView':'bus-dashboard',
+    'busReportView':'bus-report'
+  };
   var leavingHeavyView = false;
   for(var _vid in _LOADING_EXIT_VIEWS){
     var _ve = document.getElementById(_vid);
