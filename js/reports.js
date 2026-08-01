@@ -2635,15 +2635,15 @@ function tvmRenderDonutPanel(containerId, items, total){
   var el=document.getElementById(containerId);
   if(!el) return;
   if(total===0 || items.length===0){
-    el.innerHTML='<div class="tvm-donut-empty">Bu dövr ucun qeyde alinmayib.</div>';
+    el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>';
     return;
   }
   var top5=items.slice(0,5);
   var restCount=items.slice(5).reduce(function(s,it){ return s+it.count; },0);
   var chartItems=top5.slice();
-  if(restCount>0) chartItems.push({name:'Diger', count:restCount});
+  if(restCount>0) chartItems.push({name:'Digər', count:restCount});
 
-  // Sol siyahi
+  // Sol siyahı (nömrə + ad + say + faiz)
   var listHtml=top5.map(function(it,i){
     var pct=Math.round(it.count/total*100);
     return '<div class="tvm-donut-row-sm" style="border-left-color:'+TVM_DONUT_COLORS[i]+';">'
@@ -2654,19 +2654,25 @@ function tvmRenderDonutPanel(containerId, items, total){
       +'</div>';
   }).join('');
 
-  // SVG: PAD=100 ki etiketler kenarda kesmeisin
-  var PAD=100;
-  var R=76, strokeW=30, circ=2*Math.PI*R;
-  var cx=PAD+R, cy=PAD+R;
-  var W=2*(PAD+R), H=2*(PAD+R);
+  // Sağ legend — rəngli nöqtə + ad + say + faiz, heç vaxt üst-üstə düşmür
+  var legendHtml=chartItems.map(function(it,i){
+    var pct=Math.round(it.count/total*100);
+    return '<div class="tvmd-legend-row">'
+      +'<span class="tvmd-legend-dot" style="background:'+TVM_DONUT_COLORS[i]+';"></span>'
+      +'<span class="tvmd-legend-name">'+escapeHtml(it.name)+'</span>'
+      +'<span class="tvmd-legend-val">'+it.count+' · '+pct+'%</span>'
+      +'</div>';
+  }).join('');
 
-  var offset=0, segs='', labels='';
+  // Donut SVG — yalnız halqa + ortada say, etiket YOX
+  var R=72, strokeW=28, circ=2*Math.PI*R;
+  var cx=R+strokeW/2+4, cy=R+strokeW/2+4;
+  var W=cx*2, H=cy*2;
+  var offset=0, segs='';
 
   chartItems.forEach(function(it,i){
     var frac=it.count/total;
     var len=frac*circ;
-    var pct=Math.round(frac*100);
-
     segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none"'
       +' stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="'+strokeW+'"'
       +' stroke-dasharray="0 '+circ.toFixed(1)+'"'
@@ -2674,44 +2680,21 @@ function tvmRenderDonutPanel(containerId, items, total){
       +' transform="rotate(-90 '+cx+' '+cy+')"'
       +' class="tvm-donut-seg" data-len="'+len.toFixed(1)+'" data-total="'+circ.toFixed(1)+'"'
       +' style="transition:stroke-dasharray 1s cubic-bezier(.2,.7,.3,1) '+(i*0.08)+'s;"/>';
-
-    if(pct>=5){
-      var midFrac=(offset+len/2)/circ;
-      var angleDeg=midFrac*360-90;
-      var angleRad=angleDeg*Math.PI/180;
-      var cosA=Math.cos(angleRad), sinA=Math.sin(angleRad);
-      var r1=R+strokeW/2+5;
-      var r2=R+strokeW/2+24;
-      var x1=(cx+r1*cosA).toFixed(1), y1=(cy+r1*sinA).toFixed(1);
-      var x2=(cx+r2*cosA).toFixed(1), y2=(cy+r2*sinA).toFixed(1);
-      var isRight=cosA>=0;
-      var horizLen=isRight?(PAD-52):(-(PAD-52));
-      var ex=(cx+r2*cosA+horizLen).toFixed(1);
-      var ey=y2;
-      var anchor=isRight?'start':'end';
-      var textX=(parseFloat(ex)+(isRight?3:-3)).toFixed(1);
-      var nm=it.name.length>18?it.name.slice(0,18)+'...':it.name;
-      labels+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.3" stroke-linecap="round"/>'
-        +'<line x1="'+x2+'" y1="'+y2+'" x2="'+ex+'" y2="'+ey+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.3"/>'
-        +'<text x="'+textX+'" y="'+(parseFloat(ey)-2).toFixed(1)+'" text-anchor="'+anchor
-        +'" font-size="11" font-weight="700" fill="#22344F" font-family="Inter,Arial,sans-serif">'+escapeHtml(nm)+'</text>'
-        +'<text x="'+textX+'" y="'+(parseFloat(ey)+13).toFixed(1)+'" text-anchor="'+anchor
-        +'" font-size="10" font-weight="600" fill="#7A90AB" font-family="Inter,Arial,sans-serif">'+it.count+' - '+pct+'%</text>';
-    }
     offset+=len;
   });
 
   var centerText=''
-    +'<text x="'+cx+'" y="'+(cy+2)+'" text-anchor="middle" dominant-baseline="middle"'
-    +' font-size="28" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif">'+total+'</text>'
-    +'<text x="'+cx+'" y="'+(cy+24)+'" text-anchor="middle"'
-    +' font-size="10" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif">Umumi</text>';
+    +'<text x="'+cx+'" y="'+cy+'" text-anchor="middle" dominant-baseline="middle"'
+    +' font-size="26" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif">'+total+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+22)+'" text-anchor="middle"'
+    +' font-size="10" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif">Ümumi</text>';
 
   el.innerHTML='<div class="tvm-donut-panel">'
     +'<div class="tvm-donut-list-sm">'+listHtml+'</div>'
-    +'<div class="tvm-donut-visual-big">'
-    +'<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:380px;overflow:visible;">'+segs+centerText+labels+'</svg>'
+    +'<div class="tvmd-donut-center">'
+      +'<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:170px;height:170px;">'+segs+centerText+'</svg>'
     +'</div>'
+    +'<div class="tvmd-legend">'+legendHtml+'</div>'
     +'</div>';
 
   requestAnimationFrame(function(){
@@ -2804,7 +2787,7 @@ function tvmRenderAllLocations(rows){
   var items=tvmDashCountLocation(rows);
   var total=rows.length||1;
   if(items.length===0){
-    el.innerHTML='<div class="tvm-donut-empty" style="padding:20px;">Bu dovr ucun qeyde alinmayib.</div>';
+    el.innerHTML='<div class="tvm-donut-empty" style="padding:20px;">Bu dövr üçün qeydə alınmayıb.</div>';
     return;
   }
   el.innerHTML=items.map(function(it,i){
@@ -2952,23 +2935,47 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
-function tvmSearchTech(){
-  var q=document.getElementById('tvmTechSearchInput').value.trim();
+var tvmTechSearchOpen=false;
+function tvmToggleTechSearch(){
+  tvmTechSearchOpen=!tvmTechSearchOpen;
+  var panel=document.getElementById('tvmTechSearchPanel');
+  if(panel) panel.style.display=tvmTechSearchOpen?'block':'none';
+  if(tvmTechSearchOpen){
+    var inp=document.getElementById('tvmTechSearchInput');
+    if(inp){ inp.value=''; inp.focus(); }
+    var out=document.getElementById('tvmTechSearchResult');
+    if(out) out.textContent='';
+  }
+}
+
+function tvmClearTechSearch(){
+  var inp=document.getElementById('tvmTechSearchInput');
+  if(inp){ inp.value=''; inp.focus(); }
   var out=document.getElementById('tvmTechSearchResult');
-  if(!q){ out.textContent='Ad daxil edin.'; return; }
+  if(out) out.textContent='';
+}
+
+function tvmSearchTech(){
+  var inp=document.getElementById('tvmTechSearchInput');
+  var out=document.getElementById('tvmTechSearchResult');
+  if(!out) return;
+  var q=(inp?inp.value:'').trim();
+  if(!q){ out.textContent=''; return; }
   var filtered=tvmDashGetFilteredRows();
   var counts=tvmDashCountTech(filtered);
   var match=counts.find(function(it){ return it.name.toLowerCase().indexOf(q.toLowerCase())!==-1; });
   if(match){
-    out.textContent=match.name+' — seçilmiş dövrdə '+match.count+' TVM ticket-i';
+    out.innerHTML='<span style="color:#12233B;font-weight:700;">'+escapeHtml(match.name)+'</span>'
+      +' — seçilmiş dövrdə <span style="color:#2F6FED;font-weight:700;">'+match.count+'</span> TVM ticket';
     return;
   }
   var allCounts=tvmDashCountTech(tvmDashAllRows);
   var allMatch=allCounts.find(function(it){ return it.name.toLowerCase().indexOf(q.toLowerCase())!==-1; });
   if(allMatch){
-    out.textContent=allMatch.name+' — seçilmiş dövrdə heç bir ticket yoxdur (bütün tarixçədə: '+allMatch.count+')';
+    out.innerHTML='<span style="color:#12233B;font-weight:700;">'+escapeHtml(allMatch.name)+'</span>'
+      +' — seçilmiş dövrdə nəticə yoxdur (bütün tarixçədə: <span style="color:#2F6FED;font-weight:700;">'+allMatch.count+'</span>)';
   } else {
-    out.textContent='Uyğun texnik tapılmadı.';
+    out.innerHTML='<span style="color:#8CA0BC;">Uyğun texnik tapılmadı.</span>';
   }
 }
 
