@@ -742,10 +742,46 @@ body.dark-mode .tvm-loc-bar-track{ background:#1C2A3D; }
 }
 body.dark-mode .tvmd-donut-card{ background:#16212E; border-color:#2A3B52; }
 
-/* Donut panel içi — JS render edir .tvm-donut-* class-larla */
-.tvm-donut-panel{ display:grid; grid-template-columns:260px 1fr; gap:0; align-items:center; }
+/* Donut panel içi — Sol siyahı | Donut | Sağ legend */
+.tvm-donut-panel{
+  display:grid;
+  grid-template-columns:minmax(200px,260px) 180px 1fr;
+  gap:0;
+  align-items:center;
+  min-height:220px;
+}
 @media (max-width:900px){ .tvm-donut-panel{ grid-template-columns:1fr; } }
-.tvm-donut-list-sm{ overflow:hidden; }
+
+/* Donut mərkəzi */
+.tvmd-donut-center{
+  display:flex; align-items:center; justify-content:center;
+  padding:16px 8px;
+}
+
+/* Sağ legend */
+.tvmd-legend{
+  display:flex; flex-direction:column; gap:6px;
+  padding:16px 16px 16px 8px;
+  overflow:hidden;
+}
+.tvmd-legend-row{
+  display:flex; align-items:center; gap:8px;
+  min-width:0;
+}
+.tvmd-legend-dot{
+  width:9px; height:9px; border-radius:50%; flex-shrink:0;
+}
+.tvmd-legend-name{
+  flex:1; font-size:12px; font-weight:600; color:#33445E;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  min-width:0;
+}
+body.dark-mode .tvmd-legend-name{ color:#C7D5E8; }
+.tvmd-legend-val{
+  font-size:11.5px; font-weight:700; color:#5C7089;
+  white-space:nowrap; flex-shrink:0;
+}
+body.dark-mode .tvmd-legend-val{ color:#7A90AB; }
 .tvm-donut-row-sm{
   display:grid; grid-template-columns:28px 1fr auto auto; gap:8px;
   align-items:center; padding:10px 16px; border-bottom:1px solid #F0F5FC;
@@ -767,8 +803,8 @@ body.dark-mode .tvm-donut-row-name{ color:#C7D5E8; }
 .tvm-donut-row-count{ font-weight:800; color:#12233B; font-size:14px; flex-shrink:0; }
 body.dark-mode .tvm-donut-row-count{ color:#E8EEF5; }
 .tvm-donut-row-pct{ font-size:12px; color:#8CA0BC; font-weight:600; flex-shrink:0; width:36px; text-align:right; }
-.tvm-donut-visual-big{ display:flex; align-items:center; justify-content:center; padding:16px; }
-.tvm-donut-visual-big svg{ max-width:360px; width:100%; }
+.tvm-donut-visual-big{ display:flex; align-items:center; justify-content:center; padding:16px 8px; }
+.tvm-donut-visual-big svg{ max-width:180px; width:100%; }
 .tvm-donut-empty{ padding:32px; text-align:center; font-size:13px; color:#8CA0BC; }
 .tvmd-showall-link-sm{
   display:inline-flex; align-items:center; gap:5px;
@@ -901,9 +937,37 @@ body.dark-mode .tvmd-showall-link{ color:#7FB0F5; }
 .tvmd-recurring-wrap{ margin-top:8px; }
 .tvmd-tech-search-hidden{ display:none; }
 
-/* Texnik axtarış nəticəsi (köhnə JS uyğunluğu) */
-.tvm-tech-search-result{ font-size:13px; color:#33445E; font-weight:600; }
-body.dark-mode .tvm-tech-search-result{ color:#C7D5E8; }
+/* Texnik axtarış paneli */
+.tvmd-tech-search-panel{
+  margin-bottom:12px;
+  border:1.5px solid #DCE6F5;
+  border-radius:11px;
+  overflow:hidden;
+  background:#F8FAFD;
+}
+body.dark-mode .tvmd-tech-search-panel{ background:#1C2A3D; border-color:#3E5578; }
+.tvmd-tech-search-inner{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px;
+}
+.tvmd-tech-search-inner input{
+  flex:1; border:none; background:none; outline:none;
+  font-size:13.5px; font-family:'Inter',sans-serif; color:#12233B;
+}
+body.dark-mode .tvmd-tech-search-inner input{ color:#E8EEF5; }
+.tvmd-tech-search-inner input::placeholder{ color:#B0C4D8; }
+.tvmd-search-clear-btn{
+  width:22px; height:22px; border-radius:50%; border:none;
+  background:#DCE6F5; color:#5C7089; display:flex; align-items:center;
+  justify-content:center; cursor:pointer; flex-shrink:0;
+}
+.tvmd-search-clear-btn:hover{ background:#2F6FED; color:#fff; }
+body.dark-mode .tvmd-search-clear-btn{ background:#3E5578; color:#C7D5E8; }
+.tvmd-tech-search-result{
+  padding:10px 14px; font-size:13px; color:#5C7089;
+  border-top:1px solid #E1EAF6; line-height:1.5; min-height:20px;
+}
+body.dark-mode .tvmd-tech-search-result{ border-color:#2A3B52; color:#8CA0BC; }
 
 /* ── RESPONSIVE ── */
 @media(max-width:1100px){
