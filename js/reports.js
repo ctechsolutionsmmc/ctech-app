@@ -2643,40 +2643,41 @@ function tvmRenderDonutPanel(containerId, items, total){
   var chartItems=top5.slice();
   if(restCount>0) chartItems.push({name:'Digər', count:restCount});
 
-  // Sol siyahı — yalnız top5, Digər burada göstərilmir
+  // Sol siyahı — nömrə + ad (sadəcə)
   var listHtml=top5.map(function(it,i){
     var pct=Math.round(it.count/total*100);
-    var shortName=it.name.length>22?it.name.slice(0,22)+'…':it.name;
-    return '<div class="tvm-donut-row-sm" style="border-left-color:'+TVM_DONUT_COLORS[i]+';">'
-      +'<div class="tvm-donut-rank" style="background:'+TVM_DONUT_COLORS[i]+';">'+(i+1)+'</div>'
+    var shortName=it.name.length>24?it.name.slice(0,24)+'…':it.name;
+    var color=TVM_DONUT_COLORS[i];
+    return '<div class="tvm-donut-row-sm" style="border-left-color:'+color+';">'
+      +'<div class="tvm-donut-rank" style="background:'+color+';">'+(i+1)+'</div>'
       +'<div class="tvm-donut-row-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(shortName)+'</div>'
-      +'<div class="tvm-donut-row-count">'+it.count+'</div>'
-      +'<div class="tvm-donut-row-pct">'+pct+'%</div>'
+      +'<div class="tvmd-row-badge">'
+        +'<span class="tvmd-badge-count">'+it.count+'</span>'
+        +'<span class="tvmd-badge-pct" style="background:'+color+'22;color:'+color+';border:1px solid '+color+'44;">'+pct+'%</span>'
+      +'</div>'
       +'</div>';
   }).join('');
 
-  // Sağ legend — bütün chart items (Digər daxil), compact
+  // Sağ legend — ad + badge (say · faiz) bir arada
   var legendHtml=chartItems.map(function(it,i){
     var pct=Math.round(it.count/total*100);
-    var shortName=it.name.length>20?it.name.slice(0,20)+'…':it.name;
+    var shortName=it.name.length>22?it.name.slice(0,22)+'…':it.name;
     return '<div class="tvmd-legend-row">'
       +'<span class="tvmd-legend-dot" style="background:'+TVM_DONUT_COLORS[i]+';"></span>'
       +'<span class="tvmd-legend-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(shortName)+'</span>'
-      +'<span class="tvmd-legend-val">'+it.count+' · '+pct+'%</span>'
+      +'<span class="tvmd-legend-badge" style="background:'+TVM_DONUT_COLORS[i]+'22;color:'+TVM_DONUT_COLORS[i]+';border:1px solid '+TVM_DONUT_COLORS[i]+'44;">'+it.count+' · '+pct+'%</span>'
       +'</div>';
   }).join('');
 
-  // Donut SVG — halqa + ortada say, gap seqmentlər arasında
-  var R=72, strokeW=26, gap=1.5, circ=2*Math.PI*R;
+  // Böyük donut SVG
+  var R=95, strokeW=30, gap=2, circ=2*Math.PI*R;
   var cx=R+strokeW/2+6, cy=R+strokeW/2+6;
   var W=cx*2, H=cy*2;
   var offset=0, segs='';
-  var gapAngle=gap/R; // radianla gap
 
   chartItems.forEach(function(it,i){
     var frac=it.count/total;
-    var len=frac*circ - gap;
-    if(len<0) len=0;
+    var len=Math.max(frac*circ - gap, 0);
     segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none"'
       +' stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="'+strokeW+'"'
       +' stroke-linecap="round"'
@@ -2688,24 +2689,19 @@ function tvmRenderDonutPanel(containerId, items, total){
     offset+=frac*circ;
   });
 
-  // Kölgə filtr — donut dərinlik üçün
-  var defs='<defs><filter id="donut-shadow-'+containerId+'" x="-20%" y="-20%" width="140%" height="140%">'
-    +'<feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(30,68,130,0.12)"/>'
-    +'</filter></defs>';
-
-  var innerR=R-strokeW/2;
-  var bgCircle='<circle cx="'+cx+'" cy="'+cy+'" r="'+innerR+'" fill="white" opacity="0.6"/>';
+  var innerR=R-strokeW/2-2;
+  var bgCircle='<circle cx="'+cx+'" cy="'+cy+'" r="'+innerR+'" fill="rgba(247,250,254,0.7)"/>';
 
   var centerText=''
-    +'<text x="'+cx+'" y="'+(cy-2)+'" text-anchor="middle" dominant-baseline="middle"'
-    +' font-size="24" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif" letter-spacing="-0.5">'+total+'</text>'
-    +'<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle"'
-    +' font-size="9.5" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif" letter-spacing="0.3">Ümumi</text>';
+    +'<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" dominant-baseline="middle"'
+    +' font-size="32" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif" letter-spacing="-0.5">'+total+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+20)+'" text-anchor="middle"'
+    +' font-size="10" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif" letter-spacing="0.5">Ümumi</text>';
 
   el.innerHTML='<div class="tvm-donut-panel">'
     +'<div class="tvm-donut-list-sm">'+listHtml+'</div>'
     +'<div class="tvmd-donut-center">'
-      +'<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:160px;height:160px;filter:drop-shadow(0 4px 12px rgba(30,68,130,0.10));">'+defs+bgCircle+segs+centerText+'</svg>'
+      +'<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:220px;height:220px;filter:drop-shadow(0 6px 18px rgba(30,68,130,0.13));">'+bgCircle+segs+centerText+'</svg>'
     +'</div>'
     +'<div class="tvmd-legend">'+legendHtml+'</div>'
     +'</div>';
@@ -2713,7 +2709,9 @@ function tvmRenderDonutPanel(containerId, items, total){
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
       el.querySelectorAll('.tvm-donut-seg').forEach(function(seg){
-        seg.setAttribute('stroke-dasharray', seg.dataset.len+' '+(parseFloat(seg.dataset.total)-parseFloat(seg.dataset.len)));
+        var len=parseFloat(seg.dataset.len);
+        var tot=parseFloat(seg.dataset.total);
+        seg.setAttribute('stroke-dasharray', len.toFixed(2)+' '+(tot-len).toFixed(2));
       });
     });
   });
