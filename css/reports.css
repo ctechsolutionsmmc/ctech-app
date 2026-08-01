@@ -760,7 +760,7 @@ body.dark-mode .tvm-loc-bar-track{ background:#1C2A3D; }
 .tvmd-problems-row{ margin-bottom:20px; }
 .tvmd-donut-card{
   background:rgba(255,255,255,0.82); border:2px solid #A8C6EC; border-radius:16px;
-  overflow:hidden; box-shadow:0 4px 20px rgba(30,68,130,.10);
+  box-shadow:0 4px 20px rgba(30,68,130,.10);
   backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
 body.dark-mode .tvmd-donut-card{ background:rgba(22,33,46,0.82); border-color:#2A4A72; }
@@ -771,7 +771,7 @@ body.dark-mode .tvmd-donut-card{ background:rgba(22,33,46,0.82); border-color:#2
   display:grid;
   grid-template-columns:minmax(210px,260px) 1fr auto;
   align-items:center;
-  min-height:240px;
+  min-height:220px;
 }
 @media (max-width:900px){ .tvm-donut-panel-new{ grid-template-columns:1fr; } }
 
