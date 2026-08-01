@@ -2725,42 +2725,61 @@ function tvmRenderLocSplit(rows){
   });
 }
 
+var tvmAllTechsOpen=false;
+var tvmLastFilteredRows=[];
+
 function tvmRenderTechList(rows){
-  // Köhnə #tvmTechList elementi gizli saxlanılır (JS uyğunluğu)
+  tvmLastFilteredRows=rows;
   var el=document.getElementById('tvmTechList');
   if(el) el.innerHTML='';
 
-  // Yeni cədvəl #tvmTechTableBody-ə render edilir
   var tbody=document.getElementById('tvmTechTableBody');
   if(!tbody) return;
 
   var techCounts=tvmDashCountTech(rows);
-  var top=techCounts.slice(0,5);
-  if(top.length===0){
-    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#8CA0BC;padding:20px;">Bu dövr üçün qeydə alınmayıb.</td></tr>';
+  var showAllBtn=document.getElementById('tvmTechShowAllBtn');
+
+  if(techCounts.length===0){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#8CA0BC;padding:20px;">Bu dövr üçün qeydə alınmayıb.</td></tr>';
+    if(showAllBtn) showAllBtn.style.display='none';
     return;
   }
 
-  // Hər texnik üçün həll etdiyi sayı da hesabla (sadəcə count — bütün servislər həll sayılır)
-  var avgAll=tvmAvgResolutionMinutes(rows);
+  // Yalnız top 5 göstər (açılmayıbsa)
+  var displayList=tvmAllTechsOpen ? techCounts : techCounts.slice(0,5);
 
-  tbody.innerHTML=top.map(function(it){
-    // Bu texnikin ticketlərini filter et
+  tbody.innerHTML=displayList.map(function(it){
     var techRows=rows.filter(function(r){ return (r['Texnik']||'').trim()===it.name.trim(); });
-    var solved=techRows.length; // həll edən = texnikin bütün ticketləri
     var avgMin=tvmAvgResolutionMinutes(techRows);
     var avgTxt=avgMin>0?(avgMin+' dəq'):'—';
-    // SLA: orta müddəti 30 dəqiqədən az olanlar 100%, 30-60 arası 67%, 60+ 50%
     var slaPct=avgMin<=0?100:(avgMin<=30?100:(avgMin<=60?67:50));
     var slaColor=slaPct>=90?'#3FCB78':(slaPct>=65?'#D97706':'#E24B4A');
     return '<tr>'
       +'<td><span class="tvmd-tech-name">'+escapeHtml(it.name)+'</span></td>'
       +'<td><span class="tvmd-tech-num">'+it.count+'</span></td>'
-      +'<td><span class="tvmd-tech-num">'+solved+'</span></td>'
       +'<td>'+avgTxt+'</td>'
       +'<td><div class="tvmd-sla-bar-wrap"><div class="tvmd-sla-bar-track"><div class="tvmd-sla-bar-fill" style="width:'+slaPct+'%;background:'+slaColor+';"></div></div><span class="tvmd-sla-pct">'+slaPct+'%</span></div></td>'
       +'</tr>';
   }).join('');
+
+  // "Hamısını göstər" düyməsi — yalnız 5-dən çox texnik varsa göstər
+  if(showAllBtn){
+    if(techCounts.length>5){
+      showAllBtn.style.display='flex';
+      if(tvmAllTechsOpen){
+        showAllBtn.innerHTML='Yığ <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>';
+      } else {
+        showAllBtn.innerHTML='Hamısını göstər ('+techCounts.length+') <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>';
+      }
+    } else {
+      showAllBtn.style.display='none';
+    }
+  }
+}
+
+function tvmToggleAllTechs(){
+  tvmAllTechsOpen=!tvmAllTechsOpen;
+  tvmRenderTechList(tvmLastFilteredRows);
 }
 
 var tvmAllLocationsOpen=false;
@@ -2929,6 +2948,7 @@ document.addEventListener('DOMContentLoaded', function(){
     t.addEventListener('click', function(){
       tvmDashPeriod=t.getAttribute('data-period');
       tvmDashCustomRange=null;
+      tvmAllTechsOpen=false;
       updateTvmDashTabsUI();
       tvmDashComputeAndRender();
     });
