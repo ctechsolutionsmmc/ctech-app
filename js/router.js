@@ -106,10 +106,18 @@ function routerNavigate(route, pushToHistory){
     }
   }
 
-  // TVM Dashboard-dan çıxarkən (Home düyməsi VƏ ya brauzerin Geri düyməsi ilə):
-  // yükləmə vidjetini göstər, sonra keçidi et — hər iki yol eyni məntiqdən keçir.
-  var tvmDashEl = document.getElementById('tvmDashboardView');
-  var leavingTvmDash = tvmDashEl && tvmDashEl.style.display !== 'none' && base !== 'tvm-dashboard';
+  // Ağır görünüşlərdən çıxarkən (TVM Dashboard, Toplu idxal və s.):
+  // yükləmə vidjetini göstər, sonra keçidi et — Home düyməsi VƏ brauzerin
+  // Geri düyməsi bu funksiyaya gətirən hər iki yol eyni məntiqdən keçir.
+  var _LOADING_EXIT_VIEWS = { 'tvmDashboardView':'tvm-dashboard', 'busBulkView':'bus-bulk' };
+  var leavingHeavyView = false;
+  for(var _vid in _LOADING_EXIT_VIEWS){
+    var _ve = document.getElementById(_vid);
+    if(_ve && _ve.style.display !== 'none' && base !== _LOADING_EXIT_VIEWS[_vid]){
+      leavingHeavyView = true;
+      break;
+    }
+  }
 
   function _doNav(){
     var newHash = '#' + route;
@@ -149,7 +157,7 @@ function routerNavigate(route, pushToHistory){
     _isNavigating = false;
   }
 
-  if(leavingTvmDash){
+  if(leavingHeavyView){
     var loading = document.getElementById('dashLoading');
     if(loading) loading.style.display='flex';
     setTimeout(_doNav, 700);
