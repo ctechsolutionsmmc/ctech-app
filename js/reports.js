@@ -2691,10 +2691,10 @@ function tvmRenderDonutPanel(containerId, items, total){
   }
 
   // Donut SVG — boyuk, ortada, mini etiketler
-  var R=78, strokeW=22, gap=2, circ=2*Math.PI*R;
+  var R=95, strokeW=26, gap=2, circ=2*Math.PI*R;
   // SVG canvas: donut mərəkzidə, ətrafında etiket zonası
-  var EPAD=120; // sol/sağ etiket boşluğu
-  var VPAD=44;  // üst/alt boşluq
+  var EPAD=140; // sol/sağ etiket boşluğu
+  var VPAD=50;  // üst/alt boşluq
   var cx=EPAD+R+strokeW/2+2;
   var cy=VPAD+R+strokeW/2+2;
   var W=2*(EPAD+R+strokeW/2+2);
