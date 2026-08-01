@@ -686,12 +686,12 @@ body.dark-mode .tvmd-tab.active{ background:#141F30; color:#8FB4EA; }
 /* ── METRİKA KARTLAR ── */
 .tvmd-metrics-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
 .tvmd-metric-card{
-  background:rgba(255,255,255,0.88); border:1.5px solid #C9DAF3; border-radius:16px;
-  padding:18px 20px 14px; box-shadow:0 4px 20px rgba(30,68,130,.08);
+  background:rgba(255,255,255,0.82); border:2px solid #A8C6EC; border-radius:16px;
+  padding:18px 20px 14px; box-shadow:0 4px 20px rgba(30,68,130,.10);
   display:flex; flex-direction:column; gap:4px;
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
-body.dark-mode .tvmd-metric-card{ background:rgba(22,33,46,0.90); border-color:#2A4A72; }
+body.dark-mode .tvmd-metric-card{ background:rgba(22,33,46,0.82); border-color:#2A4A72; }
 .tvmd-metric-top{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
 .tvmd-metric-icon-wrap{
   width:36px; height:36px; border-radius:10px; flex-shrink:0;
@@ -712,7 +712,7 @@ body.dark-mode .tvmd-metric-value{ color:#E8EEF5; }
 .tvmd-sparkline{ width:100%; height:36px; display:block; }
 
 /* Filtr kartı */
-.tvmd-filter-card{ cursor:pointer; border:1.5px dashed #C9DAF3; justify-content:center; gap:10px; }
+.tvmd-filter-card{ cursor:pointer; border:2px dashed #A8C6EC; justify-content:center; gap:10px; }
 .tvmd-filter-card:hover{ background:#F7FAFE; border-color:#2F6FED; }
 body.dark-mode .tvmd-filter-card{ border-color:#3E5578; }
 .tvmd-filter-date-row{ display:flex; align-items:center; gap:8px; }
@@ -734,12 +734,12 @@ body.dark-mode .tvmd-section-label{ color:#E8EEF5; }
 .tvmd-loc-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
 /* Köhnə tvm-loc-* class-larını saxlayırıq — JS render edir */
 .tvm-loc-card{
-  background:rgba(255,255,255,0.88); border:1.5px solid #C9DAF3; border-radius:14px;
-  padding:16px 20px; box-shadow:0 4px 14px rgba(30,68,130,.06);
+  background:rgba(255,255,255,0.82); border:2px solid #A8C6EC; border-radius:14px;
+  padding:16px 20px; box-shadow:0 4px 14px rgba(30,68,130,.10);
   display:flex; align-items:center; gap:14px;
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
-body.dark-mode .tvm-loc-card{ background:rgba(22,33,46,0.90); border-color:#2A4A72; }
+body.dark-mode .tvm-loc-card{ background:rgba(22,33,46,0.82); border-color:#2A4A72; }
 .tvm-loc-card-icon{
   width:36px; height:36px; border-radius:10px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
@@ -759,33 +759,94 @@ body.dark-mode .tvm-loc-bar-track{ background:#1C2A3D; }
 /* ── PROBLEMLƏR BÖLÜMÜ ── */
 .tvmd-problems-row{ margin-bottom:20px; }
 .tvmd-donut-card{
-  background:rgba(255,255,255,0.88); border:1.5px solid #C9DAF3; border-radius:16px;
-  overflow:hidden; box-shadow:0 4px 20px rgba(30,68,130,.08);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  background:rgba(255,255,255,0.82); border:2px solid #A8C6EC; border-radius:16px;
+  overflow:hidden; box-shadow:0 4px 20px rgba(30,68,130,.10);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
-body.dark-mode .tvmd-donut-card{ background:rgba(22,33,46,0.90); border-color:#2A4A72; }
+body.dark-mode .tvmd-donut-card{ background:rgba(22,33,46,0.82); border-color:#2A4A72; }
 
 /* Donut panel içi — Sol siyahı | Donut | Sağ legend */
-/* Donut panel: sol siyahi | donut | sag legend */
+/* Donut panel: sol siyahi | donut+diger btn | [diger panel] */
 .tvm-donut-panel-new{
   display:grid;
-  grid-template-columns:minmax(190px,240px) 210px 1fr;
-  align-items:center;
-  min-height:220px;
+  grid-template-columns:minmax(200px,250px) 1fr auto;
+  align-items:stretch;
+  min-height:240px;
   overflow:hidden;
-}
-@media (max-width:1100px){
-  .tvm-donut-panel-new{ grid-template-columns:minmax(170px,210px) 190px 1fr; }
 }
 @media (max-width:900px){
   .tvm-donut-panel-new{ grid-template-columns:1fr; }
 }
 
-/* Donut merkezi */
+/* Donut + Diger btn orta sutun */
+.tvmd-donut-mid{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:20px 16px; gap:10px;
+}
+
+/* Kohnə donut center uygunluq */
 .tvmd-donut-center{
   display:flex; align-items:center; justify-content:center;
   padding:14px 6px;
 }
+
+/* "Diger" acilan panel - sag tərəf */
+.tvmd-diger-side{
+  flex-direction:column; gap:0;
+  border-left:1.5px solid #C9DAF3;
+  min-width:200px; max-width:260px;
+  overflow-y:auto; max-height:300px;
+  background:rgba(247,250,254,0.7);
+  padding:0;
+}
+body.dark-mode .tvmd-diger-side{ background:rgba(15,24,38,0.5); border-color:#2A4A72; }
+.tvmd-diger-side-title{
+  font-size:11px; font-weight:800; color:#8CA0BC; letter-spacing:.5px;
+  text-transform:uppercase; padding:14px 16px 8px;
+  border-bottom:1px solid #EEF3FB; position:sticky; top:0;
+  background:rgba(247,250,254,0.95);
+}
+body.dark-mode .tvmd-diger-side-title{ background:rgba(15,24,38,0.95); border-color:#1C2A3D; }
+.tvmd-diger-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 16px; border-bottom:1px solid #F3F6FB; gap:8px;
+}
+.tvmd-diger-row:last-child{ border-bottom:none; }
+body.dark-mode .tvmd-diger-row{ border-color:#1C2A3D; }
+.tvmd-diger-name{
+  font-size:12px; font-weight:600; color:#33445E;
+  flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+body.dark-mode .tvmd-diger-name{ color:#C7D5E8; }
+.tvmd-diger-badge{
+  font-size:11px; font-weight:700; color:#8CA0BC;
+  background:#EEF3FB; border-radius:10px; padding:2px 8px;
+  white-space:nowrap; flex-shrink:0;
+}
+body.dark-mode .tvmd-diger-badge{ background:#1C2A3D; color:#7A90AB; }
+.tvmd-diger-empty{
+  font-size:12px; color:#8CA0BC; padding:16px; text-align:center;
+}
+
+/* "Diger" düyməsi */
+.tvmd-diger-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 14px; border-radius:20px;
+  border:1.5px solid #C9DAF3; background:rgba(255,255,255,0.9);
+  font-size:12px; font-weight:700; color:#5C7089;
+  cursor:pointer; transition:all .15s;
+  font-family:"Inter",sans-serif;
+}
+.tvmd-diger-btn:hover{ border-color:#2F6FED; color:#2F6FED; background:#F0F6FF; }
+.tvmd-diger-btn.active{ border-color:#2F6FED; color:#2F6FED; background:#EBF2FF; }
+body.dark-mode .tvmd-diger-btn{ background:rgba(22,33,46,0.9); border-color:#2A4A72; color:#8CA0BC; }
+body.dark-mode .tvmd-diger-btn.active{ border-color:#4E7FE0; color:#7FB0F5; background:#1C2A3D; }
+.tvmd-diger-btn-count{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:18px; height:18px; border-radius:50%; background:#8CA0BC; color:#fff;
+  font-size:10px; font-weight:800;
+}
+.tvmd-diger-btn.active .tvmd-diger-btn-count{ background:#2F6FED; }
 
 /* Sağ legend — badge dizayn */
 .tvmd-legend{
@@ -837,13 +898,13 @@ body.dark-mode .tvmd-badge-count{ color:#E8EEF5; }
   margin-bottom:20px;
 }
 .tvmd-kpi-card{
-  background:rgba(255,255,255,0.88); border:1.5px solid #C9DAF3;
+  background:rgba(255,255,255,0.82); border:2px solid #A8C6EC;
   border-radius:14px; padding:14px 16px;
   display:flex; align-items:center; gap:12px;
-  box-shadow:0 4px 14px rgba(30,68,130,.06);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 4px 14px rgba(30,68,130,.10);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
-body.dark-mode .tvmd-kpi-card{ background:rgba(22,33,46,0.90); border-color:#2A4A72; }
+body.dark-mode .tvmd-kpi-card{ background:rgba(22,33,46,0.82); border-color:#2A4A72; }
 .tvmd-kpi-icon{
   width:36px; height:36px; border-radius:10px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
@@ -894,12 +955,12 @@ body.dark-mode .tvmd-showall-link-sm:hover{ background:#1C2A3D; }
 /* ── SAĞ WIDGET SÜTUNU (MTTR, SLA, Aktiv texnik) ── */
 .tvmd-side-widgets{ display:flex; flex-direction:column; gap:12px; }
 .tvmd-side-widget{
-  background:rgba(255,255,255,0.88); border:1.5px solid #C9DAF3; border-radius:14px;
+  background:rgba(255,255,255,0.82); border:2px solid #A8C6EC; border-radius:14px;
   padding:14px 16px; display:flex; align-items:flex-start; gap:12px;
-  box-shadow:0 4px 14px rgba(30,68,130,.07);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 4px 14px rgba(30,68,130,.10);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
-body.dark-mode .tvmd-side-widget{ background:rgba(22,33,46,0.90); border-color:#2A4A72; }
+body.dark-mode .tvmd-side-widget{ background:rgba(22,33,46,0.82); border-color:#2A4A72; }
 .tvmd-sw-icon{
   width:34px; height:34px; border-radius:10px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
@@ -973,11 +1034,11 @@ body.dark-mode .tvm-all-loc-pct{ color:#E8EEF5; }
 /* ── ALT BÖLÜM: TEXNİK + TƏKRARLANANlar ── */
 .tvmd-bottom-row{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
 .tvmd-bottom-card{
-  background:rgba(255,255,255,0.88); border:1.5px solid #C9DAF3; border-radius:16px;
-  padding:20px 22px; box-shadow:0 4px 20px rgba(30,68,130,.08);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  background:rgba(255,255,255,0.82); border:2px solid #A8C6EC; border-radius:16px;
+  padding:20px 22px; box-shadow:0 4px 20px rgba(30,68,130,.10);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
-body.dark-mode .tvmd-bottom-card{ background:rgba(22,33,46,0.90); border-color:#2A4A72; }
+body.dark-mode .tvmd-bottom-card{ background:rgba(22,33,46,0.82); border-color:#2A4A72; }
 
 /* Texnik cədvəl */
 .tvmd-tech-table{ width:100%; border-collapse:collapse; margin-top:8px; }
