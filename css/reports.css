@@ -611,11 +611,31 @@ body.dark-mode .dv-value { color:#E8EEF5; }
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
+
+/* Arxa fon banneri */
+#tvmDashboardView::before{
+  content:'';
+  position:fixed;
+  top:0; left:0; width:100%; height:100%;
+  background-image:url('../service_dashboards_bunner.webp');
+  background-size:cover;
+  background-position:center bottom;
+  background-repeat:no-repeat;
+  opacity:0.22;
+  z-index:0;
+  pointer-events:none;
+}
+body.dark-mode #tvmDashboardView::before{ opacity:0.10; }
+
+/* Header, body z-index üstdə olsun */
+.tvmd-header{ position:sticky; top:0; z-index:11; }
+.tvmd-body{ position:relative; z-index:1; }
+
 body.dark-mode #tvmDashboardView{ background:#0D1420; }
 
 /* ── HEADER ── */
 .tvmd-header{
-  position:sticky; top:0; z-index:10;
+  position:sticky; top:0; z-index:11;
   display:grid; grid-template-columns:48px 1fr auto;
   align-items:center; gap:12px;
   padding:13px 28px;
@@ -666,11 +686,12 @@ body.dark-mode .tvmd-tab.active{ background:#141F30; color:#8FB4EA; }
 /* ── METRİKA KARTLAR ── */
 .tvmd-metrics-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
 .tvmd-metric-card{
-  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px;
-  padding:18px 20px 14px; box-shadow:0 4px 14px rgba(30,68,130,.06);
+  background:rgba(255,255,255,0.88); border:1px solid rgba(225,234,246,0.7); border-radius:16px;
+  padding:18px 20px 14px; box-shadow:0 4px 20px rgba(30,68,130,.08);
   display:flex; flex-direction:column; gap:4px;
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
 }
-body.dark-mode .tvmd-metric-card{ background:#16212E; border-color:#2A3B52; }
+body.dark-mode .tvmd-metric-card{ background:rgba(22,33,46,0.90); border-color:rgba(42,59,82,0.8); }
 .tvmd-metric-top{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
 .tvmd-metric-icon-wrap{
   width:36px; height:36px; border-radius:10px; flex-shrink:0;
@@ -713,11 +734,12 @@ body.dark-mode .tvmd-section-label{ color:#E8EEF5; }
 .tvmd-loc-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
 /* Köhnə tvm-loc-* class-larını saxlayırıq — JS render edir */
 .tvm-loc-card{
-  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
-  padding:16px 20px; box-shadow:0 4px 12px rgba(30,68,130,.05);
+  background:rgba(255,255,255,0.88); border:1px solid rgba(225,234,246,0.7); border-radius:14px;
+  padding:16px 20px; box-shadow:0 4px 14px rgba(30,68,130,.06);
   display:flex; align-items:center; gap:14px;
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
 }
-body.dark-mode .tvm-loc-card{ background:#16212E; border-color:#2A3B52; }
+body.dark-mode .tvm-loc-card{ background:rgba(22,33,46,0.90); border-color:rgba(42,59,82,0.8); }
 .tvm-loc-card-icon{
   width:36px; height:36px; border-radius:10px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
@@ -737,51 +759,54 @@ body.dark-mode .tvm-loc-bar-track{ background:#1C2A3D; }
 /* ── PROBLEMLƏR BÖLÜMÜ ── */
 .tvmd-problems-row{ display:grid; grid-template-columns:1fr 220px; gap:16px; margin-bottom:28px; align-items:start; }
 .tvmd-donut-card{
-  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px;
-  overflow:hidden; box-shadow:0 4px 14px rgba(30,68,130,.06);
+  background:rgba(255,255,255,0.88); border:1px solid rgba(225,234,246,0.7); border-radius:16px;
+  overflow:hidden; box-shadow:0 4px 20px rgba(30,68,130,.08);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
 }
-body.dark-mode .tvmd-donut-card{ background:#16212E; border-color:#2A3B52; }
+body.dark-mode .tvmd-donut-card{ background:rgba(22,33,46,0.90); border-color:rgba(42,59,82,0.8); }
 
 /* Donut panel içi — Sol siyahı | Donut | Sağ legend */
 .tvm-donut-panel{
   display:grid;
-  grid-template-columns:minmax(200px,260px) 180px 1fr;
+  grid-template-columns:minmax(180px,240px) 170px minmax(160px,1fr);
   gap:0;
   align-items:center;
-  min-height:220px;
+  min-height:200px;
 }
 @media (max-width:900px){ .tvm-donut-panel{ grid-template-columns:1fr; } }
 
 /* Donut mərkəzi */
 .tvmd-donut-center{
   display:flex; align-items:center; justify-content:center;
-  padding:16px 8px;
+  padding:12px 6px;
 }
 
-/* Sağ legend */
+/* Sağ legend — compact, oxunaqlı */
 .tvmd-legend{
-  display:flex; flex-direction:column; gap:6px;
-  padding:16px 16px 16px 8px;
+  display:flex; flex-direction:column; gap:5px;
+  padding:12px 14px 12px 4px;
   overflow:hidden;
+  border-left:1px solid #F0F4FB;
 }
+body.dark-mode .tvmd-legend{ border-left-color:#1C2A3D; }
 .tvmd-legend-row{
-  display:flex; align-items:center; gap:8px;
-  min-width:0;
+  display:flex; align-items:center; gap:7px;
+  min-width:0; padding:2px 0;
 }
 .tvmd-legend-dot{
-  width:9px; height:9px; border-radius:50%; flex-shrink:0;
+  width:8px; height:8px; border-radius:50%; flex-shrink:0;
 }
 .tvmd-legend-name{
-  flex:1; font-size:12px; font-weight:600; color:#33445E;
+  flex:1; font-size:11.5px; font-weight:600; color:#33445E;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  min-width:0;
+  min-width:0; line-height:1.3;
 }
 body.dark-mode .tvmd-legend-name{ color:#C7D5E8; }
 .tvmd-legend-val{
-  font-size:11.5px; font-weight:700; color:#5C7089;
-  white-space:nowrap; flex-shrink:0;
+  font-size:11px; font-weight:700; color:#8CA0BC;
+  white-space:nowrap; flex-shrink:0; min-width:52px; text-align:right;
 }
-body.dark-mode .tvmd-legend-val{ color:#7A90AB; }
+body.dark-mode .tvmd-legend-val{ color:#5C7089; }
 .tvm-donut-row-sm{
   display:grid; grid-template-columns:28px 1fr auto auto; gap:8px;
   align-items:center; padding:10px 16px; border-bottom:1px solid #F0F5FC;
@@ -820,11 +845,12 @@ body.dark-mode .tvmd-showall-link-sm:hover{ background:#1C2A3D; }
 /* ── SAĞ WIDGET SÜTUNU (MTTR, SLA, Aktiv texnik) ── */
 .tvmd-side-widgets{ display:flex; flex-direction:column; gap:12px; }
 .tvmd-side-widget{
-  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  background:rgba(255,255,255,0.88); border:1px solid rgba(225,234,246,0.7); border-radius:14px;
   padding:14px 16px; display:flex; align-items:flex-start; gap:12px;
-  box-shadow:0 4px 12px rgba(30,68,130,.05);
+  box-shadow:0 4px 14px rgba(30,68,130,.07);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
 }
-body.dark-mode .tvmd-side-widget{ background:#16212E; border-color:#2A3B52; }
+body.dark-mode .tvmd-side-widget{ background:rgba(22,33,46,0.90); border-color:rgba(42,59,82,0.8); }
 .tvmd-sw-icon{
   width:34px; height:34px; border-radius:10px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
@@ -898,10 +924,11 @@ body.dark-mode .tvm-all-loc-pct{ color:#E8EEF5; }
 /* ── ALT BÖLÜM: TEXNİK + TƏKRARLANANlar ── */
 .tvmd-bottom-row{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
 .tvmd-bottom-card{
-  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px;
-  padding:20px 22px; box-shadow:0 4px 14px rgba(30,68,130,.06);
+  background:rgba(255,255,255,0.88); border:1px solid rgba(225,234,246,0.7); border-radius:16px;
+  padding:20px 22px; box-shadow:0 4px 20px rgba(30,68,130,.08);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
 }
-body.dark-mode .tvmd-bottom-card{ background:#16212E; border-color:#2A3B52; }
+body.dark-mode .tvmd-bottom-card{ background:rgba(22,33,46,0.90); border-color:rgba(42,59,82,0.8); }
 
 /* Texnik cədvəl */
 .tvmd-tech-table{ width:100%; border-collapse:collapse; margin-top:8px; }
