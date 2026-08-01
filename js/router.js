@@ -24,8 +24,8 @@ function routerGetMap(){
     'tvm-service':   { open: function(){ _callRaw('openTvmService'); },               needsAuth: true },
     'bus-report':    { open: function(){ _callRaw('openBusReport'); },                needsAuth: true },
     'tvm-report':    { open: function(){ _callRaw('openTvmReport'); },                needsAuth: true },
-    'bus-dashboard': { open: function(){ _callRaw('openBusDashboard'); },             needsAuth: true },
-    'tvm-dashboard': { open: function(){ _callRaw('openTvmDashboard'); },             needsAuth: true },
+    'bus-dashboard': { open: function(){ _callRaw('openBusDashboard'); },             needsAuth: true, desktopOnly: true },
+    'tvm-dashboard': { open: function(){ _callRaw('openTvmDashboard'); },             needsAuth: true, desktopOnly: true },
     'bus-ongoing':   { open: function(){ _callRaw('openBusOngoing'); },               needsAuth: true },
     'bus-request':   { open: function(){ _callRaw('openBusRequest'); },               needsAuth: true, desktopOnly: true },
     'bus-bulk':      { open: function(){ _callRaw('openBusBulk'); },                  needsAuth: true, desktopOnly: true },
@@ -114,7 +114,8 @@ function routerNavigate(route, pushToHistory){
     'busBulkView':'bus-bulk',
     'busOngoingView':'bus-ongoing',
     'busDashboardView':'bus-dashboard',
-    'busReportView':'bus-report'
+    'busReportView':'bus-report',
+    'tvmReportView':'tvm-report'
   };
   var leavingHeavyView = false;
   for(var _vid in _LOADING_EXIT_VIEWS){
