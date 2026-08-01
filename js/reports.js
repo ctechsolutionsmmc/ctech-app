@@ -2945,8 +2945,8 @@ function tvmDashComputeAndRender(){
   _tvmSetMetric('tvmDashDeviceChanges', deviceChanges, prevDeviceChanges, '', false);
 
   // Sparkline-lar
-  _tvmDrawSparkline('tvmSparkTotal', filtered, 'count');
-  _tvmDrawSparkline('tvmSparkAvg', filtered, 'avg');
+  _tvmDrawSparkline('tvmSparkTotal', filtered, 'count', '#2F6FED');
+  _tvmDrawSparkline('tvmSparkAvg', filtered, 'avg', '#0E8C7A');
 
   // Tarix aralığı mətni
   var dateRangeEl=document.getElementById('tvmDashDateRangeTxt');
@@ -2990,30 +2990,36 @@ function _tvmSetMetric(valueId, cur, prev, suffix, lowerIsBetter){
   var valEl=document.getElementById(valueId);
   if(valEl) valEl.textContent=(cur>0||cur===0)?(cur+(suffix||'')):'—';
 
-  // Trend elementi — valueId-dən türət (Total→TotalTrend, AvgTime→AvgTrend, DeviceChanges→DeviceTrend)
-  var trendId=valueId.replace('tvmDash','tvmDash')+'Trend';
-  // Xüsusi map:
   var trendMap={'tvmDashTotal':'tvmDashTotalTrend','tvmDashAvgTime':'tvmDashAvgTrend','tvmDashDeviceChanges':'tvmDashDeviceTrend'};
   var tid=trendMap[valueId];
   var trendEl=tid?document.getElementById(tid):null;
   if(!trendEl) return;
 
-  if(prev===0&&cur===0){ trendEl.textContent=''; trendEl.className='tvmd-metric-trend'; return; }
-  if(prev===0){ trendEl.textContent='Yeni dövr'; trendEl.className='tvmd-metric-trend'; return; }
+  // "Hamısı" seçiləndə trend göstərmə
+  if(tvmDashPeriod==='all'&&!tvmDashCustomRange){
+    trendEl.textContent='';
+    trendEl.className='tvmd-metric-trend';
+    return;
+  }
+
+  // Əvvəlki dövrdə data yoxdursa
+  if(prev===0&&cur===0){ trendEl.textContent='0% keçən dövrə görə'; trendEl.className='tvmd-metric-trend'; return; }
+  if(prev===0){ trendEl.textContent='+100% keçən dövrə görə'; trendEl.className='tvmd-metric-trend up'; return; }
 
   var diff=cur-prev;
   var pct=Math.round(Math.abs(diff)/prev*100);
   var isUp=diff>0;
   var isBetter=lowerIsBetter?!isUp:isUp;
-  var arrow=isUp?'\u2191':'\u2193';
   var sign=isUp?'+':'';
-  var cls='tvmd-metric-trend '+(isBetter?'up':'down');
-  trendEl.textContent=arrow+' '+sign+diff+(suffix||'')+' ('+pct+'%) \u00f6nc\u0259ki d\u00f6vrə görə';
+  var arrow=isUp?'\u2191':'\u2193';
+  var cls='tvmd-metric-trend '+(diff===0?'':isBetter?'up':'down');
+  trendEl.textContent=arrow+' '+sign+pct+'% keçən dövrə görə';
   trendEl.className=cls;
 }
 
 // ── Sparkline çək (Canvas) ──
-function _tvmDrawSparkline(canvasId, rows, type){
+function _tvmDrawSparkline(canvasId, rows, type, color){
+  var c=color||'#2F6FED';
   var canvas=document.getElementById(canvasId);
   if(!canvas||!canvas.getContext) return;
   var ctx=canvas.getContext('2d');
@@ -3023,7 +3029,6 @@ function _tvmDrawSparkline(canvasId, rows, type){
   ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
   ctx.clearRect(0,0,W,H);
 
-  // Son 7 günün nöqtələri
   var points=[];
   var now=new Date();
   for(var i=6;i>=0;i--){
@@ -3043,27 +3048,31 @@ function _tvmDrawSparkline(canvasId, rows, type){
   var pad=3;
   var n=points.length;
 
-  // Fill area
+  // hex → rgb helper
+  function hexToRgb(hex){
+    var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return r+','+g+','+b;
+  }
+  var rgb=hexToRgb(c);
+
   ctx.beginPath();
   points.forEach(function(v,i){
     var x=pad+(W-pad*2)*i/(n-1);
     var y=H-pad-(H-pad*2)*(v-min)/range;
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   });
-  // Close for fill
   var lastX=pad+(W-pad*2)*(n-1)/(n-1);
   ctx.lineTo(lastX,H-pad);
   ctx.lineTo(pad,H-pad);
   ctx.closePath();
   var grad=ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,'rgba(47,111,237,0.18)');
-  grad.addColorStop(1,'rgba(47,111,237,0.01)');
+  grad.addColorStop(0,'rgba('+rgb+',0.18)');
+  grad.addColorStop(1,'rgba('+rgb+',0.01)');
   ctx.fillStyle=grad;
   ctx.fill();
 
-  // Line
   ctx.beginPath();
-  ctx.strokeStyle='rgba(47,111,237,0.75)';
+  ctx.strokeStyle='rgba('+rgb+',0.80)';
   ctx.lineWidth=1.8;
   ctx.lineJoin='round';
   ctx.lineCap='round';
