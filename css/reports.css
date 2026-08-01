@@ -598,64 +598,296 @@ body.dark-mode .dv-value { color:#E8EEF5; }
 .bs-bulk-banner-btn:hover { box-shadow:0 12px 28px rgba(47,111,237,.38); }
 .bs-bulk-banner-btn:active { transform:scale(.98); }
 
-/* ── TVM DASHBOARD ── */
-#tvmDashboardView .dash-body{ background:#EEF3FB; }
-body.dark-mode #tvmDashboardView .dash-body{ background:#0F1826; }
+/* ══════════════════════════════════════════════════════════════
+   TVM DASHBOARD — YENİ DİZAYN (tvmd-* prefiksi)
+   ══════════════════════════════════════════════════════════════ */
 
-.tvm-loc-split{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:12px 0 24px; }
-.tvm-loc-card{ background:#FFFFFF; border:1.5px solid #C9DAF3; border-radius:14px; padding:16px 18px; box-shadow:0 6px 16px rgba(30,68,130,.05); }
-body.dark-mode .tvm-loc-card{ background:#16212E; border-color:#3D5578; }
-.tvm-loc-card-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:13.5px; font-weight:600; color:#33445E; }
-body.dark-mode .tvm-loc-card-top{ color:#E8EEF5; }
-.tvm-loc-card-top b{ font-weight:700; color:#12233B; }
+#tvmDashboardView{
+  display:none;
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:#F0F4FB;
+  z-index:40;
+  flex-direction:column;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+body.dark-mode #tvmDashboardView{ background:#0D1420; }
+
+/* ── HEADER ── */
+.tvmd-header{
+  position:sticky; top:0; z-index:10;
+  display:grid; grid-template-columns:48px 1fr auto;
+  align-items:center; gap:12px;
+  padding:13px 28px;
+  background:#FFFFFF;
+  border-bottom:1px solid #E1EAF6;
+  box-shadow:0 2px 8px rgba(30,68,130,.06);
+}
+body.dark-mode .tvmd-header{ background:#141F30; border-color:#2A3B52; }
+.tvmd-home-btn{
+  width:36px; height:36px; border-radius:10px; border:1px solid #E1EAF6;
+  background:#F7FAFE; display:flex; align-items:center; justify-content:center;
+  color:#12233B; cursor:pointer;
+}
+body.dark-mode .tvmd-home-btn{ background:#1C2A3D; border-color:#3E5578; color:#E8EEF5; }
+.tvmd-home-btn:active{ transform:scale(.95); }
+.tvmd-title{
+  font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px;
+  letter-spacing:1.5px; color:#12233B; text-transform:uppercase;
+  text-align:center; white-space:nowrap;
+}
+body.dark-mode .tvmd-title{ color:#E8EEF5; }
+.tvmd-title span{ color:#2F6FED; }
+.tvmd-header-right{ display:flex; align-items:center; gap:10px; }
+.tvmd-tabs{ display:flex; gap:2px; background:#EEF3FB; border-radius:10px; padding:3px; }
+body.dark-mode .tvmd-tabs{ background:#1C2A3D; }
+.tvmd-tab{
+  padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:700;
+  color:#5C7089; cursor:pointer; white-space:nowrap;
+  transition:background .12s, color .12s;
+}
+.tvmd-tab:hover{ color:#12233B; }
+body.dark-mode .tvmd-tab:hover{ color:#E8EEF5; }
+.tvmd-tab.active{ background:#FFFFFF; color:#2F6FED; box-shadow:0 2px 6px rgba(30,68,130,.1); }
+body.dark-mode .tvmd-tab.active{ background:#141F30; color:#8FB4EA; }
+.tvmd-excel-btn{
+  display:flex; align-items:center; gap:7px;
+  background:linear-gradient(135deg,#4E93FA,#2F6FED); color:#fff; border:none;
+  padding:9px 16px; border-radius:10px; font-family:'Inter',sans-serif;
+  font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+  box-shadow:0 6px 16px rgba(47,111,237,.24);
+}
+.tvmd-excel-btn:active{ transform:scale(.97); }
+
+/* ── BODY & CONTAINER ── */
+.tvmd-body{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.tvmd-container{ max-width:1360px; margin:0 auto; padding:24px 28px 48px; }
+
+/* ── METRİKA KARTLAR ── */
+.tvmd-metrics-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+.tvmd-metric-card{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px;
+  padding:18px 20px 14px; box-shadow:0 4px 14px rgba(30,68,130,.06);
+  display:flex; flex-direction:column; gap:4px;
+}
+body.dark-mode .tvmd-metric-card{ background:#16212E; border-color:#2A3B52; }
+.tvmd-metric-top{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.tvmd-metric-icon-wrap{
+  width:36px; height:36px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.tvmd-ic-blue { background:#E6F1FB; color:#2F6FED; }
+.tvmd-ic-teal { background:#E0F5F0; color:#0E8C7A; }
+.tvmd-ic-orange{ background:#FDF1E3; color:#D97706; }
+.tvmd-ic-green { background:#E5F6ED; color:#188A4B; }
+.tvmd-metric-label{ font-size:12.5px; font-weight:700; color:#8CA0BC; }
+body.dark-mode .tvmd-metric-label{ color:#6B84A0; }
+.tvmd-metric-value{ font-size:30px; font-weight:800; color:#12233B; line-height:1; font-family:'Rajdhani',sans-serif; }
+body.dark-mode .tvmd-metric-value{ color:#E8EEF5; }
+.tvmd-metric-trend{ font-size:11.5px; font-weight:600; color:#8CA0BC; min-height:16px; }
+.tvmd-metric-trend.up{ color:#188A4B; }
+.tvmd-metric-trend.down{ color:#D97706; }
+.tvmd-sparkline-wrap{ margin-top:6px; }
+.tvmd-sparkline{ width:100%; height:36px; display:block; }
+
+/* Filtr kartı */
+.tvmd-filter-card{ cursor:pointer; border:1.5px dashed #C9DAF3; justify-content:center; gap:10px; }
+.tvmd-filter-card:hover{ background:#F7FAFE; border-color:#2F6FED; }
+body.dark-mode .tvmd-filter-card{ border-color:#3E5578; }
+.tvmd-filter-date-row{ display:flex; align-items:center; gap:8px; }
+.tvmd-filter-date-txt{ font-size:13px; font-weight:700; color:#2F6FED; }
+body.dark-mode .tvmd-filter-date-txt{ color:#7FB0F5; }
+.tvmd-filter-search-row{
+  display:flex; align-items:center; gap:8px;
+  background:#F0F4FB; border-radius:8px; padding:8px 12px;
+}
+body.dark-mode .tvmd-filter-search-row{ background:#1C2A3D; }
+.tvmd-filter-search-ph{ font-size:12.5px; color:#9AACC4; }
+
+/* ── LOKASİYA TİPİ ── */
+.tvmd-section-label{
+  font-size:13.5px; font-weight:700; color:#12233B; margin:20px 0 10px;
+  letter-spacing:.2px;
+}
+body.dark-mode .tvmd-section-label{ color:#E8EEF5; }
+.tvmd-loc-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+/* Köhnə tvm-loc-* class-larını saxlayırıq — JS render edir */
+.tvm-loc-card{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  padding:16px 20px; box-shadow:0 4px 12px rgba(30,68,130,.05);
+  display:flex; align-items:center; gap:14px;
+}
+body.dark-mode .tvm-loc-card{ background:#16212E; border-color:#2A3B52; }
+.tvm-loc-card-icon{
+  width:36px; height:36px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.tvm-loc-card-body{ flex:1; }
+.tvm-loc-card-top{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:8px; font-size:13.5px; font-weight:600; color:#33445E;
+}
+body.dark-mode .tvm-loc-card-top{ color:#C7D5E8; }
+.tvm-loc-card-top b{ font-weight:800; color:#12233B; font-size:15px; }
 body.dark-mode .tvm-loc-card-top b{ color:#E8EEF5; }
-.tvm-loc-bar-track{ height:7px; background:#EEF2FA; border-radius:4px; overflow:hidden; }
+.tvm-loc-bar-track{ height:8px; background:#EEF2FA; border-radius:4px; overflow:hidden; }
 body.dark-mode .tvm-loc-bar-track{ background:#1C2A3D; }
 .tvm-loc-bar-fill{ height:100%; border-radius:4px; width:0; transition:width 1.1s cubic-bezier(.2,.7,.3,1); }
 
-.tvm-donut-panel{ display:grid; grid-template-columns:220px 1fr; gap:18px; margin:12px 0 20px; align-items:center; }
-@media (max-width:760px){ .tvm-donut-panel{ grid-template-columns:1fr; } }
-.tvm-panel-head{ display:flex; align-items:center; justify-content:space-between; margin:20px 0 8px; }
-.tvm-panel-showall{ font-size:11.5px; font-weight:700; color:#2F6FED; background:#E6F1FB; border:1px solid #C9DAF3; border-radius:8px; padding:5px 11px; cursor:pointer; }
-.tvm-panel-showall:hover{ background:#D6E8FB; }
-body.dark-mode .tvm-panel-showall{ background:#1C2A3D; border-color:#3D5578; color:#7FB0F5; }
+/* ── PROBLEMLƏR BÖLÜMÜ ── */
+.tvmd-problems-row{ display:grid; grid-template-columns:1fr 220px; gap:16px; margin-bottom:28px; align-items:start; }
+.tvmd-donut-card{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px;
+  overflow:hidden; box-shadow:0 4px 14px rgba(30,68,130,.06);
+}
+body.dark-mode .tvmd-donut-card{ background:#16212E; border-color:#2A3B52; }
 
-.tvm-donut-list-sm{ background:#FFFFFF; border:1.5px solid #C9DAF3; border-radius:14px; overflow:hidden; box-shadow:0 6px 16px rgba(30,68,130,.05); }
-body.dark-mode .tvm-donut-list-sm{ background:#16212E; border-color:#3D5578; }
-.tvm-donut-row-sm{ display:flex; align-items:center; gap:10px; padding:10px 13px; border-bottom:1px solid #EEF2FA; border-left:4px solid transparent; }
-.tvm-donut-row-sm:last-child{ border-bottom:none; }
+/* Donut panel içi — JS render edir .tvm-donut-* class-larla */
+.tvm-donut-panel{ display:grid; grid-template-columns:260px 1fr; gap:0; align-items:center; }
+@media (max-width:900px){ .tvm-donut-panel{ grid-template-columns:1fr; } }
+.tvm-donut-list-sm{ overflow:hidden; }
+.tvm-donut-row-sm{
+  display:grid; grid-template-columns:28px 1fr auto auto; gap:8px;
+  align-items:center; padding:10px 16px; border-bottom:1px solid #F0F5FC;
+  border-left:4px solid transparent;
+}
 body.dark-mode .tvm-donut-row-sm{ border-bottom-color:#1C2A3D; }
-.tvm-donut-rank{ width:20px; height:20px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:#FFFFFF; }
-.tvm-donut-row-name{ flex:1; font-size:12.5px; color:#33445E; line-height:1.35; }
-body.dark-mode .tvm-donut-row-name{ color:#E8EEF5; }
-.tvm-donut-row-count{ font-weight:700; color:#12233B; font-size:13.5px; flex-shrink:0; }
+.tvm-donut-row-sm:last-child{ border-bottom:none; }
+.tvm-donut-rank{
+  width:22px; height:22px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:#FFFFFF;
+}
+.tvm-donut-row-icon{
+  width:26px; height:26px; border-radius:7px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.tvm-donut-row-name{ font-size:13px; color:#33445E; line-height:1.3; min-width:0; }
+body.dark-mode .tvm-donut-row-name{ color:#C7D5E8; }
+.tvm-donut-row-count{ font-weight:800; color:#12233B; font-size:14px; flex-shrink:0; }
 body.dark-mode .tvm-donut-row-count{ color:#E8EEF5; }
+.tvm-donut-row-pct{ font-size:12px; color:#8CA0BC; font-weight:600; flex-shrink:0; width:36px; text-align:right; }
+.tvm-donut-visual-big{ display:flex; align-items:center; justify-content:center; padding:16px; }
+.tvm-donut-visual-big svg{ max-width:360px; width:100%; }
+.tvm-donut-empty{ padding:32px; text-align:center; font-size:13px; color:#8CA0BC; }
+.tvmd-showall-link-sm{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:13px; font-weight:700; color:#2F6FED; cursor:pointer;
+  padding:12px 16px; border-top:1px solid #F0F5FC; width:100%;
+  background:none; border-left:none; border-right:none; border-bottom:none;
+  text-align:left;
+}
+body.dark-mode .tvmd-showall-link-sm{ color:#7FB0F5; border-top-color:#1C2A3D; }
+.tvmd-showall-link-sm:hover{ background:#F7FAFE; }
+body.dark-mode .tvmd-showall-link-sm:hover{ background:#1C2A3D; }
 
-.tvm-donut-visual-big{ display:flex; align-items:center; justify-content:center; }
-.tvm-donut-visual-big svg{ max-width:400px; width:100%; }
-.tvm-donut-empty{ padding:24px; text-align:center; font-size:13px; color:#8CA0BC; }
+/* ── SAĞ WIDGET SÜTUNU (MTTR, SLA, Aktiv texnik) ── */
+.tvmd-side-widgets{ display:flex; flex-direction:column; gap:12px; }
+.tvmd-side-widget{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  padding:14px 16px; display:flex; align-items:flex-start; gap:12px;
+  box-shadow:0 4px 12px rgba(30,68,130,.05);
+}
+body.dark-mode .tvmd-side-widget{ background:#16212E; border-color:#2A3B52; }
+.tvmd-sw-icon{
+  width:34px; height:34px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.tvmd-sw-body{ flex:1; }
+.tvmd-sw-label{ font-size:11.5px; font-weight:700; color:#8CA0BC; margin-bottom:3px; }
+body.dark-mode .tvmd-sw-label{ color:#5C7089; }
+.tvmd-sw-value{ font-size:22px; font-weight:800; color:#12233B; font-family:'Rajdhani',sans-serif; line-height:1; }
+body.dark-mode .tvmd-sw-value{ color:#E8EEF5; }
+.tvmd-sw-trend{ font-size:11px; font-weight:600; color:#8CA0BC; margin-top:3px; }
+.tvmd-sw-trend.up{ color:#188A4B; }
+.tvmd-sw-trend.down{ color:#D97706; }
 
-.tvm-tech-search-box{ background:#FFFFFF; border:1.5px solid #C9DAF3; border-radius:14px; padding:16px 18px; box-shadow:0 6px 16px rgba(30,68,130,.05); }
-body.dark-mode .tvm-tech-search-box{ background:#16212E; border-color:#3D5578; }
-.tvm-tech-search-label{ font-size:12px; font-weight:700; color:#8CA0BC; margin-bottom:8px; }
-.tvm-tech-search-row{ display:flex; gap:8px; }
-.tvm-tech-search-row input{ flex:1; height:36px; border:1.5px solid #C9DAF3; border-radius:9px; padding:0 12px; font-size:13.5px; background:#F7FAFE; color:#12233B; }
-body.dark-mode .tvm-tech-search-row input{ background:#1C2A3D; border-color:#3D5578; color:#E8EEF5; }
-.tvm-tech-search-row input:focus{ outline:none; border-color:#2F6FED; }
-.tvm-tech-search-row button{ width:36px; height:36px; flex-shrink:0; border:1.5px solid #C9DAF3; border-radius:9px; background:#F7FAFE; color:#5C7089; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-body.dark-mode .tvm-tech-search-row button{ background:#1C2A3D; border-color:#3D5578; color:#8FA0B8; }
-.tvm-tech-search-row button:hover{ background:#E6F1FB; color:#1B4A8A; }
-.tvm-tech-search-result{ margin-top:10px; font-size:13px; color:#33445E; font-weight:600; min-height:18px; }
-body.dark-mode .tvm-tech-search-result{ color:#E8EEF5; }
+/* ── İKİ SÜTUN (Həllər + Lokasiyalar) ── */
+.tvmd-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+.tvmd-section-label-row{ display:flex; align-items:center; justify-content:space-between; margin:20px 0 10px; }
+.tvmd-showall-btn{
+  font-size:12px; font-weight:700; color:#2F6FED; background:#E6F1FB;
+  border:1px solid #C9DAF3; border-radius:8px; padding:5px 12px; cursor:pointer;
+}
+.tvmd-showall-btn:hover{ background:#D6E8FB; }
+body.dark-mode .tvmd-showall-btn{ background:#1C2A3D; border-color:#3E5578; color:#7FB0F5; }
 
-.tvm-all-locations-panel{ background:#FFFFFF; border:1.5px solid #C9DAF3; border-radius:14px; padding:6px; margin:0 0 24px; max-height:340px; overflow-y:auto; box-shadow:0 6px 16px rgba(30,68,130,.05); }
-body.dark-mode .tvm-all-locations-panel{ background:#16212E; border-color:#3D5578; }
-.tvm-all-loc-row{ display:flex; align-items:center; gap:10px; padding:8px 10px; }
-.tvm-all-loc-name{ flex:0 0 150px; font-size:12px; color:#33445E; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-body.dark-mode .tvm-all-loc-name{ color:#E8EEF5; }
+/* Hamısını göstər panel */
+.tvm-all-locations-panel{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:12px;
+  padding:6px; margin-top:8px; max-height:300px; overflow-y:auto;
+  box-shadow:0 4px 12px rgba(30,68,130,.05);
+}
+body.dark-mode .tvm-all-locations-panel{ background:#16212E; border-color:#2A3B52; }
+.tvm-all-loc-row{ display:flex; align-items:center; gap:10px; padding:7px 10px; }
+.tvm-all-loc-name{ flex:0 0 140px; font-size:12px; color:#33445E; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+body.dark-mode .tvm-all-loc-name{ color:#C7D5E8; }
 .tvm-all-loc-bar-track{ flex:1; height:7px; background:#EEF2FA; border-radius:4px; overflow:hidden; }
 body.dark-mode .tvm-all-loc-bar-track{ background:#1C2A3D; }
 .tvm-all-loc-bar-fill{ height:100%; background:#378ADD; border-radius:4px; width:0; transition:width .8s cubic-bezier(.2,.7,.3,1); }
-.tvm-all-loc-pct{ flex-shrink:0; width:70px; text-align:right; font-size:12px; font-weight:700; color:#12233B; }
+.tvm-all-loc-pct{ flex-shrink:0; width:64px; text-align:right; font-size:12px; font-weight:700; color:#12233B; }
 body.dark-mode .tvm-all-loc-pct{ color:#E8EEF5; }
+
+/* ── ALT BÖLÜM: TEXNİK + TƏKRARLANANlar ── */
+.tvmd-bottom-row{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+.tvmd-bottom-card{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px;
+  padding:20px 22px; box-shadow:0 4px 14px rgba(30,68,130,.06);
+}
+body.dark-mode .tvmd-bottom-card{ background:#16212E; border-color:#2A3B52; }
+
+/* Texnik cədvəl */
+.tvmd-tech-table{ width:100%; border-collapse:collapse; margin-top:8px; }
+.tvmd-tech-table thead th{
+  font-size:11.5px; font-weight:700; color:#8CA0BC; text-align:left;
+  padding:0 10px 10px 0; border-bottom:1.5px solid #EEF2FA; white-space:nowrap;
+  letter-spacing:.2px; text-transform:uppercase;
+}
+body.dark-mode .tvmd-tech-table thead th{ color:#5C7089; border-color:#1C2A3D; }
+.tvmd-tech-table tbody td{
+  padding:11px 10px 11px 0; font-size:13px; color:#33445E;
+  border-bottom:1px solid #F3F6FB; vertical-align:middle;
+}
+body.dark-mode .tvmd-tech-table tbody td{ color:#C7D5E8; border-color:#1C2A3D; }
+.tvmd-tech-table tbody tr:last-child td{ border-bottom:none; }
+.tvmd-tech-name{ font-weight:700; color:#12233B; font-size:13.5px; }
+body.dark-mode .tvmd-tech-name{ color:#E8EEF5; }
+.tvmd-tech-num{ font-family:'IBM Plex Mono',monospace; font-weight:700; color:#2F6FED; }
+.tvmd-sla-bar-wrap{ display:flex; align-items:center; gap:8px; }
+.tvmd-sla-bar-track{ flex:1; height:7px; background:#EEF2FA; border-radius:4px; overflow:hidden; min-width:60px; }
+body.dark-mode .tvmd-sla-bar-track{ background:#1C2A3D; }
+.tvmd-sla-bar-fill{ height:100%; border-radius:4px; transition:width .8s cubic-bezier(.2,.7,.3,1); }
+.tvmd-sla-pct{ font-size:12px; font-weight:700; color:#33445E; white-space:nowrap; }
+body.dark-mode .tvmd-sla-pct{ color:#C7D5E8; }
+.tvmd-showall-link{
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:12.5px; font-weight:700; color:#2F6FED; cursor:pointer;
+  background:none; border:none;
+}
+body.dark-mode .tvmd-showall-link{ color:#7FB0F5; }
+.tvmd-showall-link:hover{ text-decoration:underline; }
+
+.tvmd-recurring-wrap{ margin-top:8px; }
+.tvmd-tech-search-hidden{ display:none; }
+
+/* Texnik axtarış nəticəsi (köhnə JS uyğunluğu) */
+.tvm-tech-search-result{ font-size:13px; color:#33445E; font-weight:600; }
+body.dark-mode .tvm-tech-search-result{ color:#C7D5E8; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .tvmd-metrics-row{ grid-template-columns:repeat(2,1fr); }
+  .tvmd-problems-row{ grid-template-columns:1fr; }
+  .tvmd-side-widgets{ flex-direction:row; flex-wrap:wrap; }
+  .tvmd-side-widget{ flex:1 1 45%; }
+  .tvmd-two-col{ grid-template-columns:1fr; }
+  .tvmd-bottom-row{ grid-template-columns:1fr; }
+}
+@media(max-width:700px){
+  .tvmd-metrics-row{ grid-template-columns:1fr 1fr; }
+  .tvmd-loc-row{ grid-template-columns:1fr; }
+  .tvm-donut-panel{ grid-template-columns:1fr; }
+  .tvmd-container{ padding:16px 14px 40px; }
+  .tvmd-header{ padding:12px 14px; }
+}
 
