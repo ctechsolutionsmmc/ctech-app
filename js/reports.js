@@ -2952,7 +2952,7 @@ function tvmDashComputeAndRender(){
   var dateRangeEl=document.getElementById('tvmDashDateRangeTxt');
   if(dateRangeEl){
     if(tvmDashCustomRange&&tvmDashCustomRange.start&&tvmDashCustomRange.end){
-      function fmtD(d){ return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); }
+      var fmtD=function(d){ return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
       dateRangeEl.textContent=fmtD(tvmDashCustomRange.start)+' - '+fmtD(tvmDashCustomRange.end);
     } else {
       var periodMap={'24h':'Son 24 saat','week':'Son 1 həftə','month':'Son 1 ay','all':'Bütün dövr'};
