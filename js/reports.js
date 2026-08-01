@@ -3121,19 +3121,13 @@ function openTvmDashboard(){
   }
 }
 function closeTvmDashboard(){
-  var loading = document.getElementById('dashLoading');
-  if(loading) loading.style.display='flex';
-
-  setTimeout(function(){
-    if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
-      routerNavigate('dashboard', true);
-    } else {
-      document.getElementById('tvmDashboardView').style.display='none';
-      document.getElementById('dashboardView').style.display='block';
-      window.scrollTo(0,0);
-    }
-    if(loading) loading.style.display='none';
-  }, 700);
+  if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
+    routerNavigate('dashboard', true);
+  } else {
+    document.getElementById('tvmDashboardView').style.display='none';
+    document.getElementById('dashboardView').style.display='block';
+    window.scrollTo(0,0);
+  }
 }
 document.addEventListener('DOMContentLoaded', function(){
   var tabs=document.querySelectorAll('#tvmDashTabs .tvmd-tab');
