@@ -2643,14 +2643,14 @@ function tvmRenderDonutPanel(containerId, items, total){
   var chartItems=top5.slice();
   if(restCount>0) chartItems.push({name:'Digər',count:restCount});
 
-  // Sol siyahi
+  // Sol siyahi: nomre + ad + [say] [faiz%]
   var listHtml=top5.map(function(it,i){
     var pct=Math.round(it.count/total*100);
     var c=TVM_DONUT_COLORS[i];
-    var shortName=it.name.length>22?it.name.slice(0,22)+'…':it.name;
+    var nm=it.name.length>20?it.name.slice(0,20)+'…':it.name;
     return '<div class="tvm-donut-row-sm" style="border-left-color:'+c+';">'
       +'<div class="tvm-donut-rank" style="background:'+c+';">'+(i+1)+'</div>'
-      +'<div class="tvm-donut-row-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(shortName)+'</div>'
+      +'<div class="tvm-donut-row-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(nm)+'</div>'
       +'<div class="tvmd-row-badge">'
         +'<span class="tvmd-badge-count">'+it.count+'</span>'
         +'<span class="tvmd-badge-pct" style="background:'+c+'18;color:'+c+';border:1.5px solid '+c+'55;">'+pct+'%</span>'
@@ -2658,22 +2658,28 @@ function tvmRenderDonutPanel(containerId, items, total){
       +'</div>';
   }).join('');
 
-  // SVG: sol list | boyuk donut (sagda) + etiketler
-  var R=108, strokeW=32, gap=2.5, circ=2*Math.PI*R;
-  var LPAD=170, RPAD=170, PADV=55;
-  var cx=LPAD+R+strokeW/2+4;
-  var cy=PADV+R+strokeW/2+4;
-  var W=cx+R+strokeW/2+4+RPAD;
-  var H=cy+R+strokeW/2+4+PADV;
+  // Sag legend: nokta + ad + badge (say · faiz)
+  var legendHtml=chartItems.map(function(it,i){
+    var pct=Math.round(it.count/total*100);
+    var c=TVM_DONUT_COLORS[i];
+    var nm=it.name.length>18?it.name.slice(0,18)+'…':it.name;
+    return '<div class="tvmd-legend-row">'
+      +'<span class="tvmd-legend-dot" style="background:'+c+';"></span>'
+      +'<span class="tvmd-legend-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(nm)+'</span>'
+      +'<span class="tvmd-legend-badge" style="background:'+c+'15;color:'+c+';border:1.5px solid '+c+'44;">'+it.count+' · '+pct+'%</span>'
+      +'</div>';
+  }).join('');
 
-  var offset=0, segs='', labelLines='';
+  // Donut SVG - sadece halqa + ortada say
+  var R=80, strokeW=26, gap=2, circ=2*Math.PI*R;
+  var cx=R+strokeW/2+4, cy=R+strokeW/2+4;
+  var W=cx*2, H=cy*2;
+  var offset=0, segs='';
 
   chartItems.forEach(function(it,i){
     var frac=it.count/total;
     var len=Math.max(frac*circ-gap,0);
     var c=TVM_DONUT_COLORS[i];
-    var pct=Math.round(frac*100);
-
     segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none"'
       +' stroke="'+c+'" stroke-width="'+strokeW+'"'
       +' stroke-linecap="round"'
@@ -2682,43 +2688,25 @@ function tvmRenderDonutPanel(containerId, items, total){
       +' transform="rotate(-90 '+cx+' '+cy+')"'
       +' class="tvm-donut-seg" data-len="'+len.toFixed(2)+'" data-total="'+circ.toFixed(2)+'"'
       +' style="transition:stroke-dasharray 0.9s cubic-bezier(.2,.8,.3,1) '+(i*0.07)+'s;"/>';
-
-    if(pct>=3){
-      var midFrac=(offset+len/2)/circ;
-      var ang=(midFrac-0.25)*2*Math.PI;
-      var cosA=Math.cos(ang), sinA=Math.sin(ang);
-      var r1=R+strokeW/2+7;
-      var r2=R+strokeW/2+32;
-      var x1=(cx+r1*cosA).toFixed(1), y1=(cy+r1*sinA).toFixed(1);
-      var x2=(cx+r2*cosA).toFixed(1), y2=(cy+r2*sinA).toFixed(1);
-      var isRight=cosA>=0;
-      var xEnd=isRight?(cx+R+strokeW/2+RPAD-12):(cx-R-strokeW/2-LPAD+12);
-      var nm=it.name.length>18?it.name.slice(0,18)+'…':it.name;
-      var anchor=isRight?'start':'end';
-      var textX=isRight?(xEnd+4):(xEnd-4);
-      labelLines+=''
-        +'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="1.3" stroke-linecap="round"/>'
-        +'<line x1="'+x2+'" y1="'+y2+'" x2="'+xEnd.toFixed(1)+'" y2="'+y2+'" stroke="'+c+'" stroke-width="1.3"/>'
-        +'<circle cx="'+x2+'" cy="'+y2+'" r="2.2" fill="'+c+'"/>'
-        +'<text x="'+textX.toFixed(1)+'" y="'+(parseFloat(y2)-3).toFixed(1)+'" text-anchor="'+anchor+'" font-size="11" font-weight="700" fill="#22344F" font-family="Inter,Arial,sans-serif">'+escapeHtml(nm)+'</text>'
-        +'<text x="'+textX.toFixed(1)+'" y="'+(parseFloat(y2)+11).toFixed(1)+'" text-anchor="'+anchor+'" font-size="10" font-weight="700" fill="'+c+'" font-family="Inter,Arial,sans-serif">'+it.count+' · '+pct+'%</text>';
-    }
     offset+=frac*circ;
   });
 
-  var innerR=R-strokeW/2-3;
+  var innerR=R-strokeW/2-2;
   var bgCircle='<circle cx="'+cx+'" cy="'+cy+'" r="'+innerR+'" fill="rgba(247,250,254,0.85)"/>';
   var centerText=''
-    +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" dominant-baseline="middle" font-size="40" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif" letter-spacing="-1">'+total+'</text>'
-    +'<text x="'+cx+'" y="'+(cy+24)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif" letter-spacing="0.8">Ümumi</text>';
+    +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" dominant-baseline="middle"'
+    +' font-size="28" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif" letter-spacing="-0.5">'+total+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle"'
+    +' font-size="9.5" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif" letter-spacing="0.5">Ümumi</text>';
 
   el.innerHTML='<div class="tvm-donut-panel-new">'
     +'<div class="tvm-donut-list-sm">'+listHtml+'</div>'
-    +'<div class="tvmd-donut-svg-wrap">'
-      +'<svg viewBox="0 0 '+W.toFixed(0)+' '+H.toFixed(0)+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;overflow:visible;filter:drop-shadow(0 6px 18px rgba(30,68,130,0.11));">'
-      +bgCircle+segs+centerText+labelLines
-      +'</svg>'
+    +'<div class="tvmd-donut-center">'
+      +'<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg"'
+      +' style="width:200px;height:200px;flex-shrink:0;filter:drop-shadow(0 4px 14px rgba(30,68,130,0.10));">'
+      +bgCircle+segs+centerText+'</svg>'
     +'</div>'
+    +'<div class="tvmd-legend">'+legendHtml+'</div>'
     +'</div>';
 
   requestAnimationFrame(function(){
@@ -2730,7 +2718,6 @@ function tvmRenderDonutPanel(containerId, items, total){
     });
   });
 }
-
 function tvmRenderLocSplit(rows){
   var el=document.getElementById('tvmLocSplit');
   if(!el) return;
