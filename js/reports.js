@@ -40,6 +40,7 @@ function openBusReport(forceOpenOnly){
   document.getElementById('dashboardView').style.display='none';
   var view=document.getElementById('busReportView');
   view.style.display='flex';
+  view.scrollTop=0;
   document.getElementById('rptGlobalSearch').value='';
   rptServiceTypeFilter='all';
   rptForceOpenOnly=!!forceOpenOnly;
@@ -70,6 +71,7 @@ function openBusOngoing(){
   document.getElementById('dashboardView').style.display='none';
   var view=document.getElementById('busOngoingView');
   view.style.display='flex';
+  view.scrollTop=0;
   document.getElementById('ongGlobalSearch').value='';
   ongServiceTypeFilter='all';
   document.querySelectorAll('#ongTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
@@ -86,8 +88,13 @@ function openBusOngoing(){
 function closeBusOngoing(){
   if(ongAutoRefresh){ clearInterval(ongAutoRefresh); ongAutoRefresh=null; }
   if(ongDateInterval){ clearInterval(ongDateInterval); ongDateInterval=null; }
-  document.getElementById('busOngoingView').style.display='none';
-  document.getElementById('dashboardView').style.display='block';
+  if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
+    routerNavigate('dashboard', true);
+  } else {
+    document.getElementById('busOngoingView').style.display='none';
+    document.getElementById('dashboardView').style.display='block';
+    window.scrollTo(0,0);
+  }
 }
 function updateOngDate(){
   var now=new Date();
@@ -215,8 +222,13 @@ function exportOngoingToExcel(){
 function closeBusReport(){
   if(rptAutoRefresh){ clearInterval(rptAutoRefresh); rptAutoRefresh=null; }
   if(rptDateInterval){ clearInterval(rptDateInterval); rptDateInterval=null; }
-  document.getElementById('busReportView').style.display='none';
-  document.getElementById('dashboardView').style.display='block';
+  if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
+    routerNavigate('dashboard', true);
+  } else {
+    document.getElementById('busReportView').style.display='none';
+    document.getElementById('dashboardView').style.display='block';
+    window.scrollTo(0,0);
+  }
 }
 function rptSortKey(row){
   var d=row['Tarix']||'';
@@ -870,7 +882,9 @@ function loadDashData(){
 function updateDashTabsUI(){ document.querySelectorAll('#dashTabs .dash-tab').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-period')===dashPeriod); }); }
 function openBusDashboard(){
   document.getElementById('dashboardView').style.display='none';
-  document.getElementById('busDashboardView').style.display='flex';
+  var bdv=document.getElementById('busDashboardView');
+  bdv.style.display='flex';
+  bdv.scrollTop=0;
   dashCustomRange=null;
   dashPeriod='24h';
   dashServiceTypeFilter='all';
@@ -880,8 +894,13 @@ function openBusDashboard(){
   loadDashData();
 }
 function closeBusDashboard(){
-  document.getElementById('busDashboardView').style.display='none';
-  document.getElementById('dashboardView').style.display='block';
+  if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
+    routerNavigate('dashboard', true);
+  } else {
+    document.getElementById('busDashboardView').style.display='none';
+    document.getElementById('dashboardView').style.display='block';
+    window.scrollTo(0,0);
+  }
 }
 document.addEventListener('DOMContentLoaded', function(){
   var tabs=document.querySelectorAll('#dashTabs .dash-tab');
