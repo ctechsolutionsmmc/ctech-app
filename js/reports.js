@@ -2631,36 +2631,67 @@ function tvmAvgResolutionMinutes(rows){
   return n>0 ? Math.round(total/n) : 0;
 }
 
+function _tvmPickIcon(name, kind){
+  var n=(name||'').toLowerCase();
+  var I={
+    box:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>',
+    wifi:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>',
+    coin:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6v4"/></svg>',
+    cash:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>',
+    receipt:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/></svg>',
+    card:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>',
+    alert:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    refresh:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>',
+    check:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    gear:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    pin:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    wrench:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
+  };
+  if(n.indexOf('qutu')!==-1) return I.box;
+  if(n.indexOf('şəbəkə')!==-1) return I.wifi;
+  if(n.indexOf('əlaqə')!==-1) return I.wifi;
+  if(n.indexOf('ayarland')!==-1) return I.gear;
+  if(n.indexOf('qəpik')!==-1) return I.coin;
+  if(n.indexOf('lent')!==-1) return I.coin;
+  if(n.indexOf('manat')!==-1) return I.cash;
+  if(n.indexOf('qəbz')!==-1) return I.receipt;
+  if(n.indexOf('kart')!==-1) return I.card;
+  if(n.indexOf('nasaz')!==-1) return I.alert;
+  if(n.indexOf('xəta')!==-1) return I.alert;
+  if(n.indexOf('ilişmə')!==-1) return I.alert;
+  if(n.indexOf('proqram')!==-1) return I.refresh;
+  if(n.indexOf('yenilə')!==-1) return I.refresh;
+  if(n.indexOf('dəyişil')!==-1) return I.refresh;
+  if(n.indexOf('dəyişdi')!==-1) return I.refresh;
+  if(n.indexOf('təmizlə')!==-1) return I.check;
+  if(kind==='solution') return I.check;
+  if(kind==='location') return I.pin;
+  return I.wrench;
+}
+
 function tvmRenderDonutPanel(containerId, items, total){
   var el=document.getElementById(containerId);
   if(!el) return;
   if(total===0||items.length===0){
-    el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>';
+    el.innerHTML='<div class="tvm-donut-empty">Bu d\u00f6vr \u00fc\u00e7\u00fcn qeyd\u0259 al\u0131nmay\u0131b.</div>';
     return;
   }
+  var kind = containerId.indexOf('Location')!==-1 ? 'location' : (containerId.indexOf('Solution')!==-1 ? 'solution' : 'problem');
+
   var top5=items.slice(0,5);
   var restItems=items.slice(5);
   var restCount=restItems.reduce(function(s,it){return s+it.count;},0);
   var chartItems=top5.slice();
-  if(restCount>0) chartItems.push({name:'Digər',count:restCount});
+  if(restCount>0) chartItems.push({name:'Dig\u0259r',count:restCount});
 
-  var ICONS=[
-    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>',
-    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>',
-    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>',
-    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
-    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
-  ];
-
-  // Sol siyahi
+  // Sol siyahi — nomre + ikon + ad + [say][faiz]
   var listHtml=top5.map(function(it,i){
     var pct=Math.round(it.count/total*100);
     var c=TVM_DONUT_COLORS[i];
-    var nm=it.name.length>22?it.name.slice(0,22)+'…':it.name;
     return '<div class="tvm-donut-row-sm" style="border-left-color:'+c+';">'
       +'<div class="tvm-donut-rank" style="background:'+c+';">'+(i+1)+'</div>'
-      +'<div class="tvm-donut-row-icon" style="background:'+c+'18;color:'+c+';">'+ICONS[i%ICONS.length]+'</div>'
-      +'<div class="tvm-donut-row-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(nm)+'</div>'
+      +'<div class="tvm-donut-row-icon" style="background:'+c+'18;color:'+c+';">'+_tvmPickIcon(it.name,kind)+'</div>'
+      +'<div class="tvm-donut-row-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(it.name)+'</div>'
       +'<div class="tvmd-row-badge">'
         +'<span class="tvmd-badge-count">'+it.count+'</span>'
         +'<span class="tvmd-badge-pct" style="background:'+c+'18;color:'+c+';border:1.5px solid '+c+'55;">'+pct+'%</span>'
@@ -2668,19 +2699,29 @@ function tvmRenderDonutPanel(containerId, items, total){
       +'</div>';
   }).join('');
 
-  // Sag legend - HTML, hec vaxt kesil mez
-  var legendHtml=chartItems.map(function(it,i){
-    var pct=Math.round(it.count/total*100);
-    var c=TVM_DONUT_COLORS[i];
-    var nm=it.name.length>18?it.name.slice(0,18)+'…':it.name;
-    return '<div class="tvmd-legend-row">'
-      +'<span class="tvmd-legend-dot" style="background:'+c+';flex-shrink:0;"></span>'
-      +'<span class="tvmd-legend-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(nm)+'</span>'
-      +'<span class="tvmd-legend-badge" style="background:'+c+'15;color:'+c+';border:1.5px solid '+c+'44;flex-shrink:0;">'+it.count+' · '+pct+'%</span>'
+  // Sag sutun — Diger elementleri, SOL siyahi ile EYNI sətir stilində (statik, duyme yoxdur)
+  var hasDiger = restItems.length>0;
+  var digerHtml='';
+  if(hasDiger){
+    var digerRows=restItems.map(function(it,i){
+      var pct=Math.round(it.count/total*100);
+      return '<div class="tvm-donut-row-sm tvm-donut-row-muted">'
+        +'<div class="tvm-donut-rank tvm-donut-rank-muted">'+(6+i)+'</div>'
+        +'<div class="tvm-donut-row-icon tvm-donut-row-icon-muted">'+_tvmPickIcon(it.name,kind)+'</div>'
+        +'<div class="tvm-donut-row-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(it.name)+'</div>'
+        +'<div class="tvmd-row-badge">'
+          +'<span class="tvmd-badge-count">'+it.count+'</span>'
+          +'<span class="tvmd-badge-pct tvmd-badge-pct-muted">'+pct+'%</span>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+    digerHtml='<div class="tvm-donut-diger-col">'
+      +'<div class="tvm-donut-diger-title">Dig\u0259r <span>('+restCount+')</span></div>'
+      +'<div class="tvm-donut-diger-rows">'+digerRows+'</div>'
       +'</div>';
-  }).join('');
+  }
 
-  // Donut SVG - yalniz halqa + ortada say, ETIKET YOX
+  // Donut SVG — sade, funksional: ortada say, halqa reng ile
   var R=90, strokeW=26, gap=2, circ=2*Math.PI*R;
   var cx=R+strokeW/2+6, cy=R+strokeW/2+6;
   var W=cx*2, H=cy*2;
@@ -2705,45 +2746,18 @@ function tvmRenderDonutPanel(containerId, items, total){
     +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" dominant-baseline="middle"'
     +' font-size="32" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif">'+total+'</text>'
     +'<text x="'+cx+'" y="'+(cy+20)+'" text-anchor="middle"'
-    +' font-size="10" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif">Ümumi</text>';
+    +' font-size="10" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif">\u00dcmumi</text>';
 
-  var digerBtnId='tvmDigerBtn_'+containerId;
-  var digerPanelId='tvmDigerPanel_'+containerId;
-  var hasDigerItems=restItems.length>0;
+  var gridCols = hasDiger ? 'minmax(210px,260px) 220px 1fr' : 'minmax(210px,320px) 1fr';
 
-  var digerPanelHtml='';
-  if(hasDigerItems){
-    digerPanelHtml=restItems.map(function(it,i){
-      var pct=Math.round(it.count/total*100);
-      return '<div class="tvmd-diger-row">'
-        +'<div class="tvmd-diger-rank">'+(6+i)+'</div>'
-        +'<div class="tvmd-diger-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(it.name)+'</div>'
-        +'<div class="tvmd-diger-stats">'
-          +'<span class="tvmd-diger-count">'+it.count+'</span>'
-          +'<div class="tvmd-diger-bar-track"><div class="tvmd-diger-bar-fill" style="width:'+pct+'%;"></div></div>'
-          +'<span class="tvmd-diger-pct">'+pct+'%</span>'
-        +'</div>'
-        +'</div>';
-    }).join('');
-  }
-
-  el.innerHTML='<div class="tvm-donut-panel-new">'
+  el.innerHTML='<div class="tvm-donut-panel-new" style="grid-template-columns:'+gridCols+';">'
     +'<div class="tvm-donut-list-sm">'+listHtml+'</div>'
     +'<div class="tvmd-donut-mid">'
       +'<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg"'
-      +' style="width:220px;height:220px;flex-shrink:0;filter:drop-shadow(0 4px 14px rgba(30,68,130,0.10));">'
+      +' style="width:210px;height:210px;flex-shrink:0;filter:drop-shadow(0 4px 14px rgba(30,68,130,0.10));">'
       +bgCircle+segs+centerText+'</svg>'
-      +(hasDigerItems
-        ?'<button id="'+digerBtnId+'" class="tvmd-diger-btn" onclick="tvmToggleDigerPanel(\''+digerPanelId+'\',\''+digerBtnId+'\')">'
-          +'Digər <span class="tvmd-diger-btn-count">'+restCount+'</span>'
-          +'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>'
-          +'</button>'
-        :'')
     +'</div>'
-    +'<div class="tvmd-legend">'+legendHtml+'</div>'
-    +(hasDigerItems
-      ?'<div class="tvmd-diger-side" id="'+digerPanelId+'" style="display:none;"><div class="tvmd-diger-side-title">Digər servislər</div>'+digerPanelHtml+'</div>'
-      :'')
+    +digerHtml
     +'</div>';
 
   requestAnimationFrame(function(){
@@ -2754,16 +2768,6 @@ function tvmRenderDonutPanel(containerId, items, total){
       });
     });
   });
-}
-function tvmToggleDigerPanel(panelId, btnId){
-  var panel=document.getElementById(panelId);
-  var btn=document.getElementById(btnId);
-  if(!panel) return;
-  var isOpen=panel.style.display!=='none';
-  panel.style.display=isOpen?'none':'flex';
-  if(btn){
-    btn.classList.toggle('active', !isOpen);
-  }
 }
 function tvmRenderLocSplit(rows){
   var el=document.getElementById('tvmLocSplit');
