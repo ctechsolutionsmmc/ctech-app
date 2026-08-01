@@ -1880,12 +1880,11 @@
           <div class="tvmd-donut-card" id="tvmSolutionsPanel"></div>
         </div>
         <div class="tvmd-two-col-right">
-          <div class="tvmd-section-label-row">
-            <div class="tvmd-section-label" style="margin:0;">Ən çox servis alan lokasiyalar</div>
-            <button class="tvmd-showall-btn" onclick="tvmToggleAllLocations()" id="tvmShowAllLocBtn">Hamısını göstər</button>
-          </div>
+          <div class="tvmd-section-label" style="margin-bottom:10px;">Ən çox servis alan lokasiyalar</div>
           <div class="tvmd-donut-card" id="tvmLocationsPanel"></div>
-          <div class="tvm-all-locations-panel" id="tvmAllLocationsPanel" style="display:none;"></div>
+          <!-- "Hamısını göstər" düyməsi kartın içindədir — JS tərəfindən render edilir -->
+          <!-- Açılan panel — scroll ilə -->
+          <div class="tvmd-all-loc-panel" id="tvmAllLocationsPanel" style="display:none;"></div>
         </div>
       </div>
 
