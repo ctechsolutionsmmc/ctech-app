@@ -1764,78 +1764,171 @@
 <!-- ===== TVM DASHBOARD VIEW ===== -->
 <div id="tvmDashboardView" style="display:none;">
 
-  <div class="dash-header">
-    <button onclick="closeTvmDashboard()" class="bs-home-btn" aria-label="Ana səhifəyə qayıt">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+  <!-- HEADER -->
+  <div class="tvmd-header">
+    <button onclick="closeTvmDashboard()" class="tvmd-home-btn" aria-label="Ana səhifəyə qayıt">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
     </button>
-    <div class="dash-title">TVM <span>DASHBOARD</span></div>
-    <div class="dash-right">
-      <div class="dash-tabs" id="tvmDashTabs">
-        <div class="dash-tab active" data-period="24h">24 saat</div>
-        <div class="dash-tab" data-period="week">1 həftə</div>
-        <div class="dash-tab" data-period="month">1 ay</div>
-        <div class="dash-tab" data-period="all">Hamısı</div>
+    <div class="tvmd-title">TVM <span>DASHBOARD</span></div>
+    <div class="tvmd-header-right">
+      <div class="tvmd-tabs" id="tvmDashTabs">
+        <div class="tvmd-tab active" data-period="24h">24 saat</div>
+        <div class="tvmd-tab" data-period="week">1 həftə</div>
+        <div class="tvmd-tab" data-period="month">1 ay</div>
+        <div class="tvmd-tab" data-period="all">Hamısı</div>
       </div>
-      <button class="dash-excel-btn" onclick="exportTvmDashboardExcel()">
+      <button class="tvmd-excel-btn" onclick="exportTvmDashboardExcel()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Excel
       </button>
     </div>
   </div>
 
-  <div class="dash-body">
-    <div class="dash-container">
+  <div class="tvmd-body">
+    <div class="tvmd-container">
 
-      <div class="dash-top-grid" style="grid-template-columns:repeat(4,1fr);">
-        <div class="dash-metric">
-          <div><div class="dash-metric-label">Ümumi ticket</div><div class="dash-metric-value" id="tvmDashTotal">—</div></div>
-          <div class="dash-metric-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6"/></svg></div>
-        </div>
-        <div class="dash-metric">
-          <div><div class="dash-metric-label">Orta həll müddəti</div><div class="dash-metric-value" id="tvmDashAvgTime">—</div></div>
-          <div class="dash-metric-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-        </div>
-        <div class="dash-metric">
-          <div><div class="dash-metric-label">Cihaz dəyişdirilib</div><div class="dash-metric-value" id="tvmDashDeviceChanges">—</div></div>
-          <div class="dash-metric-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></div>
-        </div>
-        <div class="dash-range-btn" onclick="openTvmDashModal()">
-          <div class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
-          <div class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
-        </div>
-      </div>
-
-      <div class="dash-section-title">Lokasiya tipi</div>
-      <div class="tvm-loc-split" id="tvmLocSplit"></div>
-
-      <div class="dash-section-title">Ən çox rast gəlinən problemlər</div>
-      <div class="tvm-donut-panel" id="tvmProblemsPanel"></div>
-
-      <div class="dash-section-title">Ən çox tətbiq olunan həllər</div>
-      <div class="tvm-donut-panel" id="tvmSolutionsPanel"></div>
-
-      <div class="tvm-panel-head">
-        <div class="dash-section-title" style="margin:0;">Ən çox servis alan lokasiyalar</div>
-        <button class="tvm-panel-showall" onclick="tvmToggleAllLocations()" id="tvmShowAllLocBtn">Hamısını göstər</button>
-      </div>
-      <div class="tvm-donut-panel" id="tvmLocationsPanel"></div>
-      <div class="tvm-all-locations-panel" id="tvmAllLocationsPanel" style="display:none;"></div>
-
-      <div class="dash-section-title">Texnik iş yükü</div>
-      <div class="dash-grid-2">
-        <div class="dash-ranklist" id="tvmTechList"></div>
-        <div class="tvm-tech-search-box">
-          <div class="tvm-tech-search-label">Texnik axtar</div>
-          <div class="tvm-tech-search-row">
-            <input id="tvmTechSearchInput" type="text" placeholder="Ad yaz..." onkeydown="if(event.key==='Enter')tvmSearchTech();">
-            <button onclick="tvmSearchTech()" aria-label="Axtar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      <!-- TOP METRİKA KARTLAR -->
+      <div class="tvmd-metrics-row">
+        <!-- Ümumi ticket -->
+        <div class="tvmd-metric-card">
+          <div class="tvmd-metric-top">
+            <div class="tvmd-metric-icon-wrap tvmd-ic-blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6"/></svg>
+            </div>
+            <div class="tvmd-metric-label">Ümumi ticket</div>
           </div>
-          <div id="tvmTechSearchResult" class="tvm-tech-search-result"></div>
+          <div class="tvmd-metric-value" id="tvmDashTotal">—</div>
+          <div class="tvmd-metric-trend" id="tvmDashTotalTrend"></div>
+          <div class="tvmd-sparkline-wrap"><canvas id="tvmSparkTotal" class="tvmd-sparkline"></canvas></div>
+        </div>
+        <!-- Orta həll müddəti -->
+        <div class="tvmd-metric-card">
+          <div class="tvmd-metric-top">
+            <div class="tvmd-metric-icon-wrap tvmd-ic-teal">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+            <div class="tvmd-metric-label">Orta həll müddəti</div>
+          </div>
+          <div class="tvmd-metric-value" id="tvmDashAvgTime">—</div>
+          <div class="tvmd-metric-trend" id="tvmDashAvgTrend"></div>
+          <div class="tvmd-sparkline-wrap"><canvas id="tvmSparkAvg" class="tvmd-sparkline"></canvas></div>
+        </div>
+        <!-- Cihaz dəyişdirilib -->
+        <div class="tvmd-metric-card">
+          <div class="tvmd-metric-top">
+            <div class="tvmd-metric-icon-wrap tvmd-ic-orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            </div>
+            <div class="tvmd-metric-label">Cihaz dəyişdirilib</div>
+          </div>
+          <div class="tvmd-metric-value" id="tvmDashDeviceChanges">—</div>
+          <div class="tvmd-metric-trend" id="tvmDashDeviceTrend"></div>
+        </div>
+        <!-- Tarix / Filtr -->
+        <div class="tvmd-metric-card tvmd-filter-card" onclick="openTvmDashModal()">
+          <div class="tvmd-filter-date-row">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F6FED" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span class="tvmd-filter-date-txt" id="tvmDashDateRangeTxt">Bütün dövr</span>
+          </div>
+          <div class="tvmd-filter-search-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8CA0BC" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <span class="tvmd-filter-search-ph">Axtarış / filtr</span>
+          </div>
         </div>
       </div>
 
-      <div class="dash-section-title">Təkrarlanan servislər</div>
-      <div class="dash-alert-panel" id="tvmRecurringPanel"></div>
+      <!-- LOKASİYA TİPİ -->
+      <div class="tvmd-section-label">Lokasiya tipi</div>
+      <div class="tvmd-loc-row" id="tvmLocSplit"></div>
+
+      <!-- PROBLEMLƏR — Sol panel + donut + sağda MTTR widget -->
+      <div class="tvmd-section-label">Ən çox rast gəlinən problemlər</div>
+      <div class="tvmd-problems-row">
+        <div class="tvmd-donut-card" id="tvmProblemsPanel"></div>
+        <div class="tvmd-side-widgets">
+          <div class="tvmd-side-widget">
+            <div class="tvmd-sw-icon tvmd-ic-teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+            <div class="tvmd-sw-body">
+              <div class="tvmd-sw-label">MTTR</div>
+              <div class="tvmd-sw-value" id="tvmSideMTTR">—</div>
+              <div class="tvmd-sw-trend" id="tvmSideMTTRTrend"></div>
+            </div>
+          </div>
+          <div class="tvmd-side-widget">
+            <div class="tvmd-sw-icon tvmd-ic-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="tvmd-sw-body">
+              <div class="tvmd-sw-label">SLA Uyğunluğu</div>
+              <div class="tvmd-sw-value" id="tvmSideSLA">—</div>
+              <div class="tvmd-sw-trend" id="tvmSideSLATrend"></div>
+            </div>
+          </div>
+          <div class="tvmd-side-widget">
+            <div class="tvmd-sw-icon tvmd-ic-orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg></div>
+            <div class="tvmd-sw-body">
+              <div class="tvmd-sw-label">Aktiv texnik</div>
+              <div class="tvmd-sw-value" id="tvmSideActiveTech">—</div>
+              <div class="tvmd-sw-trend" id="tvmSideActiveTechTrend"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HƏLLƏR + LOKASİYALAR — yan-yana -->
+      <div class="tvmd-two-col">
+        <div class="tvmd-two-col-left">
+          <div class="tvmd-section-label">Ən çox tətbiq olunan həllər</div>
+          <div class="tvmd-donut-card" id="tvmSolutionsPanel"></div>
+        </div>
+        <div class="tvmd-two-col-right">
+          <div class="tvmd-section-label-row">
+            <div class="tvmd-section-label" style="margin:0;">Ən çox servis alan lokasiyalar</div>
+            <button class="tvmd-showall-btn" onclick="tvmToggleAllLocations()" id="tvmShowAllLocBtn">Hamısını göstər</button>
+          </div>
+          <div class="tvmd-donut-card" id="tvmLocationsPanel"></div>
+          <div class="tvm-all-locations-panel" id="tvmAllLocationsPanel" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- TEXNİK FƏALİYYƏT + SON TİCKETLƏR -->
+      <div class="tvmd-bottom-row">
+        <div class="tvmd-bottom-card">
+          <div class="tvmd-section-label-row">
+            <div class="tvmd-section-label" style="margin:0;">Texnik fəaliyyət</div>
+            <button class="tvmd-showall-link" onclick="tvmSearchTech()">
+              Texnik axtar
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+          <table class="tvmd-tech-table">
+            <thead>
+              <tr>
+                <th>Texnik</th>
+                <th>Gediş sayı</th>
+                <th>Həll edən</th>
+                <th>Orta həll müddəti</th>
+                <th>SLA</th>
+              </tr>
+            </thead>
+            <tbody id="tvmTechTableBody">
+              <tr><td colspan="5" style="text-align:center;color:#8CA0BC;padding:20px;">Yüklənir...</td></tr>
+            </tbody>
+          </table>
+          <div class="tvmd-tech-search-hidden" style="display:none;">
+            <input id="tvmTechSearchInput" type="text" placeholder="Ad yaz..." onkeydown="if(event.key==='Enter')tvmSearchTech();">
+            <button onclick="tvmSearchTech()"></button>
+            <div id="tvmTechSearchResult" class="tvm-tech-search-result"></div>
+          </div>
+          <!-- Köhnə tvmTechList — gizli, JS uyğunluğu üçün saxlanılır -->
+          <div id="tvmTechList" style="display:none;"></div>
+        </div>
+
+        <div class="tvmd-bottom-card">
+          <div class="tvmd-section-label-row">
+            <div class="tvmd-section-label" style="margin:0;">Təkrarlanan servislər</div>
+          </div>
+          <div class="tvmd-recurring-wrap" id="tvmRecurringPanel"></div>
+        </div>
+      </div>
 
     </div>
   </div>
