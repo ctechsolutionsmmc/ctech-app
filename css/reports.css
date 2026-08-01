@@ -812,20 +812,51 @@ body.dark-mode .tvmd-sw-value{ color:#E8EEF5; }
 .tvmd-showall-btn:hover{ background:#D6E8FB; }
 body.dark-mode .tvmd-showall-btn{ background:#1C2A3D; border-color:#3E5578; color:#7FB0F5; }
 
-/* Hamısını göstər panel */
-.tvm-all-locations-panel{
-  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:12px;
-  padding:6px; margin-top:8px; max-height:300px; overflow-y:auto;
-  box-shadow:0 4px 12px rgba(30,68,130,.05);
+/* "Hamısını göstər" düyməsi — lokasiyalar kartının içindədir */
+.tvmd-showall-inside{
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  width:100%; padding:11px 16px;
+  border:none; border-top:1px solid #EEF2FA;
+  background:none; cursor:pointer;
+  font-size:13px; font-weight:700; color:#2F6FED;
+  font-family:'Inter',sans-serif;
+  border-radius:0 0 16px 16px;
+  transition:background .12s;
 }
-body.dark-mode .tvm-all-locations-panel{ background:#16212E; border-color:#2A3B52; }
-.tvm-all-loc-row{ display:flex; align-items:center; gap:10px; padding:7px 10px; }
-.tvm-all-loc-name{ flex:0 0 140px; font-size:12px; color:#33445E; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tvmd-showall-inside:hover{ background:#F3F7FF; }
+body.dark-mode .tvmd-showall-inside{ color:#7FB0F5; border-top-color:#1C2A3D; }
+body.dark-mode .tvmd-showall-inside:hover{ background:#1C2A3D; }
+
+/* Bütün lokasiyalar açılan paneli */
+.tvmd-all-loc-panel{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  margin-top:10px;
+  max-height:320px; overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  box-shadow:0 4px 16px rgba(30,68,130,.07);
+}
+body.dark-mode .tvmd-all-loc-panel{ background:#16212E; border-color:#2A3B52; }
+
+/* Köhnə id-yə alias (JS uyğunluğu) */
+#tvmAllLocationsPanel{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  margin-top:10px;
+  max-height:320px; overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  box-shadow:0 4px 16px rgba(30,68,130,.07);
+}
+body.dark-mode #tvmAllLocationsPanel{ background:#16212E; border-color:#2A3B52; }
+.tvm-all-loc-row{ display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid #F3F6FB; }
+.tvm-all-loc-row:last-child{ border-bottom:none; }
+body.dark-mode .tvm-all-loc-row{ border-color:#1C2A3D; }
+.tvm-all-loc-num{ width:22px; height:22px; border-radius:50%; background:#EEF3FB; color:#5C7089; font-size:10.5px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+body.dark-mode .tvm-all-loc-num{ background:#1C2A3D; color:#6B84A0; }
+.tvm-all-loc-name{ flex:0 0 150px; font-size:12.5px; font-weight:600; color:#33445E; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 body.dark-mode .tvm-all-loc-name{ color:#C7D5E8; }
 .tvm-all-loc-bar-track{ flex:1; height:7px; background:#EEF2FA; border-radius:4px; overflow:hidden; }
 body.dark-mode .tvm-all-loc-bar-track{ background:#1C2A3D; }
 .tvm-all-loc-bar-fill{ height:100%; background:#378ADD; border-radius:4px; width:0; transition:width .8s cubic-bezier(.2,.7,.3,1); }
-.tvm-all-loc-pct{ flex-shrink:0; width:64px; text-align:right; font-size:12px; font-weight:700; color:#12233B; }
+.tvm-all-loc-pct{ flex-shrink:0; width:68px; text-align:right; font-size:12px; font-weight:700; color:#12233B; }
 body.dark-mode .tvm-all-loc-pct{ color:#E8EEF5; }
 
 /* ── ALT BÖLÜM: TEXNİK + TƏKRARLANANlar ── */
@@ -890,4 +921,3 @@ body.dark-mode .tvm-tech-search-result{ color:#C7D5E8; }
   .tvmd-container{ padding:16px 14px 40px; }
   .tvmd-header{ padding:12px 14px; }
 }
-
