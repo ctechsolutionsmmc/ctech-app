@@ -106,38 +106,56 @@ function routerNavigate(route, pushToHistory){
     }
   }
 
-  var newHash = '#' + route;
-  if(window.location.hash !== newHash){
-    if(pushToHistory){
-      history.pushState({ route: route }, '', newHash);
-    } else {
-      history.replaceState({ route: route }, '', newHash);
+  // TVM Dashboard-dan çıxarkən (Home düyməsi VƏ ya brauzerin Geri düyməsi ilə):
+  // yükləmə vidjetini göstər, sonra keçidi et — hər iki yol eyni məntiqdən keçir.
+  var tvmDashEl = document.getElementById('tvmDashboardView');
+  var leavingTvmDash = tvmDashEl && tvmDashEl.style.display !== 'none' && base !== 'tvm-dashboard';
+
+  function _doNav(){
+    var newHash = '#' + route;
+    if(window.location.hash !== newHash){
+      if(pushToHistory){
+        history.pushState({ route: route }, '', newHash);
+      } else {
+        history.replaceState({ route: route }, '', newHash);
+      }
     }
-  }
 
-  _currentRoute = route;
-  routerHideAll();
+    _currentRoute = route;
+    routerHideAll();
 
-  if(base === 'bus-detail' && detailId){
-    if(_rawFns['openBusDetail']) _rawFns['openBusDetail'](detailId);
+    if(base === 'bus-detail' && detailId){
+      if(_rawFns['openBusDetail']) _rawFns['openBusDetail'](detailId);
+      var ld1=document.getElementById('dashLoading'); if(ld1) ld1.style.display='none';
+      _isNavigating = false;
+      return;
+    }
+    if(base === 'tvm-detail' && detailId){
+      if(_rawFns['openTvmDetail']) _rawFns['openTvmDetail'](detailId);
+      var ld2=document.getElementById('dashLoading'); if(ld2) ld2.style.display='none';
+      _isNavigating = false;
+      return;
+    }
+
+    if(r){
+      r.open();
+    } else {
+      _openDashboardRaw();
+      _currentRoute = 'dashboard';
+      history.replaceState({ route: 'dashboard' }, '', '#dashboard');
+    }
+
+    var ld=document.getElementById('dashLoading'); if(ld) ld.style.display='none';
     _isNavigating = false;
-    return;
-  }
-  if(base === 'tvm-detail' && detailId){
-    if(_rawFns['openTvmDetail']) _rawFns['openTvmDetail'](detailId);
-    _isNavigating = false;
-    return;
   }
 
-  if(r){
-    r.open();
+  if(leavingTvmDash){
+    var loading = document.getElementById('dashLoading');
+    if(loading) loading.style.display='flex';
+    setTimeout(_doNav, 700);
   } else {
-    _openDashboardRaw();
-    _currentRoute = 'dashboard';
-    history.replaceState({ route: 'dashboard' }, '', '#dashboard');
+    _doNav();
   }
-
-  _isNavigating = false;
 }
 
 // ── Aktiv formaya uyğun "Home cəhdi" funksiyasını tap ──
