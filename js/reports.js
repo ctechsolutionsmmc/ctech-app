@@ -2691,10 +2691,10 @@ function tvmRenderDonutPanel(containerId, items, total){
   }
 
   // Donut SVG — boyuk, ortada, mini etiketler
-  var R=95, strokeW=28, gap=2.2, circ=2*Math.PI*R;
+  var R=90, strokeW=26, gap=2.2, circ=2*Math.PI*R;
   // SVG canvas: donut + etiket zonasi
-  var EPAD=90; // etiket ucun sol/sag boşluq
-  var VPAD=52; // ust/alt
+  var EPAD=110; // etiket ucun sol/sag boşluq
+  var VPAD=50; // ust/alt
   var cx=EPAD+R+strokeW/2+2;
   var cy=VPAD+R+strokeW/2+2;
   var W=2*(EPAD+R+strokeW/2+2);
@@ -2766,7 +2766,7 @@ function tvmRenderDonutPanel(containerId, items, total){
     +'<div class="tvm-donut-list-sm">'+listHtml+'</div>'
     +'<div class="tvmd-donut-mid">'
       +'<svg viewBox="0 0 '+W.toFixed(0)+' '+H.toFixed(0)+'" xmlns="http://www.w3.org/2000/svg"'
-      +' style="width:100%;max-width:'+W.toFixed(0)+'px;height:auto;overflow:visible;filter:drop-shadow(0 4px 14px rgba(30,68,130,0.10));">'
+      +' style="width:100%;max-width:'+W.toFixed(0)+'px;height:auto;overflow:hidden;filter:drop-shadow(0 4px 14px rgba(30,68,130,0.10));">'
       +bgCircle+segs+centerText+labels+'</svg>'
       +digerBtn
     +'</div>'
