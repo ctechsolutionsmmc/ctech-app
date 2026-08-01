@@ -492,7 +492,7 @@ body.dark-mode .dash-modal-left { border-right-color:#4A6182; }
 body.dark-mode .dash-search-warn { background:#3A2E1C; border-color:#5C4522; color:#F0C060; }
 .dash-search-btn { margin-top:auto; background:linear-gradient(135deg,#4E93FA,#2F6FED); color:#fff; border:none; padding:11px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; }
 
-.dash-loading-overlay { display:none; position:fixed; inset:0; background:rgba(244,248,253,.85); align-items:center; justify-content:center; z-index:210; flex-direction:column; gap:14px; }
+.dash-loading-overlay { display:none; position:fixed; inset:0; background:rgba(244,248,253,.85); align-items:center; justify-content:center; z-index:35; flex-direction:column; gap:14px; }
 .dash-loading-overlay.open { display:flex !important; }
 body.dark-mode .dash-loading-overlay { background:rgba(15,24,38,.88); }
 .dash-loading-text { font-size:14px; font-weight:600; color:#2F4C6E; }
