@@ -1893,37 +1893,24 @@
         <div class="tvmd-bottom-card">
           <div class="tvmd-section-label-row">
             <div class="tvmd-section-label" style="margin:0;">Texnik fəaliyyət</div>
-            <button class="tvmd-showall-link" onclick="tvmToggleTechSearch()">
-              Texnik axtar
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
-          <!-- Texnik axtarış paneli (gizli, düymə ilə açılır) -->
-          <div class="tvmd-tech-search-panel" id="tvmTechSearchPanel" style="display:none;">
-            <div class="tvmd-tech-search-inner">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8CA0BC" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-              <input id="tvmTechSearchInput" type="text" placeholder="Texnik adı yazın..." onkeydown="if(event.key==='Enter')tvmSearchTech();" oninput="tvmSearchTech();">
-              <button class="tvmd-search-clear-btn" onclick="tvmClearTechSearch()" aria-label="Təmizlə">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>
-              </button>
-            </div>
-            <div id="tvmTechSearchResult" class="tvmd-tech-search-result"></div>
           </div>
           <table class="tvmd-tech-table">
             <thead>
               <tr>
                 <th>Texnik</th>
-                <th>Gediş sayı</th>
-                <th>Həll edən</th>
+                <th>Servis sayı</th>
                 <th>Orta həll müddəti</th>
                 <th>SLA</th>
               </tr>
             </thead>
             <tbody id="tvmTechTableBody">
-              <tr><td colspan="5" style="text-align:center;color:#8CA0BC;padding:20px;">Yüklənir...</td></tr>
+              <tr><td colspan="4" style="text-align:center;color:#8CA0BC;padding:20px;">Yüklənir...</td></tr>
             </tbody>
           </table>
-          <!-- Köhnə tvmTechList — gizli, JS uyğunluğu üçün saxlanılır -->
+          <button class="tvmd-showall-inside" id="tvmTechShowAllBtn" onclick="tvmToggleAllTechs()" style="display:none;">
+            Hamısını göstər
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
           <div id="tvmTechList" style="display:none;"></div>
         </div>
 
