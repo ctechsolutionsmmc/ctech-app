@@ -3086,17 +3086,16 @@ function updateTvmDashTabsUI(){
 }
 
 function loadTvmDashData(){
-  var body=document.querySelector('.tvmd-body');
-  if(body) body.style.opacity='0.5';
+  document.getElementById('dashLoading').style.display='flex';
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData'})})
   .then(function(r){ return r.json(); })
   .then(function(d){
-    if(body) body.style.opacity='1';
+    document.getElementById('dashLoading').style.display='none';
     if(d.status!=='OK') return;
     tvmDashAllRows=(d.rows||[]).slice().sort(function(a,b){ var da=tvmRowDate(a),db=tvmRowDate(b); return (db?db.getTime():0)-(da?da.getTime():0); });
     tvmDashComputeAndRender();
   })
-  .catch(function(){ if(body) body.style.opacity='1'; });
+  .catch(function(){ document.getElementById('dashLoading').style.display='none'; });
 }
 
 function openTvmDashboard(){
