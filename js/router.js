@@ -315,8 +315,8 @@ function initRouter(){
         if(ROUTER_READY){
           var hash = _getHashFromUrl();
           var validRoutes = ['bus-service','tvm-service','bus-report','tvm-report',
-                             'bus-dashboard','bus-ongoing','bus-request','bus-bulk',
-                             'admin','notifications','collectives'];
+                             'bus-dashboard','tvm-dashboard','bus-ongoing','bus-request','bus-bulk',
+                             'admin','notifications','collectives','bus-detail','tvm-detail'];
           if(hash && hash !== 'dashboard' && hash !== 'login' && validRoutes.indexOf(hash.split('/')[0]) !== -1){
             setTimeout(function(){ routerNavigate(hash, false); }, 100);
           } else {
