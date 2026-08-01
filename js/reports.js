@@ -2734,7 +2734,7 @@ function tvmRenderDonutPanel(containerId, items, total){
       +' style="width:220px;height:220px;flex-shrink:0;filter:drop-shadow(0 4px 14px rgba(30,68,130,0.10));">'
       +bgCircle+segs+centerText+'</svg>'
       +(hasDigerItems
-        ?'<button id="'+digerBtnId+'" class="tvmd-diger-btn" onclick="tvmToggleDigerPanel(''+digerPanelId+'',''+digerBtnId+'')">'
+        ?'<button id="'+digerBtnId+'" class="tvmd-diger-btn" onclick="tvmToggleDigerPanel(\''+digerPanelId+'\',\''+digerBtnId+'\')">'
           +'Digər <span class="tvmd-diger-btn-count">'+restCount+'</span>'
           +'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>'
           +'</button>'
