@@ -2635,19 +2635,20 @@ function tvmRenderDonutPanel(containerId, items, total){
   var el=document.getElementById(containerId);
   if(!el) return;
   if(total===0||items.length===0){
-    el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>';
+    el.innerHTML='<div class="tvm-donut-empty">Bu d\u00f6vr \u00fc\u00e7\u00fcn qeyd\u0259 al\u0131nmay\u0131b.</div>';
     return;
   }
   var top5=items.slice(0,5);
-  var restCount=items.slice(5).reduce(function(s,it){return s+it.count;},0);
+  var restItems=items.slice(5);
+  var restCount=restItems.reduce(function(s,it){return s+it.count;},0);
   var chartItems=top5.slice();
-  if(restCount>0) chartItems.push({name:'Digər',count:restCount});
+  if(restCount>0) chartItems.push({name:'Dig\u0259r',count:restCount});
 
-  // Sol siyahi: nomre + ad + [say] [faiz%]
+  // Sol siyahi
   var listHtml=top5.map(function(it,i){
     var pct=Math.round(it.count/total*100);
     var c=TVM_DONUT_COLORS[i];
-    var nm=it.name.length>20?it.name.slice(0,20)+'…':it.name;
+    var nm=it.name.length>20?it.name.slice(0,20)+'\u2026':it.name;
     return '<div class="tvm-donut-row-sm" style="border-left-color:'+c+';">'
       +'<div class="tvm-donut-rank" style="background:'+c+';">'+(i+1)+'</div>'
       +'<div class="tvm-donut-row-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(nm)+'</div>'
@@ -2658,24 +2659,29 @@ function tvmRenderDonutPanel(containerId, items, total){
       +'</div>';
   }).join('');
 
-  // Sag legend: nokta + ad + badge (say · faiz)
-  var legendHtml=chartItems.map(function(it,i){
-    var pct=Math.round(it.count/total*100);
-    var c=TVM_DONUT_COLORS[i];
-    var nm=it.name.length>18?it.name.slice(0,18)+'…':it.name;
-    return '<div class="tvmd-legend-row">'
-      +'<span class="tvmd-legend-dot" style="background:'+c+';"></span>'
-      +'<span class="tvmd-legend-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(nm)+'</span>'
-      +'<span class="tvmd-legend-badge" style="background:'+c+'15;color:'+c+';border:1.5px solid '+c+'44;">'+it.count+' · '+pct+'%</span>'
-      +'</div>';
-  }).join('');
+  // Digər paneli ucun HTML
+  var digerItems=items.slice(5);
+  var digerPanelHtml='';
+  if(digerItems.length>0){
+    digerPanelHtml=digerItems.map(function(it,i){
+      var pct=Math.round(it.count/total*100);
+      var c='#8CA0BC';
+      var nm=it.name.length>22?it.name.slice(0,22)+'\u2026':it.name;
+      return '<div class="tvmd-diger-row">'
+        +'<span class="tvmd-diger-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(nm)+'</span>'
+        +'<span class="tvmd-diger-badge">'+it.count+' \u00b7 '+pct+'%</span>'
+        +'</div>';
+    }).join('');
+  } else {
+    // top5-den artiq item yoxdursa, top5-in ozunu goster
+    digerPanelHtml='<div class="tvmd-diger-empty">Əlavə element yoxdur.</div>';
+  }
 
-  // Donut SVG - sadece halqa + ortada say
-  var R=80, strokeW=26, gap=2, circ=2*Math.PI*R;
-  var cx=R+strokeW/2+4, cy=R+strokeW/2+4;
+  // Donut SVG
+  var R=92, strokeW=28, gap=2, circ=2*Math.PI*R;
+  var cx=R+strokeW/2+6, cy=R+strokeW/2+6;
   var W=cx*2, H=cy*2;
   var offset=0, segs='';
-
   chartItems.forEach(function(it,i){
     var frac=it.count/total;
     var len=Math.max(frac*circ-gap,0);
@@ -2690,23 +2696,34 @@ function tvmRenderDonutPanel(containerId, items, total){
       +' style="transition:stroke-dasharray 0.9s cubic-bezier(.2,.8,.3,1) '+(i*0.07)+'s;"/>';
     offset+=frac*circ;
   });
-
   var innerR=R-strokeW/2-2;
   var bgCircle='<circle cx="'+cx+'" cy="'+cy+'" r="'+innerR+'" fill="rgba(247,250,254,0.85)"/>';
   var centerText=''
     +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" dominant-baseline="middle"'
-    +' font-size="28" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif" letter-spacing="-0.5">'+total+'</text>'
-    +'<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle"'
-    +' font-size="9.5" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif" letter-spacing="0.5">Ümumi</text>';
+    +' font-size="32" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif" letter-spacing="-0.5">'+total+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+20)+'" text-anchor="middle"'
+    +' font-size="9.5" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif" letter-spacing="0.5">\u00dcmumi</text>';
+
+  var digerBtnId='tvmDigerBtn_'+containerId;
+  var digerPanelId='tvmDigerPanel_'+containerId;
 
   el.innerHTML='<div class="tvm-donut-panel-new">'
     +'<div class="tvm-donut-list-sm">'+listHtml+'</div>'
-    +'<div class="tvmd-donut-center">'
+    +'<div class="tvmd-donut-mid">'
       +'<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg"'
-      +' style="width:200px;height:200px;flex-shrink:0;filter:drop-shadow(0 4px 14px rgba(30,68,130,0.10));">'
+      +' style="width:220px;height:220px;filter:drop-shadow(0 4px 14px rgba(30,68,130,0.10));">'
       +bgCircle+segs+centerText+'</svg>'
+      +(restCount>0
+        ? '<button id="'+digerBtnId+'" class="tvmd-diger-btn" onclick="tvmToggleDigerPanel(\''+digerPanelId+'\',\''+digerBtnId+'\')">'
+          +'Dig\u0259r <span class="tvmd-diger-btn-count">'+restCount+'</span>'
+          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>'
+          +'</button>'
+        : '')
     +'</div>'
-    +'<div class="tvmd-legend">'+legendHtml+'</div>'
+    +'<div class="tvmd-diger-side" id="'+digerPanelId+'" style="display:none;">'
+      +'<div class="tvmd-diger-side-title">Dig\u0259r servislər</div>'
+      +digerPanelHtml
+    +'</div>'
     +'</div>';
 
   requestAnimationFrame(function(){
@@ -2717,6 +2734,17 @@ function tvmRenderDonutPanel(containerId, items, total){
       });
     });
   });
+}
+
+function tvmToggleDigerPanel(panelId, btnId){
+  var panel=document.getElementById(panelId);
+  var btn=document.getElementById(btnId);
+  if(!panel) return;
+  var isOpen=panel.style.display!=='none';
+  panel.style.display=isOpen?'none':'flex';
+  if(btn){
+    btn.classList.toggle('active', !isOpen);
+  }
 }
 function tvmRenderLocSplit(rows){
   var el=document.getElementById('tvmLocSplit');
