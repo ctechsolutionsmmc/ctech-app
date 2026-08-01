@@ -3018,41 +3018,57 @@ function _tvmDrawSparkline(canvasId, rows, type){
   if(!canvas||!canvas.getContext) return;
   var ctx=canvas.getContext('2d');
   var W=canvas.offsetWidth||120, H=canvas.offsetHeight||36;
-  canvas.width=W; canvas.height=H;
+  canvas.width=W*window.devicePixelRatio||W;
+  canvas.height=H*window.devicePixelRatio||H;
+  ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
   ctx.clearRect(0,0,W,H);
 
-  // Datanı günlərə böl (son 7 nöqtə)
+  // Son 7 günün nöqtələri
   var points=[];
   var now=new Date();
   for(var i=6;i>=0;i--){
-    var d=new Date(now);
-    d.setDate(d.getDate()-i);
-    var dayStr=d.toISOString().slice(0,10);
+    var dayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);
+    var dayEnd=new Date(dayStart.getTime()+86400000);
     var dayRows=rows.filter(function(r){
-      var rd=r['Tarix']||(r['report_date']||'');
-      return rd&&rd.slice(0,10)===dayStr;
+      var d=tvmRowDate(r);
+      return d&&d>=dayStart&&d<dayEnd;
     });
     if(type==='count') points.push(dayRows.length);
-    else points.push(tvmAvgResolutionMinutes(dayRows)||0);
+    else{ var a=tvmAvgResolutionMinutes(dayRows); points.push(a||0); }
   }
 
   var max=Math.max.apply(null,points)||1;
   var min=Math.min.apply(null,points);
-  var range=max-min||1;
+  var range=(max-min)||1;
+  var pad=3;
+  var n=points.length;
 
-  var gradient=ctx.createLinearGradient(0,0,W,0);
-  gradient.addColorStop(0,'rgba(47,111,237,0.4)');
-  gradient.addColorStop(1,'rgba(78,147,250,0.9)');
-
+  // Fill area
   ctx.beginPath();
-  ctx.strokeStyle=gradient;
-  ctx.lineWidth=2;
+  points.forEach(function(v,i){
+    var x=pad+(W-pad*2)*i/(n-1);
+    var y=H-pad-(H-pad*2)*(v-min)/range;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  // Close for fill
+  var lastX=pad+(W-pad*2)*(n-1)/(n-1);
+  ctx.lineTo(lastX,H-pad);
+  ctx.lineTo(pad,H-pad);
+  ctx.closePath();
+  var grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(47,111,237,0.18)');
+  grad.addColorStop(1,'rgba(47,111,237,0.01)');
+  ctx.fillStyle=grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle='rgba(47,111,237,0.75)';
+  ctx.lineWidth=1.8;
   ctx.lineJoin='round';
   ctx.lineCap='round';
-
-  var pad=4;
   points.forEach(function(v,i){
-    var x=pad+(W-pad*2)*i/(points.length-1);
+    var x=pad+(W-pad*2)*i/(n-1);
     var y=H-pad-(H-pad*2)*(v-min)/range;
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   });
@@ -3065,19 +3081,19 @@ function tvmDashGetPrevPeriodRows(){
   var now=new Date();
   var start,end;
   if(tvmDashCustomRange&&tvmDashCustomRange.start&&tvmDashCustomRange.end){
-    var dur=tvmDashCustomRange.end-tvmDashCustomRange.start;
+    var dur=tvmDashCustomRange.end.getTime()-tvmDashCustomRange.start.getTime();
     end=new Date(tvmDashCustomRange.start.getTime());
     start=new Date(end.getTime()-dur);
   } else {
     switch(tvmDashPeriod){
-      case '24h': end=new Date(now-86400000); start=new Date(end-86400000); break;
-      case 'week': end=new Date(now-7*86400000); start=new Date(end-7*86400000); break;
-      case 'month': end=new Date(now-30*86400000); start=new Date(end-30*86400000); break;
+      case '24h': end=new Date(now.getTime()-86400000); start=new Date(end.getTime()-86400000); break;
+      case 'week': end=new Date(now.getTime()-7*86400000); start=new Date(end.getTime()-7*86400000); break;
+      case 'month': end=new Date(now.getTime()-30*86400000); start=new Date(end.getTime()-30*86400000); break;
       default: return [];
     }
   }
   return tvmDashAllRows.filter(function(r){
-    var d=tvmParseDate(r['Tarix']||(r['report_date']||''));
+    var d=tvmRowDate(r);
     return d&&d>=start&&d<end;
   });
 }
