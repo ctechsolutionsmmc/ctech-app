@@ -2635,15 +2635,15 @@ function tvmRenderDonutPanel(containerId, items, total){
   var el=document.getElementById(containerId);
   if(!el) return;
   if(total===0 || items.length===0){
-    el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>';
+    el.innerHTML='<div class="tvm-donut-empty">Bu dövr ucun qeyde alinmayib.</div>';
     return;
   }
   var top5=items.slice(0,5);
   var restCount=items.slice(5).reduce(function(s,it){ return s+it.count; },0);
   var chartItems=top5.slice();
-  if(restCount>0) chartItems.push({name:'Digər', count:restCount});
+  if(restCount>0) chartItems.push({name:'Diger', count:restCount});
 
-  // Sol siyahı — nömrə + ad + say + faiz (4 sütun cədvəl görünüşü)
+  // Sol siyahi
   var listHtml=top5.map(function(it,i){
     var pct=Math.round(it.count/total*100);
     return '<div class="tvm-donut-row-sm" style="border-left-color:'+TVM_DONUT_COLORS[i]+';">'
@@ -2654,12 +2654,19 @@ function tvmRenderDonutPanel(containerId, items, total){
       +'</div>';
   }).join('');
 
-  // Donut SVG — ortada ümumi say + etiket
-  var W=340, H=280, cx=170, cy=140, R=88, strokeW=36, circ=2*Math.PI*R;
+  // SVG: PAD=100 ki etiketler kenarda kesmeisin
+  var PAD=100;
+  var R=76, strokeW=30, circ=2*Math.PI*R;
+  var cx=PAD+R, cy=PAD+R;
+  var W=2*(PAD+R), H=2*(PAD+R);
+
   var offset=0, segs='', labels='';
 
   chartItems.forEach(function(it,i){
-    var frac=it.count/total, len=frac*circ, pct=Math.round(frac*100);
+    var frac=it.count/total;
+    var len=frac*circ;
+    var pct=Math.round(frac*100);
+
     segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none"'
       +' stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="'+strokeW+'"'
       +' stroke-dasharray="0 '+circ.toFixed(1)+'"'
@@ -2668,31 +2675,43 @@ function tvmRenderDonutPanel(containerId, items, total){
       +' class="tvm-donut-seg" data-len="'+len.toFixed(1)+'" data-total="'+circ.toFixed(1)+'"'
       +' style="transition:stroke-dasharray 1s cubic-bezier(.2,.7,.3,1) '+(i*0.08)+'s;"/>';
 
-    // Etiketlər
-    var midFrac=(offset+len/2)/circ;
-    var angleRad=(midFrac*360-90)*Math.PI/180;
-    var lx=cx+(R+20)*Math.cos(angleRad), ly=cy+(R+20)*Math.sin(angleRad);
-    var isRight=Math.cos(angleRad)>=0;
-    var lx2=cx+(R+44)*Math.cos(angleRad), ly2=cy+(R+44)*Math.sin(angleRad);
-    var ex=isRight?lx2+20:lx2-20;
-    var anchor=isRight?'start':'end';
-    var nm=it.name.length>16?it.name.slice(0,16)+'…':it.name;
     if(pct>=5){
-      labels+='<line x1="'+lx.toFixed(1)+'" y1="'+ly.toFixed(1)+'" x2="'+lx2.toFixed(1)+'" y2="'+ly2.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.4"/>'
-        +'<line x1="'+lx2.toFixed(1)+'" y1="'+ly2.toFixed(1)+'" x2="'+ex.toFixed(1)+'" y2="'+ly2.toFixed(1)+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.4"/>'
-        +'<text x="'+(ex+(isRight?4:-4)).toFixed(1)+'" y="'+(ly2-3).toFixed(1)+'" text-anchor="'+anchor+'" font-size="11.5" font-weight="700" fill="#12233B" font-family="Inter,sans-serif">'+escapeHtml(nm)+'</text>'
-        +'<text x="'+(ex+(isRight?4:-4)).toFixed(1)+'" y="'+(ly2+11).toFixed(1)+'" text-anchor="'+anchor+'" font-size="11" font-weight="600" fill="#5C7089" font-family="Inter,sans-serif">'+it.count+' · '+pct+'%</text>';
+      var midFrac=(offset+len/2)/circ;
+      var angleDeg=midFrac*360-90;
+      var angleRad=angleDeg*Math.PI/180;
+      var cosA=Math.cos(angleRad), sinA=Math.sin(angleRad);
+      var r1=R+strokeW/2+5;
+      var r2=R+strokeW/2+24;
+      var x1=(cx+r1*cosA).toFixed(1), y1=(cy+r1*sinA).toFixed(1);
+      var x2=(cx+r2*cosA).toFixed(1), y2=(cy+r2*sinA).toFixed(1);
+      var isRight=cosA>=0;
+      var horizLen=isRight?(PAD-52):(-(PAD-52));
+      var ex=(cx+r2*cosA+horizLen).toFixed(1);
+      var ey=y2;
+      var anchor=isRight?'start':'end';
+      var textX=(parseFloat(ex)+(isRight?3:-3)).toFixed(1);
+      var nm=it.name.length>18?it.name.slice(0,18)+'...':it.name;
+      labels+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.3" stroke-linecap="round"/>'
+        +'<line x1="'+x2+'" y1="'+y2+'" x2="'+ex+'" y2="'+ey+'" stroke="'+TVM_DONUT_COLORS[i]+'" stroke-width="1.3"/>'
+        +'<text x="'+textX+'" y="'+(parseFloat(ey)-2).toFixed(1)+'" text-anchor="'+anchor
+        +'" font-size="11" font-weight="700" fill="#22344F" font-family="Inter,Arial,sans-serif">'+escapeHtml(nm)+'</text>'
+        +'<text x="'+textX+'" y="'+(parseFloat(ey)+13).toFixed(1)+'" text-anchor="'+anchor
+        +'" font-size="10" font-weight="600" fill="#7A90AB" font-family="Inter,Arial,sans-serif">'+it.count+' - '+pct+'%</text>';
     }
     offset+=len;
   });
 
-  // Ortada ümumi say
-  var centerText='<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="28" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif">'+total+'</text>'
-    +'<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="10.5" font-weight="600" fill="#8CA0BC" font-family="Inter,sans-serif">Ümumi</text>';
+  var centerText=''
+    +'<text x="'+cx+'" y="'+(cy+2)+'" text-anchor="middle" dominant-baseline="middle"'
+    +' font-size="28" font-weight="800" fill="#12233B" font-family="Rajdhani,sans-serif">'+total+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+24)+'" text-anchor="middle"'
+    +' font-size="10" font-weight="600" fill="#8CA0BC" font-family="Inter,Arial,sans-serif">Umumi</text>';
 
   el.innerHTML='<div class="tvm-donut-panel">'
     +'<div class="tvm-donut-list-sm">'+listHtml+'</div>'
-    +'<div class="tvm-donut-visual-big"><svg viewBox="0 0 '+W+' '+H+'" width="100%">'+segs+centerText+labels+'</svg></div>'
+    +'<div class="tvm-donut-visual-big">'
+    +'<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:380px;overflow:visible;">'+segs+centerText+labels+'</svg>'
+    +'</div>'
     +'</div>';
 
   requestAnimationFrame(function(){
@@ -2762,17 +2781,21 @@ function tvmRenderTechList(rows){
 }
 
 var tvmAllLocationsOpen=false;
-function tvmToggleAllLocations(){
+function tvmToggleAllLocations(filteredRows){
   tvmAllLocationsOpen=!tvmAllLocationsOpen;
   var panel=document.getElementById('tvmAllLocationsPanel');
-  var btn=document.getElementById('tvmShowAllLocBtn');
+  // Düyməni tap (kartın içindədir)
+  var locCard=document.getElementById('tvmLocationsPanel');
+  var btn=locCard?locCard.querySelector('.tvmd-showall-inside'):null;
+
   if(tvmAllLocationsOpen){
     panel.style.display='block';
-    btn.textContent='Gizlət';
-    tvmRenderAllLocations(tvmDashGetFilteredRows());
+    if(btn){ btn.innerHTML='Gizlət <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>'; }
+    var rows=filteredRows||tvmDashGetFilteredRows();
+    tvmRenderAllLocations(rows);
   } else {
     panel.style.display='none';
-    btn.textContent='Hamısını göstər';
+    if(btn){ btn.innerHTML='Hamısını göstər <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>'; }
   }
 }
 function tvmRenderAllLocations(rows){
@@ -2780,12 +2803,19 @@ function tvmRenderAllLocations(rows){
   if(!el) return;
   var items=tvmDashCountLocation(rows);
   var total=rows.length||1;
-  if(items.length===0){ el.innerHTML='<div class="tvm-donut-empty">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
-  el.innerHTML=items.map(function(it){
+  if(items.length===0){
+    el.innerHTML='<div class="tvm-donut-empty" style="padding:20px;">Bu dovr ucun qeyde alinmayib.</div>';
+    return;
+  }
+  el.innerHTML=items.map(function(it,i){
     var pct=Math.round(it.count/total*100);
-    return '<div class="tvm-all-loc-row"><div class="tvm-all-loc-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(it.name)+'</div>'+
-      '<div class="tvm-all-loc-bar-track"><div class="tvm-all-loc-bar-fill" data-w="'+pct+'"></div></div>'+
-      '<div class="tvm-all-loc-pct">'+it.count+' · '+pct+'%</div></div>';
+    var color=TVM_DONUT_COLORS[i]||'#8CA0BC';
+    return '<div class="tvm-all-loc-row">'
+      +'<div class="tvm-all-loc-num" style="background:'+color+'22;color:'+color+';">'+(i+1)+'</div>'
+      +'<div class="tvm-all-loc-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(it.name)+'</div>'
+      +'<div class="tvm-all-loc-bar-track"><div class="tvm-all-loc-bar-fill" data-w="'+pct+'" style="background:'+color+';"></div></div>'
+      +'<div class="tvm-all-loc-pct">'+it.count+' · '+pct+'%</div>'
+      +'</div>';
   }).join('');
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
@@ -2851,9 +2881,26 @@ function tvmDashComputeAndRender(){
   tvmRenderDonutPanel('tvmProblemsPanel', problemItems, problemTotal);
   tvmRenderDonutPanel('tvmSolutionsPanel', solutionItems, solutionTotal);
   tvmRenderDonutPanel('tvmLocationsPanel', tvmDashCountLocation(filtered), filtered.length);
+  // "Hamısını göstər" düyməsini lokasiyalar kartının altına əlavə et
+  tvmAppendShowAllBtn(filtered);
   tvmRenderTechList(filtered);
   tvmRenderRecurring(filtered);
   if(tvmAllLocationsOpen) tvmRenderAllLocations(filtered);
+}
+
+// "Hamısını göstər" düyməsini lokasiyalar kartına əlavə edir
+function tvmAppendShowAllBtn(filtered){
+  var locPanel=document.getElementById('tvmLocationsPanel');
+  if(!locPanel) return;
+  // Əgər artıq varsa sil
+  var old=locPanel.querySelector('.tvmd-showall-inside');
+  if(old) old.parentNode.removeChild(old);
+
+  var btn=document.createElement('button');
+  btn.className='tvmd-showall-inside';
+  btn.innerHTML='Hamısını göstər <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>';
+  btn.onclick=function(){ tvmToggleAllLocations(filtered); };
+  locPanel.appendChild(btn);
 }
 
 function updateTvmDashTabsUI(){
