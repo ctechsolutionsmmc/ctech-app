@@ -1218,20 +1218,20 @@ function openBusBulk(){
   var now = bakuNowDate();
   document.getElementById('dashboardView').style.display = 'none';
   document.getElementById('busServiceView').style.display = 'none';
-  document.getElementById('busBulkView').style.display = 'flex';
+  var bv=document.getElementById('busBulkView');
+  bv.style.display = 'flex';
+  bv.scrollTop = 0;
 
-  var needsFetch = !(bsFormData && bsFormData.carriers);
-  if(needsFetch){
-    var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
-    var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');
-    ov.style.display='flex'; ov.classList.add('open'); sp.style.display='block'; ic.style.display='none'; tx.textContent='Yüklənir...';
-  }
+  // Hər dəfə (sessiya keşindən asılı olmayaraq) yenidən yüklə — hazırlanır vidjeti göstər
+  var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
+  var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');
+  ov.style.display='flex'; ov.classList.add('open'); sp.style.display='block'; ic.style.display='none'; tx.textContent='Yüklənir...';
+
   ensureBulkFormData(function(){
-    if(needsFetch){
-      var ov2=document.getElementById('bsLoadingOverlay');
-      ov2.classList.remove('open'); ov2.style.display='none';
-    }
-  });
+    var ov2=document.getElementById('bsLoadingOverlay');
+    ov2.classList.remove('open'); ov2.style.display='none';
+  }, true);
+
   if(!bkSelectedDate){
     bkCalYear = now.getFullYear();
     bkCalMonth = now.getMonth();
@@ -1253,17 +1253,41 @@ function attemptBusBulkHome(){
 }
 
 function closeBusBulk(){
-  document.getElementById('busBulkView').style.display = 'none';
-  if(bkReturnTarget === 'dashboard'){
-    document.getElementById('dashboardView').style.display = 'block';
-  } else {
-    document.getElementById('busServiceView').style.display = 'block';
-  }
   resetBulkForm();
+  var loading = document.getElementById('dashLoading');
+  if(loading) loading.style.display='flex';
+
+  setTimeout(function(){
+    var bv = document.getElementById('busBulkView');
+    bv.style.display = 'none';
+    bv.scrollTop = 0;
+
+    if(bkReturnTarget === 'dashboard'){
+      // Dashboard-a qayıdış — router vasitəsilə (təhlükəsiz, heç bir form state itmir)
+      if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
+        routerNavigate('dashboard', true);
+      } else {
+        document.getElementById('dashboardView').style.display = 'block';
+        window.scrollTo(0,0);
+      }
+    } else {
+      // Davam edən Bus Service formuna qayıdış — formu YENİDƏN BAŞLATMADAN sadəcə göstər
+      // (startBusService çağırılsa, doldurulmuş form sıfırlana bilər — buna görə routerNavigate işlətmirik)
+      document.getElementById('busServiceView').style.display = 'block';
+      window.scrollTo(0,0);
+      if(typeof _pushRouteOnly === 'function'){
+        _pushRouteOnly('bus-service');
+      } else if(window.location.hash !== '#bus-service'){
+        history.pushState({route:'bus-service'}, '', '#bus-service');
+      }
+    }
+
+    if(loading) loading.style.display='none';
+  }, 700);
 }
 
-function ensureBulkFormData(callback){
-  if(bsFormData && bsFormData.carriers){ bkFillSelects(); bkFormDataLoaded=true; if(callback) callback(); return; }
+function ensureBulkFormData(callback, force){
+  if(!force && bsFormData && bsFormData.carriers){ bkFillSelects(); bkFormDataLoaded=true; if(callback) callback(); return; }
   fetch(API_URL,{
     method:'POST',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
