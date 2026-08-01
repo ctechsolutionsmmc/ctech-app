@@ -3100,7 +3100,7 @@ function loadTvmDashData(){
 
 function openTvmDashboard(){
   document.getElementById('dashboardView').style.display='none';
-  document.getElementById('tvmDashboardView').style.display='block';
+  document.getElementById('tvmDashboardView').style.display='flex';
   tvmDashCustomRange=null;
   tvmDashPeriod='24h';
   tvmDashActiveChips={}; tvmDashSubfilterState={}; tvmDashTextFilters={};
