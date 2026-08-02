@@ -27,7 +27,7 @@
     content:'';
     position:fixed;
     top:0; left:0; width:100%; height:100%;
-    background-image:url('../service_dashboards_bunner.webp');
+    background-image:url('../login-bg.webp');
     background-size:cover;
     background-position:center bottom;
     background-repeat:no-repeat;
@@ -108,6 +108,14 @@ body.dark-mode .bs-home-btn { color:#E8EEF5 !important; }
   border-radius:16px;
   padding:18px;
   margin-bottom:14px;
+}
+
+/* "Servis" başlıqlı bölmələr — qalın göy xətt (Bus Service + Bus Request-də) */
+.bs-section-servis{
+  border:3px solid #2F6FED;
+}
+body.dark-mode .bs-section-servis{
+  border-color:#4E93FA;
 }
 
 .bs-section-title {
