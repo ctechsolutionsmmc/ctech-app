@@ -668,7 +668,8 @@ var DASH_CATS=[
   {key:'Qrup Rəhbəri', type:'multi', getOptions:function(){ return bsFormData.leaders||[]; }},
   {key:'Texnik', type:'multi', getOptions:function(){ return bsFormData.technicians||[]; }},
   {key:'Servis verilən Ünvan', type:'multi', getOptions:function(){ return bsFormData.locations||[]; }},
-  {key:'Servis Kateqoriyaları', type:'multi', getOptions:function(){ return bsFormData.busEquipment||[]; }}
+  {key:'Servis Kateqoriyaları', type:'multi', getOptions:function(){ return bsFormData.busEquipment||[]; }},
+  {key:'Problem Owner', type:'multi', getOptions:function(){ return ['AYNA','BakıKart','AYNA və BakıKart']; }}
 ];
 var dashActiveChips={}, dashSubfilterState={}, dashTextFilters={}, dashCustomRange=null, dashPeriod='24h', dashAllRows=[];
 function dashSelectedOptions(key){
@@ -697,6 +698,7 @@ function dashGetFilteredRows(){
     if(dashHasActiveOptions('Texnik')&&!(dashMatchMulti(row['1. Texnik'],'Texnik')||dashMatchMulti(row['2. Texnik'],'Texnik'))) return false;
     if(dashHasActiveOptions('Servis verilən Ünvan')&&!dashMatchLocation(row['Servis yeri'],'Servis verilən Ünvan')) return false;
     if(dashHasActiveOptions('Servis Kateqoriyaları')&&!dashMatchMulti(row['Servis Kat.'],'Servis Kateqoriyaları')) return false;
+    if(dashHasActiveOptions('Problem Owner')&&!dashMatchMulti(row['Problem Owner'],'Problem Owner')) return false;
     return true;
   });
 }
