@@ -222,7 +222,7 @@ function applyAccessLevel(){
     return;
   }
 
-  document.getElementById('dashboardsSection').style.display=(level==='technician')?'none':'block';
+  document.getElementById('dashboardsSection').style.display=(level==='technician'||window.innerWidth<901)?'none':'block';
   document.getElementById('reportsSection').style.display='block';
   var ctdHeroN=document.getElementById('ctdHero'); if(ctdHeroN) ctdHeroN.classList.remove('guest-hero');
 
