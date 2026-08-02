@@ -16,6 +16,34 @@
   -webkit-overflow-scrolling:touch;
 }
 
+/* Arxa fon banneri — Bus Service VƏ Bus Request görünüşlərində.
+   YALNIZ DESKTOP (≥901px) — mobil ekranda bu bölmə tamamilə toxunulmaz qalır.
+   #busRequestView-un öz CSS qaydası yoxdur (JS runtime-da position:fixed
+   təyin edir), amma ::before ana elementin mövcud position-ına güvənir,
+   ona görə əlavə heç nə etməyə ehtiyac yoxdur. */
+@media(min-width:901px){
+  #busServiceView::before,
+  #busRequestView::before{
+    content:'';
+    position:fixed;
+    top:0; left:0; width:100%; height:100%;
+    background-image:url('../service_dashboards_bunner.webp');
+    background-size:cover;
+    background-position:center bottom;
+    background-repeat:no-repeat;
+    opacity:0.22;
+    z-index:0;
+    pointer-events:none;
+  }
+  body.dark-mode #busServiceView::before,
+  body.dark-mode #busRequestView::before{ opacity:0.10; }
+
+  #busServiceView .bs-body,
+  #busRequestView .bs-body{ position:relative; z-index:1; }
+  /* .bs-header-ə TOXUNMURUQ — onun öz position:sticky; z-index:10; qaydası
+     artıq banner-in (z-index:0) üstündə düzgün göstərir, əlavəyə ehtiyac yoxdur */
+}
+
 .bs-header {
   position:sticky;
   top:0;
