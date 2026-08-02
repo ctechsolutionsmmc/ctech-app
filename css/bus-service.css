@@ -31,12 +31,12 @@
     background-size:cover;
     background-position:center bottom;
     background-repeat:no-repeat;
-    opacity:0.22;
+    opacity:0.55;
     z-index:0;
     pointer-events:none;
   }
   body.dark-mode #busServiceView::before,
-  body.dark-mode #busRequestView::before{ opacity:0.10; }
+  body.dark-mode #busRequestView::before{ opacity:0.22; }
 
   #busServiceView .bs-body,
   #busRequestView .bs-body{ position:relative; z-index:1; }
