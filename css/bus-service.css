@@ -43,15 +43,16 @@
   /* .bs-header-ə TOXUNMURUQ — onun öz position:sticky; z-index:10; qaydası
      artıq banner-in (z-index:0) üstündə düzgün göstərir, əlavəyə ehtiyac yoxdur */
 
-  /* Kartların öz fonu — "buzlu şüşə" effekti, banner bir az görünsün.
+  /* Kartların öz fonu — şəffaf ton, banner bir az görünsün.
      DAXİLİ elementlərə (bs-input, bs-select, bs-picker-btn) TOXUNMUR —
      onların öz sabit (#F8FAFD) fonu var, fon irsi keçmədiyi üçün
-     tam oxunaqlı qalırlar. */
+     tam oxunaqlı qalırlar.
+     DİQQƏT: backdrop-filter İSTİFADƏ ETMİRİK — bu, hər qutunu ayrıca
+     stacking context edir, açılan dropdown siyahılarını öz qutusunun
+     arxasında həbs edirdi (bug idi, indi düzəldi). */
   #busServiceView .bs-section,
   #busRequestView .bs-section{
     background:rgba(255,255,255,0.80);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
   }
   body.dark-mode #busServiceView .bs-section,
   body.dark-mode #busRequestView .bs-section{
