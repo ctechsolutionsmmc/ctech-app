@@ -42,6 +42,33 @@
   #busRequestView .bs-body{ position:relative; z-index:1; }
   /* .bs-header-ə TOXUNMURUQ — onun öz position:sticky; z-index:10; qaydası
      artıq banner-in (z-index:0) üstündə düzgün göstərir, əlavəyə ehtiyac yoxdur */
+
+  /* Kartların öz fonu — "buzlu şüşə" effekti, banner bir az görünsün.
+     DAXİLİ elementlərə (bs-input, bs-select, bs-picker-btn) TOXUNMUR —
+     onların öz sabit (#F8FAFD) fonu var, fon irsi keçmədiyi üçün
+     tam oxunaqlı qalırlar. */
+  #busServiceView .bs-section,
+  #busRequestView .bs-section{
+    background:rgba(255,255,255,0.80);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  body.dark-mode #busServiceView .bs-section,
+  body.dark-mode #busRequestView .bs-section{
+    background:rgba(22,33,46,0.82);
+  }
+}
+
+/* Bütün qutucuqların (Yeni Servis + Yeni Müraciət) kənarı — qalın göy xətt.
+   Mobil-də DƏ tətbiq olunur (banner-dən fərqli olaraq, bu qeyri-desktop
+   ekranlarda da işə düşür). */
+#busServiceView .bs-section,
+#busRequestView .bs-section{
+  border:3px solid #2F6FED;
+}
+body.dark-mode #busServiceView .bs-section,
+body.dark-mode #busRequestView .bs-section{
+  border-color:#4E93FA;
 }
 
 .bs-header {
@@ -108,14 +135,6 @@ body.dark-mode .bs-home-btn { color:#E8EEF5 !important; }
   border-radius:16px;
   padding:18px;
   margin-bottom:14px;
-}
-
-/* "Servis" başlıqlı bölmələr — qalın göy xətt (Bus Service + Bus Request-də) */
-.bs-section-servis{
-  border:3px solid #2F6FED;
-}
-body.dark-mode .bs-section-servis{
-  border-color:#4E93FA;
 }
 
 .bs-section-title {
