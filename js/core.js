@@ -222,7 +222,7 @@ function applyAccessLevel(){
     return;
   }
 
-  document.getElementById('dashboardsSection').style.display=(level==='technician'||window.innerWidth<901)?'none':'block';
+  document.getElementById('dashboardsSection').style.display=(level==='technician')?'none':'block';
   document.getElementById('reportsSection').style.display='block';
   var ctdHeroN=document.getElementById('ctdHero'); if(ctdHeroN) ctdHeroN.classList.remove('guest-hero');
 
@@ -279,46 +279,62 @@ function toggleUserMenu(){ var dd=document.getElementById('ctdUserDropdown'); if
 
 function signOut(){
   closeMenu();
-  clearSession();
-  currentUser=null;
-  // Refresh-flash önləyici sinifi sil (yoxsa loginView !important ilə gizli qalır)
-  document.documentElement.classList.remove('has-session');
-  // CTD dropdown açıq qalıbsa bağla
-  var ctdDD = document.getElementById('ctdUserDropdown');
-  if(ctdDD) ctdDD.classList.remove('open');
-  // Remember Me sıfırla
-  var rm=document.getElementById('rememberMe');
-  if(rm) rm.checked=false;
-  // Login formu təmizlə
-  document.getElementById('email').value='';
-  document.getElementById('password').value='';
-  var btn=document.getElementById('loginBtn');
-  btn.disabled=false;
-  btn.innerHTML='Daxil ol';
-  // Bütün view-ları bağla (router varsa hamısını, yoxdursa əsasları)
-  if(typeof routerHideAll === 'function'){
-    routerHideAll();
-  } else {
-    document.getElementById('dashboardView').style.display='none';
-    document.getElementById('busServiceView').style.display='none';
-  }
-  // Login-i MÜTLƏQ göstər — CSS-in default cascade-inə güvənmə, sərt təyin et
-  // (mobil ≤900px üçün 'block', desktop üçün 'flex' — login.css-dəki media query ilə eyni)
-  var lv = document.getElementById('loginView');
-  lv.style.display = (window.innerWidth <= 900) ? 'block' : 'flex';
-  // URL-i təmizlə
-  try{ history.replaceState({ route:'login' }, '', window.location.pathname); }catch(e){}
-  if(typeof _currentRoute !== 'undefined') _currentRoute = 'dashboard';
-  if(typeof ROUTER_READY !== 'undefined') ROUTER_READY = false; // hər hansı gecikmiş routerNavigate çağırışının qarşısını al
 
-  // Bir tick sonra YENİDƏN yoxla — hər hansı gecikmiş kod loginView-u gizlətsə, geri qaytar
+  // "Çıxış..." vidjeti göstər — mövcud dashLoading overlay-i yenidən istifadə edirik,
+  // mətnini müvəqqəti dəyişib sonra geri qaytarırıq ki, başqa yerlərdə ("Hazırlanır...")
+  // istifadə olunan mətnə təsir etməsin.
+  var loading = document.getElementById('dashLoading');
+  var loadingTextEl = loading ? loading.querySelector('.dash-loading-text') : null;
+  var originalLoadingText = loadingTextEl ? loadingTextEl.textContent : null;
+  if(loadingTextEl) loadingTextEl.textContent = 'Çıxış...';
+  if(loading) loading.style.display = 'flex';
+
   setTimeout(function(){
-    var lv2 = document.getElementById('loginView');
-    if(lv2 && getComputedStyle(lv2).display === 'none'){
-      lv2.style.display = (window.innerWidth <= 900) ? 'block' : 'flex';
+    clearSession();
+    currentUser=null;
+    // Refresh-flash önləyici sinifi sil (yoxsa loginView !important ilə gizli qalır)
+    document.documentElement.classList.remove('has-session');
+    // CTD dropdown açıq qalıbsa bağla
+    var ctdDD = document.getElementById('ctdUserDropdown');
+    if(ctdDD) ctdDD.classList.remove('open');
+    // Remember Me sıfırla
+    var rm=document.getElementById('rememberMe');
+    if(rm) rm.checked=false;
+    // Login formu təmizlə
+    document.getElementById('email').value='';
+    document.getElementById('password').value='';
+    var btn=document.getElementById('loginBtn');
+    btn.disabled=false;
+    btn.innerHTML='Daxil ol';
+    // Bütün view-ları bağla (router varsa hamısını, yoxdursa əsasları)
+    if(typeof routerHideAll === 'function'){
+      routerHideAll();
+    } else {
+      document.getElementById('dashboardView').style.display='none';
+      document.getElementById('busServiceView').style.display='none';
     }
-    if(typeof ROUTER_READY !== 'undefined') ROUTER_READY = true;
-  }, 250);
+    // Login-i MÜTLƏQ göstər — CSS-in default cascade-inə güvənmə, sərt təyin et
+    // (mobil ≤900px üçün 'block', desktop üçün 'flex' — login.css-dəki media query ilə eyni)
+    var lv = document.getElementById('loginView');
+    lv.style.display = (window.innerWidth <= 900) ? 'block' : 'flex';
+    // URL-i təmizlə
+    try{ history.replaceState({ route:'login' }, '', window.location.pathname); }catch(e){}
+    if(typeof _currentRoute !== 'undefined') _currentRoute = 'dashboard';
+    if(typeof ROUTER_READY !== 'undefined') ROUTER_READY = false; // hər hansı gecikmiş routerNavigate çağırışının qarşısını al
+
+    // Vidjeti gizlət, mətni geri qaytar
+    if(loading) loading.style.display = 'none';
+    if(loadingTextEl && originalLoadingText !== null) loadingTextEl.textContent = originalLoadingText;
+
+    // Bir tick sonra YENİDƏN yoxla — hər hansı gecikmiş kod loginView-u gizlətsə, geri qaytar
+    setTimeout(function(){
+      var lv2 = document.getElementById('loginView');
+      if(lv2 && getComputedStyle(lv2).display === 'none'){
+        lv2.style.display = (window.innerWidth <= 900) ? 'block' : 'flex';
+      }
+      if(typeof ROUTER_READY !== 'undefined') ROUTER_READY = true;
+    }, 250);
+  }, 2000);
 }
 
 function moduleAlert(n){ alert(n+' modulu tezliklə hazır olacaq'); }
