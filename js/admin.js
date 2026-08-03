@@ -797,6 +797,7 @@ function loadAdminLeaders(){
 
 var admBusRegistryAll=[], admBusProblems=[], admBusSolutions=[], admBusEquipment=[], admBusLocations=[];
 var admBusSolutionOwners={}; // { "həll mətni": "AYNA"/"BakıKart"/"AYNA və BakıKart" }
+var admBusSolutionCategories={}; // { "həll mətni": "Validator"/"SAM Card"/... }
 var admBusRegCurrentPage=1, admBusRegPageSize=8, admBusRegEditingId=null;
 var admBusListEditingSheet=null, admBusListEditingValue=null;
 var admBusRegSearchDebounceTimer=null;
@@ -838,6 +839,7 @@ function loadBusManagementData(){
     admBusProblems=d.problems||[];
     admBusSolutions=d.solutions||[];
     admBusSolutionOwners=d.solutionOwners||{};
+    admBusSolutionCategories=d.solutionCategories||{};
     admBusEquipment=d.equipment||[];
     admBusLocations=d.locations||[];
     admBusRegCurrentPage=1;
@@ -1248,15 +1250,19 @@ function admRenderBusSimpleList(sheetName, arr){
   listEl.innerHTML=arr.map(function(val, idx){
     var safeVal=val.replace(/'/g,'');
     var ownerBadge='';
+    var categoryBadge='';
     if(isSolutions){
       var owner=admBusSolutionOwners[val]||'';
       var c=OWNER_COLORS[owner]||'#8CA0BC';
       ownerBadge='<span class="adm-owner-badge" style="background:'+c+'18;color:'+c+';border:1px solid '+c+'44;">'+(owner?escapeHtml(owner):'Owner yoxdur')+'</span>';
+      var category=admBusSolutionCategories[val]||'';
+      categoryBadge='<span class="adm-owner-badge" style="background:#5C708918;color:#5C7089;border:1px solid #5C708944;">'+(category?escapeHtml(category):'Kateqoriya yoxdur')+'</span>';
     }
     return '<div class="adm-reorder-row">'
       +'<span class="adm-reorder-num">'+(idx+1)+'</span>'
       +'<span class="adm-reorder-text">'+escapeHtml(val)+'</span>'
       +ownerBadge
+      +categoryBadge
       +'<div class="adm-reorder-arrows">'
       +'<button class="adm-reorder-arrow" '+(idx===0?'disabled':'')+' onclick="admMoveBusListItem(\''+sheetName+'\',\''+safeVal+'\',\'up\')" aria-label="Yuxarı"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg></button>'
       +'<button class="adm-reorder-arrow" '+(idx===arr.length-1?'disabled':'')+' onclick="admMoveBusListItem(\''+sheetName+'\',\''+safeVal+'\',\'down\')" aria-label="Aşağı"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></button>'
@@ -1293,11 +1299,19 @@ function openBusListModal(sheetName, oldValue){
   document.getElementById('admBusListValue').value=oldValue||'';
   document.getElementById('admBusListSaveBtn').textContent=oldValue?'Save Changes':'Save';
   var ownerWrap=document.getElementById('admBusListOwnerWrap');
+  var categoryWrap=document.getElementById('admBusListCategoryWrap');
   if(sheetName==='BUS_SOLUTIONS'){
     ownerWrap.style.display='block';
     document.getElementById('admBusListOwner').value=oldValue?(admBusSolutionOwners[oldValue]||''):'';
+    categoryWrap.style.display='block';
+    var catSel=document.getElementById('admBusListCategory');
+    catSel.innerHTML='<option value="">Seçin</option>'+admBusEquipment.map(function(eq){
+      return '<option value="'+escapeHtml(eq)+'">'+escapeHtml(eq)+'</option>';
+    }).join('');
+    catSel.value=oldValue?(admBusSolutionCategories[oldValue]||''):'';
   } else {
     ownerWrap.style.display='none';
+    categoryWrap.style.display='none';
   }
   var ov=document.getElementById('admBusListModal');
   ov.style.display='flex'; ov.classList.add('open');
@@ -1314,10 +1328,12 @@ function submitBusListModal(){
   if(!value){ errEl.textContent='Boş dəyər saxlanıla bilməz.'; errEl.style.display='block'; return; }
 
   var isSolutions=(admBusListEditingSheet==='BUS_SOLUTIONS');
-  var ownerVal='';
+  var ownerVal='', categoryVal='';
   if(isSolutions){
     ownerVal=document.getElementById('admBusListOwner').value;
     if(!ownerVal){ errEl.textContent='Problem Owner seçilməlidir.'; errEl.style.display='block'; return; }
+    categoryVal=document.getElementById('admBusListCategory').value;
+    if(!categoryVal){ errEl.textContent='Servis Kateqoriyası seçilməlidir.'; errEl.style.display='block'; return; }
   }
 
   var btn=document.getElementById('admBusListSaveBtn');
@@ -1326,8 +1342,8 @@ function submitBusListModal(){
   var payload;
   if(isSolutions){
     payload = admBusListEditingValue
-      ? { action:'updateBusSolutionWithOwner', oldSolution:admBusListEditingValue, newSolution:value, newOwner:ownerVal, requesterEmail: currentUser?currentUser.email:'' }
-      : { action:'addBusSolutionWithOwner', solution:value, owner:ownerVal, requesterEmail: currentUser?currentUser.email:'' };
+      ? { action:'updateBusSolutionWithOwner', oldSolution:admBusListEditingValue, newSolution:value, newOwner:ownerVal, newCategory:categoryVal, requesterEmail: currentUser?currentUser.email:'' }
+      : { action:'addBusSolutionWithOwner', solution:value, owner:ownerVal, category:categoryVal, requesterEmail: currentUser?currentUser.email:'' };
   } else {
     payload = admBusListEditingValue
       ? { action:'updateBusListItem', sheetName:admBusListEditingSheet, oldValue:admBusListEditingValue, newValue:value, requesterEmail: currentUser?currentUser.email:'' }
