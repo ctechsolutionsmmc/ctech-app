@@ -39,9 +39,7 @@
   body.dark-mode #busRequestView::before{ opacity:0.22; }
 
   #busServiceView .bs-body,
-  #busRequestView .bs-body,
-  #busServiceView .bs-submit,
-  #busRequestView .bs-submit{ position:relative; z-index:1; }
+  #busRequestView .bs-body{ position:relative; z-index:1; }
   /* .bs-header-ə TOXUNMURUQ — onun öz position:sticky; z-index:10; qaydası
      artıq banner-in (z-index:0) üstündə düzgün göstərir, əlavəyə ehtiyac yoxdur.
      .bs-submit .bs-body-nin KƏNARINDADIR (sibling), ona görə ayrıca daxil edildi —
@@ -63,6 +61,15 @@
   body.dark-mode #busRequestView .bs-section{
     background:rgba(22,33,46,0.82);
   }
+}
+
+/* "Göndər" düyməsi HƏMİŞƏ açıq dropdown siyahılarının (bs-dd-list, z-index:50)
+   üstündə qalsın — Qrup Rəhbəri kimi son sahələrin dropdown-u aşağı açılanda
+   düymənin üzərinə düşüb onu vizual "içinə alırdı". Mobil+desktop, hər ikisində. */
+#busServiceView .bs-submit,
+#busRequestView .bs-submit{
+  position:relative;
+  z-index:60;
 }
 
 /* Bütün qutucuqların (Yeni Servis + Yeni Müraciət) kənarı — qalın göy xətt.
