@@ -115,7 +115,8 @@ function routerNavigate(route, pushToHistory){
     'busOngoingView':'bus-ongoing',
     'busDashboardView':'bus-dashboard',
     'busReportView':'bus-report',
-    'tvmReportView':'tvm-report'
+    'tvmReportView':'tvm-report',
+    'adminPanelView':'admin'
   };
   var leavingHeavyView = false;
   for(var _vid in _LOADING_EXIT_VIEWS){
