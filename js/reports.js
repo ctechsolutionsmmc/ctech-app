@@ -1293,24 +1293,13 @@ function closeBusBulk(){
     bv.style.display = 'none';
     bv.scrollTop = 0;
 
-    if(bkReturnTarget === 'dashboard'){
-      // Dashboard-a qayıdış — router vasitəsilə (təhlükəsiz, heç bir form state itmir)
-      if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
-        routerNavigate('dashboard', true);
-      } else {
-        document.getElementById('dashboardView').style.display = 'block';
-        window.scrollTo(0,0);
-      }
+    // Digər bölmələrlə eyni — həmişə Dashboard-a qayıdır (router vasitəsilə,
+    // təhlükəsiz, heç bir form state itmir).
+    if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
+      routerNavigate('dashboard', true);
     } else {
-      // Davam edən Bus Service formuna qayıdış — formu YENİDƏN BAŞLATMADAN sadəcə göstər
-      // (startBusService çağırılsa, doldurulmuş form sıfırlana bilər — buna görə routerNavigate işlətmirik)
-      document.getElementById('busServiceView').style.display = 'block';
+      document.getElementById('dashboardView').style.display = 'block';
       window.scrollTo(0,0);
-      if(typeof _pushRouteOnly === 'function'){
-        _pushRouteOnly('bus-service');
-      } else if(window.location.hash !== '#bus-service'){
-        history.pushState({route:'bus-service'}, '', '#bus-service');
-      }
     }
 
     if(loading) loading.style.display='none';
@@ -1319,6 +1308,18 @@ function closeBusBulk(){
 
 function ensureBulkFormData(callback, force){
   if(!force && bsFormData && bsFormData.carriers){ bkFillSelects(); bkFormDataLoaded=true; if(callback) callback(); return; }
+
+  // Təhlükəsizlik şəbəkəsi — fetch nə səbəbdənsə (şəbəkə, server) heç vaxt
+  // cavab verməsə belə, vidjet 10 saniyədən sonra MÜTLƏQ bağlanır.
+  var finished = false;
+  var safetyTimer = setTimeout(function(){
+    if(finished) return;
+    finished = true;
+    bkFillSelects();
+    bkFormDataLoaded = true;
+    if(callback) callback();
+  }, 10000);
+
   fetch(API_URL,{
     method:'POST',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -1326,6 +1327,9 @@ function ensureBulkFormData(callback, force){
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
+    if(finished) return;
+    finished = true;
+    clearTimeout(safetyTimer);
     if(d.status === 'OK'){
       bsFormData = d;
     }
@@ -1333,7 +1337,14 @@ function ensureBulkFormData(callback, force){
     bkFormDataLoaded = true;
     if(callback) callback();
   })
-  .catch(function(){ if(callback) callback(); });
+  .catch(function(){
+    if(finished) return;
+    finished = true;
+    clearTimeout(safetyTimer);
+    bkFillSelects();
+    bkFormDataLoaded = true;
+    if(callback) callback();
+  });
 }
 
 function bkFillSelects(){
