@@ -63,13 +63,14 @@
   }
 }
 
-/* "Göndər" düyməsi HƏMİŞƏ açıq dropdown siyahılarının (bs-dd-list, z-index:50)
-   üstündə qalsın — Qrup Rəhbəri kimi son sahələrin dropdown-u aşağı açılanda
-   düymənin üzərinə düşüb onu vizual "içinə alırdı". Mobil+desktop, hər ikisində. */
+/* "Göndər" düyməsi banner-in (z-index:0) üstündə qalsın ki, solğun görünməsin —
+   AMMA dropdown siyahılarından (bs-dd-list, z-index:50/60) AŞAĞI qalmalıdır,
+   yoxsa açıq dropdown-un üstünə çıxıb klikləri özü tutur (seçim etmək olmurdu —
+   bu, əvvəlki səhv düzəliş idi, indi geri qaytarıldı). */
 #busServiceView .bs-submit,
 #busRequestView .bs-submit{
   position:relative;
-  z-index:60;
+  z-index:1;
 }
 
 /* Bütün qutucuqların (Yeni Servis + Yeni Müraciət) kənarı — qalın göy xətt.
