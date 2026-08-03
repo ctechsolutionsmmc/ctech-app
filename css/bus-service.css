@@ -39,7 +39,7 @@
   body.dark-mode #busRequestView::before{ opacity:0.22; }
 
   #busServiceView .bs-body,
-  #busRequestView .bs-body{ position:relative; z-index:1; }
+  #busRequestView .bs-body{ position:relative; z-index:2; }
   /* .bs-header-ə TOXUNMURUQ — onun öz position:sticky; z-index:10; qaydası
      artıq banner-in (z-index:0) üstündə düzgün göstərir, əlavəyə ehtiyac yoxdur.
      .bs-submit .bs-body-nin KƏNARINDADIR (sibling), ona görə ayrıca daxil edildi —
