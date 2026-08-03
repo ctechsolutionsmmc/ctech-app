@@ -6,23 +6,38 @@
 function openAdminPanel(){
   closeMenu();
   if(window.innerWidth < 901){ return; }
-  var nameEl=document.getElementById('admProfileName');
-  var roleEl=document.getElementById('admProfileRole');
-  if(currentUser){
-    if(nameEl) nameEl.textContent=currentUser.name||'—';
-    if(roleEl) roleEl.textContent=currentUser.role||'—';
-  }
-  document.getElementById('dashboardView').style.display='none';
-  document.getElementById('adminPanelView').style.display='flex';
-  
-  // BUS Management məlumatlarını da yüklə
-  loadAdminUsers();
-  loadBusManagementData();
+
+  // Giriş vidjeti — digər ağır bölmələrlə eyni 700ms pattern
+  var loading = document.getElementById('dashLoading');
+  if(loading) loading.style.display='flex';
+
+  setTimeout(function(){
+    var nameEl=document.getElementById('admProfileName');
+    var roleEl=document.getElementById('admProfileRole');
+    if(currentUser){
+      if(nameEl) nameEl.textContent=currentUser.name||'—';
+      if(roleEl) roleEl.textContent=currentUser.role||'—';
+    }
+    document.getElementById('dashboardView').style.display='none';
+    document.getElementById('adminPanelView').style.display='flex';
+
+    // BUS Management məlumatlarını da yüklə
+    loadAdminUsers();
+    loadBusManagementData();
+
+    if(loading) loading.style.display='none';
+  }, 700);
 }
 
 function closeAdminPanel(){
-  document.getElementById('adminPanelView').style.display='none';
-  document.getElementById('dashboardView').style.display='block';
+  // Router vasitəsilə — digər bölmələrlə eyni "Hazırlanır..." vidjeti
+  // avtomatik göstərilir (_LOADING_EXIT_VIEWS-də adminPanelView var).
+  if(typeof routerNavigate === 'function' && typeof ROUTER_READY !== 'undefined' && ROUTER_READY && currentUser){
+    routerNavigate('dashboard', true);
+  } else {
+    document.getElementById('adminPanelView').style.display='none';
+    document.getElementById('dashboardView').style.display='block';
+  }
 }
 
 function switchAdminSection(key, btn){
