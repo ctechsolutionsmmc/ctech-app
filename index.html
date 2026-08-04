@@ -1673,7 +1673,10 @@
 
           <!-- Məhsul sahibi -->
           <div class="dash-filter-card">
-            <div class="dash-filter-card-label">Məhsul sahibi üzrə kategoriyalar:</div>
+            <div class="dash-filter-card-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px;color:#2F6FED;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Məhsul sahibi üzrə kategoriyalar:
+            </div>
             <div class="dash-filter-card-sel">
               <select class="dash-filter-select" id="dashOwnerSelect" onchange="setDashOwnerFilter(this.value)">
                 <option value="all">Hamısı</option>
@@ -1686,7 +1689,10 @@
 
           <!-- Daşıyıcı filter -->
           <div class="dash-filter-card">
-            <div class="dash-filter-card-label">Daşıyıcı üzrə filter:</div>
+            <div class="dash-filter-card-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px;color:#2F6FED;"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              Daşıyıcı üzrə filter:
+            </div>
             <div class="dash-filter-card-sel">
               <select class="dash-filter-select" id="dashCarrierSelect" onchange="setDashCarrierFilter(this.value)">
                 <option value="all">Hamısı</option>
@@ -1703,7 +1709,8 @@
             <div class="dash-stat-lbl">Ümumi servis</div>
             <div class="dash-stat-val" id="dashTotalAll">—</div>
             <div class="dash-stat-pct" id="dashPctAll"></div>
-            <svg class="dash-stat-wave" viewBox="0 0 120 28" preserveAspectRatio="none"><path d="M0,14 C20,4 40,24 60,14 C80,4 100,24 120,14" fill="none" stroke="#2F6FED" stroke-width="2.5" opacity="0.35"/></svg>
+            <div class="dash-stat-sub" id="dashSubAll"></div>
+            <canvas class="dash-stat-canvas" id="dashSparkAll"></canvas>
           </div>
 
           <!-- Bu gün -->
@@ -1714,7 +1721,8 @@
             <div class="dash-stat-lbl">Bu gün</div>
             <div class="dash-stat-val" id="dashTotalToday">—</div>
             <div class="dash-stat-pct" id="dashPctToday"></div>
-            <svg class="dash-stat-wave" viewBox="0 0 120 28" preserveAspectRatio="none"><path d="M0,14 C20,4 40,24 60,14 C80,4 100,24 120,14" fill="none" stroke="#10B981" stroke-width="2.5" opacity="0.35"/></svg>
+            <div class="dash-stat-sub" id="dashSubToday"></div>
+            <canvas class="dash-stat-canvas" id="dashSparkToday"></canvas>
           </div>
 
           <!-- Bu həftə -->
@@ -1725,7 +1733,8 @@
             <div class="dash-stat-lbl">Bu həftə</div>
             <div class="dash-stat-val" id="dashTotalWeek">—</div>
             <div class="dash-stat-pct" id="dashPctWeek"></div>
-            <svg class="dash-stat-wave" viewBox="0 0 120 28" preserveAspectRatio="none"><path d="M0,14 C20,4 40,24 60,14 C80,4 100,24 120,14" fill="none" stroke="#8B5CF6" stroke-width="2.5" opacity="0.35"/></svg>
+            <div class="dash-stat-sub" id="dashSubWeek"></div>
+            <canvas class="dash-stat-canvas" id="dashSparkWeek"></canvas>
           </div>
 
           <!-- Tarix + Axtarış düyməsi -->
