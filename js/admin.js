@@ -3,6 +3,35 @@
 // CTECH Service Platform
 // ═══════════════════════════════════════════════════════════════
 
+// ── Universal Admin Loading Overlay ──
+// Bütün CRUD əməliyyatları bu funksiya ilə loading göstərir/gizlədir.
+// afterFn: prosses bitəndə hansı yükləmə funksiyası çağırılsın.
+function admShowProcessing(msgText){
+  var ov=document.getElementById('admProcessingOverlay');
+  var txt=document.getElementById('admProcessingText');
+  if(ov){ ov.style.display='flex'; setTimeout(function(){ ov.classList.add('open'); },10); }
+  if(txt) txt.textContent=msgText||'İcra olunur...';
+}
+function admHideProcessing(){
+  var ov=document.getElementById('admProcessingOverlay');
+  if(ov){ ov.classList.remove('open'); setTimeout(function(){ ov.style.display='none'; },300); }
+}
+
+// ── Robust fetch: JSON xətasını tutub aydın mesaj verir ──
+function admFetch(payload){
+  return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+  .then(function(r){
+    var ct=r.headers.get('content-type')||'';
+    if(ct.indexOf('application/json')===-1&&ct.indexOf('text/plain')===-1){
+      // HTML cavab gəldi — Apps Script deploy xətası
+      return r.text().then(function(html){
+        throw new Error('Server xətası (Apps Script yenidən deploy edilməlidir). Cavab: '+html.slice(0,120));
+      });
+    }
+    return r.json();
+  });
+}
+
 function openAdminPanel(){
   closeMenu();
   if(window.innerWidth < 901){ return; }
@@ -843,8 +872,7 @@ function switchBusSubtab(key, btn){
 function loadBusManagementData(){
   var body=document.getElementById('admBusRegTableBody');
   if(body) body.innerHTML='<tr><td colspan="4"><div class="adm-empty">Yüklənir...</div></td></tr>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getBusManagementData', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'getBusManagementData', requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){
       if(body) body.innerHTML='<tr><td colspan="4"><div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div></td></tr>';
@@ -959,30 +987,39 @@ function submitBusRegistryModal(){
 
   var btn=document.getElementById('admBusRegSaveBtn');
   btn.disabled=true; var origText=btn.textContent; btn.textContent='Yadda saxlanılır...';
+  closeBusRegistryModal();
+  admShowProcessing(admBusRegEditingId ? 'Bus yenilənir...' : 'Yeni Bus əlavə olunur...');
 
   var payload = admBusRegEditingId
     ? { action:'updateBusRegistryEntry', originalId:admBusRegEditingId, data:{id:id, carrier:carrier, dqn:dqn, model:model}, requesterEmail: currentUser?currentUser.email:'' }
     : { action:'addBusRegistryEntry', data:{id:id, carrier:carrier, dqn:dqn, model:model}, requesterEmail: currentUser?currentUser.email:'' };
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admFetch(payload)
   .then(function(d){
     btn.disabled=false; btn.textContent=origText;
-    if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
-    closeBusRegistryModal();
+    admHideProcessing();
+    if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); loadBusManagementData(); return; }
     loadBusManagementData();
   })
   .catch(function(e){
     btn.disabled=false; btn.textContent=origText;
-    errEl.textContent='Şəbəkə xətası: '+e.message; errEl.style.display='block';
+    admHideProcessing();
+    alert('Şəbəkə xətası: '+e.message);
+    loadBusManagementData();
   });
 }
 function admDeleteBusRegistry(id){
   admOpenDeleteConfirm('"'+id+'" avtobusunu silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'deleteBusRegistryEntry', id:id, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    admShowProcessing('Bus silinir...');
+    return admFetch({action:'deleteBusRegistryEntry', id:id, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
+      admHideProcessing();
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
+      loadBusManagementData();
+    })
+    .catch(function(e){
+      admHideProcessing();
+      alert('Şəbəkə xətası: '+e.message);
       loadBusManagementData();
     });
   });
@@ -1295,13 +1332,14 @@ function admMoveBusListItem(sheetName, value, direction){
   var payload = (sheetName==='BUS_SOLUTIONS')
     ? { action:action, solution:value, direction:direction, requesterEmail: currentUser?currentUser.email:'' }
     : { action:action, sheetName:sheetName, value:value, direction:direction, requesterEmail: currentUser?currentUser.email:'' };
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admShowProcessing('Sıra dəyişdirilir...');
+  admFetch(payload)
   .then(function(d){
+    admHideProcessing();
     if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
     admReloadBusListSource(sheetName);
   })
-  .catch(function(e){ alert('Şəbəkə xətası: '+e.message); });
+  .catch(function(e){ admHideProcessing(); alert('Şəbəkə xətası: '+e.message); });
 }
 function openBusListModal(sheetName, oldValue){
   admBusListEditingSheet=sheetName;
@@ -1353,6 +1391,9 @@ function submitBusListModal(){
 
   var btn=document.getElementById('admBusListSaveBtn');
   btn.disabled=true; var origText=btn.textContent; btn.textContent='Yadda saxlanılır...';
+  var sheetForReload=admBusListEditingSheet;
+  closeBusListModal();
+  admShowProcessing(admBusListEditingValue ? 'Dəyər yenilənir...' : 'Yeni dəyər əlavə olunur...');
 
   var payload;
   if(isSolutions){
@@ -1361,31 +1402,37 @@ function submitBusListModal(){
       : { action:'addBusSolutionWithOwner', solution:value, owner:ownerVal, category:categoryVal, requesterEmail: currentUser?currentUser.email:'' };
   } else {
     payload = admBusListEditingValue
-      ? { action:'updateBusListItem', sheetName:admBusListEditingSheet, oldValue:admBusListEditingValue, newValue:value, requesterEmail: currentUser?currentUser.email:'' }
-      : { action:'addBusListItem', sheetName:admBusListEditingSheet, value:value, requesterEmail: currentUser?currentUser.email:'' };
+      ? { action:'updateBusListItem', sheetName:sheetForReload, oldValue:admBusListEditingValue, newValue:value, requesterEmail: currentUser?currentUser.email:'' }
+      : { action:'addBusListItem', sheetName:sheetForReload, value:value, requesterEmail: currentUser?currentUser.email:'' };
   }
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admFetch(payload)
   .then(function(d){
     btn.disabled=false; btn.textContent=origText;
-    if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
-    closeBusListModal();
-    admReloadBusListSource(admBusListEditingSheet);
+    admHideProcessing();
+    if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); admReloadBusListSource(sheetForReload); return; }
+    admReloadBusListSource(sheetForReload);
   })
   .catch(function(e){
     btn.disabled=false; btn.textContent=origText;
-    errEl.textContent='Şəbəkə xətası: '+e.message; errEl.style.display='block';
+    admHideProcessing();
+    alert('Şəbəkə xətası: '+e.message);
+    admReloadBusListSource(sheetForReload);
   });
 }
 function admDeleteBusListItem(sheetName, value){
   var label=ADM_BUS_SHEET_LABEL[sheetName]||'dəyəri';
   admOpenDeleteConfirm('"'+value+'" '+label+'ni silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'deleteBusListItem', sheetName:sheetName, value:value, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    admShowProcessing('Silinir...');
+    return admFetch({action:'deleteBusListItem', sheetName:sheetName, value:value, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
+      admHideProcessing();
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
       admReloadBusListSource(sheetName);
+    })
+    .catch(function(e){
+      admHideProcessing();
+      alert('Şəbəkə xətası: '+e.message);
     });
   });
 }
