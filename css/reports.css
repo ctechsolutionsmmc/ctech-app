@@ -1149,3 +1149,131 @@ body.dark-mode .dash-cat-count{ color:#E8EEF5; }
 body.dark-mode .dash-show-more-btn{ border-color:#4A6182; color:#4E93FA; }
 body.dark-mode .dash-show-more-btn:hover{ background:#1C2A3D; }
 
+
+/* ═══════════════════════════════════════════════════
+   BUS DASHBOARD — YENİ LAYOUT (Şəkilə uyğun)
+   ═══════════════════════════════════════════════════ */
+
+/* Xidmət növü filter — mərkəzdə böyük tab-lar */
+.dash-svctype-row{ padding:14px 20px 0; display:flex; justify-content:center; }
+.dash-svctype-tabs{ display:flex; gap:0; background:#F0F5FC; border-radius:12px; padding:4px; }
+.dash-svctype-btn{
+  padding:8px 22px; border-radius:9px; font-size:13px; font-weight:700;
+  color:#5C7089; background:none; border:none; cursor:pointer; transition:all .15s;
+}
+.dash-svctype-btn.dash-svctype-active{ background:#2F6FED; color:#fff; box-shadow:0 4px 12px rgba(47,111,237,.3); }
+.dash-svctype-btn:hover:not(.dash-svctype-active){ background:#DDE9FB; color:#12233B; }
+body.dark-mode .dash-svctype-tabs{ background:#1C2A3D; }
+body.dark-mode .dash-svctype-btn{ color:#8FA0B8; }
+
+/* Üst kart sırası — 6 element */
+.dash-top-row{
+  display:grid;
+  grid-template-columns:190px 190px 1fr 1fr 1fr 80px;
+  gap:12px; margin-bottom:20px;
+}
+
+/* Filter kart (dropdown) */
+.dash-filter-card{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  padding:16px 18px; box-shadow:0 6px 18px rgba(30,68,130,.06);
+  display:flex; flex-direction:column; gap:10px;
+}
+body.dark-mode .dash-filter-card{ background:#16212E; border-color:#4A6182; }
+.dash-filter-card-label{ font-size:11.5px; font-weight:700; color:#8CA0BC; line-height:1.4; }
+.dash-filter-card-sel{ position:relative; display:flex; align-items:center; }
+.dash-filter-select{
+  width:100%; padding:8px 28px 8px 10px; border-radius:9px;
+  border:1.5px solid #E1EAF6; background:#F7FAFD;
+  font-size:13px; font-weight:600; color:#12233B;
+  appearance:none; -webkit-appearance:none; cursor:pointer; outline:none;
+}
+.dash-filter-select:focus{ border-color:#2F6FED; }
+body.dark-mode .dash-filter-select{ background:#1C2A3D; border-color:#4A6182; color:#E8EEF5; }
+.dash-filter-caret{
+  position:absolute; right:8px; pointer-events:none; color:#8CA0BC;
+}
+
+/* Stat kart */
+.dash-stat-card{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  padding:18px 18px 0; box-shadow:0 6px 18px rgba(30,68,130,.06);
+  display:flex; flex-direction:column; overflow:hidden; position:relative;
+}
+body.dark-mode .dash-stat-card{ background:#16212E; border-color:#4A6182; }
+.dash-stat-icon{
+  width:36px; height:36px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-bottom:10px;
+}
+.dash-stat-icon-blue{ background:#EBF3FF; color:#2F6FED; }
+.dash-stat-icon-green{ background:#D1FAE5; color:#059669; }
+.dash-stat-icon-purple{ background:#EDE9FE; color:#7C3AED; }
+.dash-stat-lbl{ font-size:11.5px; font-weight:700; color:#8CA0BC; margin-bottom:4px; }
+body.dark-mode .dash-stat-lbl{ color:#8FA0B8; }
+.dash-stat-val{ font-family:'Rajdhani',sans-serif; font-size:34px; font-weight:700; color:#12233B; line-height:1; }
+body.dark-mode .dash-stat-val{ color:#E8EEF5; }
+.dash-stat-pct{ font-size:12px; font-weight:700; margin-top:5px; min-height:16px; margin-bottom:10px; }
+.dash-stat-wave{ width:100%; height:28px; display:block; margin-top:auto; }
+
+/* Tarix/axtarış düyməsi */
+.dash-range-btn{
+  background:#FFFFFF; border:1.5px solid #E1EAF6; border-radius:14px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; cursor:pointer; box-shadow:0 6px 18px rgba(30,68,130,.06);
+  transition:all .15s;
+}
+.dash-range-btn:hover{ background:#F0F5FC; }
+body.dark-mode .dash-range-btn{ background:#16212E; border-color:#4A6182; }
+.dash-range-ic{
+  width:36px; height:36px; border-radius:10px;
+  background:#F0F5FC; color:#2F6FED;
+  display:flex; align-items:center; justify-content:center;
+}
+body.dark-mode .dash-range-ic{ background:#1C2A3D; color:#4E93FA; }
+
+/* Orta 2 sütun layout */
+.dash-mid-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:0; }
+.dash-mid-left{ display:flex; flex-direction:column; }
+.dash-mid-right{ display:flex; flex-direction:column; }
+
+/* 3 sütun layout */
+.dash-three-col{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+/* Digər Problemlər */
+.dash-other-wrap{ display:flex; gap:16px; align-items:flex-start; }
+.dash-other-list{ flex:1; display:flex; flex-direction:column; gap:8px; }
+.dash-other-row{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; background:#FFFFFF; border:1px solid #E1EAF6;
+  border-radius:10px; box-shadow:0 4px 10px rgba(30,68,130,.04);
+}
+body.dark-mode .dash-other-row{ background:#16212E; border-color:#4A6182; }
+.dash-other-dot{
+  width:22px; height:22px; border-radius:50%;
+  color:#fff; font-size:11px; font-weight:800;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.dash-other-name{ flex:1; font-size:13px; color:#12233B; font-weight:600; }
+body.dark-mode .dash-other-name{ color:#E8EEF5; }
+.dash-other-count{ font-size:13px; font-weight:700; color:#12233B; white-space:nowrap; }
+body.dark-mode .dash-other-count{ color:#E8EEF5; }
+.dash-other-donut{ display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; }
+.dash-other-donut-lbl{ font-size:11.5px; color:#8CA0BC; font-weight:600; text-align:center; }
+.dash-other-donut-lbl b{ color:#12233B; }
+body.dark-mode .dash-other-donut-lbl b{ color:#E8EEF5; }
+
+/* Location wrap */
+.dash-loc-wrap{ display:flex; gap:16px; align-items:flex-start; }
+.dash-loc-table-wrap{ flex:1; min-width:0; }
+
+/* Responsive */
+@media(max-width:1200px){
+  .dash-top-row{ grid-template-columns:1fr 1fr 1fr 1fr; }
+  .dash-top-row .dash-range-btn{ grid-column:span 1; min-height:80px; }
+}
+@media(max-width:900px){
+  .dash-top-row{ grid-template-columns:1fr 1fr; }
+  .dash-mid-row{ grid-template-columns:1fr; }
+  .dash-three-col{ grid-template-columns:1fr; }
+}
+
