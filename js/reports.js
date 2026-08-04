@@ -907,13 +907,17 @@ function dashGetPrevRange(period, customRange){
 function dashGetPrevRows(prevRange){
   if(!prevRange) return [];
   return dashAllRows.filter(function(row){
-    // owner + carrier filterlərini əvvəlki dövrə də tətbiq et
     if(dashOwnerFilter!=='all'){
       var owner=(row['Problem Owner']||'').trim();
       if(dashOwnerFilter==='AYNA'&&owner!=='AYNA'&&owner!=='AYNA və BakıKart') return false;
       if(dashOwnerFilter==='BakıKart'&&owner!=='BakıKart'&&owner!=='AYNA və BakıKart') return false;
     }
     if(dashCarrierFilter!=='all'&&(row['Daşıyıcı']||'').trim()!==dashCarrierFilter) return false;
+    if(dashServiceTypeFilter!=='all'){
+      var t=(row['Xidmət Növü']||'').toLowerCase();
+      if(dashServiceTypeFilter==='individual'&&t.indexOf('fərdi')===-1) return false;
+      if(dashServiceTypeFilter==='bulk'&&t.indexOf('toplu')===-1) return false;
+    }
     var rd=rowDate(row);
     return rd&&rd>=prevRange.start&&rd<prevRange.end;
   });
@@ -934,7 +938,7 @@ function dashFixedMetrics(){
   var todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
   var weekStart=new Date(now); weekStart.setDate(weekStart.getDate()-7);
 
-  // Cari dövrün filterlənmiş sətirləri (owner + carrier filterlərini nəzərə alır)
+  // Bütün filterlər: owner + carrier + serviceType
   var filteredAll=dashAllRows.filter(function(r){
     if(dashOwnerFilter!=='all'){
       var owner=(r['Problem Owner']||'').trim();
@@ -942,6 +946,12 @@ function dashFixedMetrics(){
       if(dashOwnerFilter==='BakıKart'&&owner!=='BakıKart'&&owner!=='AYNA və BakıKart') return false;
     }
     if(dashCarrierFilter!=='all'&&(r['Daşıyıcı']||'').trim()!==dashCarrierFilter) return false;
+    // serviceType filtri
+    if(dashServiceTypeFilter!=='all'){
+      var t=(r['Xidmət Növü']||'').toLowerCase();
+      if(dashServiceTypeFilter==='individual'&&t.indexOf('fərdi')===-1) return false;
+      if(dashServiceTypeFilter==='bulk'&&t.indexOf('toplu')===-1) return false;
+    }
     return true;
   });
 
@@ -953,11 +963,9 @@ function dashFixedMetrics(){
     if(rd>=weekStart) totalWeek++;
   });
 
-  // Müqayisə üçün əvvəlki dövr
   var prevRange=dashGetPrevRange(dashPeriod, dashCustomRange);
   var prevRows=dashGetPrevRows(prevRange);
 
-  // Seçilmiş tab üzrə filtered count
   var curRange=dashCustomRange||dashComputeRange(dashPeriod);
   var curFiltered=filteredAll.filter(function(r){
     if(dashPeriod==='all'&&!dashCustomRange) return true;
@@ -966,7 +974,6 @@ function dashFixedMetrics(){
 
   var pctAll=dashPctChange(curFiltered.length, prevRows.length);
   var pctToday=null, pctWeek=null;
-  // Yalnız "Hamısı" tab deyilsə bugün/həftə müqayisəsini göstər
   if(dashPeriod!=='all'&&!dashCustomRange){
     var prevToday=0, prevWeek=0;
     var prevTodayStart=new Date(todayStart.getTime()-86400000);
