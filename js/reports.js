@@ -720,7 +720,8 @@ function dashGetFilteredRows(){
 // ── Üst dropdown filter funksiyaları ──
 function setDashOwnerFilter(val){
   dashOwnerFilter=val;
-  document.querySelectorAll('.dash-owner-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-owner')===val); });
+  var sel=document.getElementById('dashOwnerSelect');
+  if(sel) sel.value=val;
   dashComputeAndRender();
 }
 function setDashCarrierFilter(val){
@@ -737,8 +738,8 @@ function buildDashCarrierDropdown(){
 }
 function setDashServiceTypeFilter(type, btn){
   dashServiceTypeFilter=type;
-  document.querySelectorAll('#dashTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
-  if(btn) btn.classList.add('rpt-type-btn-active');
+  document.querySelectorAll('#dashTypeFilter .dash-svctype-btn').forEach(function(b){ b.classList.remove('dash-svctype-active'); });
+  if(btn) btn.classList.add('dash-svctype-active');
   dashComputeAndRender();
 }
 function dashCount(rows,field,splitMulti){
@@ -908,6 +909,52 @@ function dashRenderRadial(containerId, items, total){
 }
 
 // ── Yeni problem kartları: 24h→2 kart, digərləri→4 kart ──
+// ── "Digər Tələb/Problemlər" — sıralı siyahı + donut chart ──
+var DONUT_COLORS=['#2F6FED','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#EC4899'];
+function dashRenderOtherProblems(containerId, items, total){
+  var el=document.getElementById(containerId);
+  if(!el) return;
+  if(items.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  var show=items.slice(0,5);
+  var html='<div class="dash-other-wrap">';
+  // Sol siyahı
+  html+='<div class="dash-other-list">';
+  show.forEach(function(it,i){
+    var pct=total>0?Math.round(it.count/total*100):0;
+    var col=DONUT_COLORS[i%DONUT_COLORS.length];
+    html+='<div class="dash-other-row">'
+      +'<span class="dash-other-dot" style="background:'+col+';">'+( i+1)+'</span>'
+      +'<span class="dash-other-name">'+escapeHtml(it.name)+'</span>'
+      +'<span class="dash-other-count">'+it.count+' <span style="color:#8CA0BC;">('+pct+'%)</span></span>'
+      +'</div>';
+  });
+  if(items.length>5){
+    html+='<div class="dash-show-more-row"><button class="dash-show-more-btn" onclick="dashToggleSection(\'otherProblems\')">Hamısını göstər →</button></div>';
+  }
+  html+='</div>';
+  // Sağ donut chart
+  var size=110, cx=55, cy=55, R=42, C=2*Math.PI*R;
+  var donutHtml='<svg width="'+size+'" height="'+size+'" viewBox="0 0 110 110">';
+  var offset=0;
+  var shown2=show.slice(0,5);
+  shown2.forEach(function(it,i){
+    var pct=total>0?it.count/total:0;
+    var arc=C*pct;
+    var col=DONUT_COLORS[i%DONUT_COLORS.length];
+    donutHtml+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="18"'
+      +' stroke-dasharray="'+arc.toFixed(2)+' '+(C-arc).toFixed(2)+'"'
+      +' stroke-dashoffset="'+(-(offset)).toFixed(2)+'"'
+      +' transform="rotate(-90 '+cx+' '+cy+')"/>';
+    offset+=arc;
+  });
+  donutHtml+='<text x="55" y="51" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="18" fill="#12233B">'+total+'</text>';
+  donutHtml+='<text x="55" y="65" text-anchor="middle" font-family="Inter" font-size="9" fill="#8CA0BC">Ümumi</text>';
+  donutHtml+='</svg>';
+  html+='<div class="dash-other-donut">'+donutHtml+'<div class="dash-other-donut-lbl">Cəmi <b>'+total+'</b> (100%)</div></div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function dashRenderProblemCards(containerId, items, total, prevItems){
   var el=document.getElementById(containerId);
   if(!el) return;
@@ -1042,6 +1089,50 @@ function dashRenderLeaders(containerId, items, max){
 }
 
 // ── "Hamısını göstər" ilə genişlənən seksiyalar ──
+// ── Servis verilən ünvan: cədvəl + donut chart ──
+function dashRenderLocationWithDonut(containerId, items, total){
+  var el=document.getElementById(containerId);
+  if(!el) return;
+  if(items.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  var show=items.slice(0,5);
+  var html='<div class="dash-loc-wrap">';
+  // Cədvəl
+  html+='<div class="dash-loc-table-wrap"><div class="dash-ranklist-wrap"><table class="dash-ranklist"><thead><tr><th class="dr-num-col"></th><th>Ünvan</th><th class="dr-count-col">Servis sayı</th><th class="dr-count-col" style="width:60px;">Pay</th></tr></thead><tbody>';
+  show.forEach(function(it,i){
+    var pct=total>0?Math.round(it.count/total*100):0;
+    var barW=items[0].count>0?Math.round(it.count/items[0].count*100):0;
+    html+='<tr><td><span style="width:24px;height:24px;border-radius:7px;background:#F0F5FC;color:#2F6FED;font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center;">'+(i+1)+'</span></td>'
+      +'<td>'+escapeHtml(it.name)+'</td>'
+      +'<td class="dr-count-col"><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;"><div style="width:50px;height:5px;background:#E6F1FB;border-radius:3px;overflow:hidden;"><div style="width:'+barW+'%;height:100%;background:#2F6FED;border-radius:3px;"></div></div><span class="dash-rank-count-val">'+it.count+'</span></div></td>'
+      +'<td class="dr-count-col" style="color:#8CA0BC;font-size:12px;">'+pct+'%</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  if(items.length>5){
+    html+='<div class="dash-show-more-row"><button class="dash-show-more-btn" onclick="dashToggleSection(\'locations\')">Hamısını göstər →</button></div>';
+  }
+  html+='</div>';
+  // Donut
+  var size=110, cx=55, cy=55, R=42, C=2*Math.PI*R;
+  var donutHtml='<svg width="'+size+'" height="'+size+'" viewBox="0 0 110 110">';
+  var off2=0;
+  show.forEach(function(it,i){
+    var pct2=total>0?it.count/total:0;
+    var arc2=C*pct2;
+    var col2=DONUT_COLORS[i%DONUT_COLORS.length];
+    donutHtml+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+col2+'" stroke-width="18"'
+      +' stroke-dasharray="'+arc2.toFixed(2)+' '+(C-arc2).toFixed(2)+'"'
+      +' stroke-dashoffset="'+(-(off2)).toFixed(2)+'"'
+      +' transform="rotate(-90 '+cx+' '+cy+')"/>';
+    off2+=arc2;
+  });
+  donutHtml+='<text x="55" y="51" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="18" fill="#12233B">'+total+'</text>';
+  donutHtml+='<text x="55" y="65" text-anchor="middle" font-family="Inter" font-size="9" fill="#8CA0BC">Ümumi</text>';
+  donutHtml+='</svg>';
+  html+='<div class="dash-other-donut">'+donutHtml+'<div class="dash-other-donut-lbl">Cəmi <b>'+total+'</b> (100%)</div></div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function dashRenderExpandable(containerId, items, sectionKey, shortMax, headerLabel, nameHeader){
   var el=document.getElementById(containerId);
   if(!el) return;
@@ -1129,11 +1220,12 @@ function dashComputeAndRender(){
   // Render
   dashRenderProblemCards('dashProblemGrid', problems, filtered.length, prevProblems);
   dashRenderSolutionList('dashSolutionList', solutions, filtered.length);
+  dashRenderOtherProblems('dashOtherProblems', problems, filtered.length);
   dashRenderCategories('dashCategoryGrid', categories, prevCategories);
+  dashRenderLocationWithDonut('dashLocationList', locations, filtered.length);
   dashRenderExpandable('dashTechList', tech, 'tech', 4, 'Servis sayı', 'Texnik');
   dashRenderExpandable('dashLeaderList', leaders, 'leaders', 4, 'Servis sayı', 'Qrup Rəhbəri');
   dashRenderExpandable('dashCarrierList', carriers, 'carriers', 4, 'Servis sayı', 'Daşıyıcı');
-  dashRenderExpandable('dashLocationList', locations, 'locations', 4, 'Servis sayı', 'Ünvan');
   dashRenderRecurring('dashRecurringPanel', recurring);
 
   // Carrier dropdown-u yenilə
@@ -1173,8 +1265,8 @@ function openBusDashboard(){
   dashOwnerFilter='all';
   dashCarrierFilter='all';
   Object.keys(dashExpandedSections).forEach(function(k){ dashExpandedSections[k]=false; });
-  document.querySelectorAll('#dashTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
-  var allBtn=document.querySelector('#dashTypeFilter [data-type="all"]'); if(allBtn) allBtn.classList.add('rpt-type-btn-active');
+  document.querySelectorAll('#dashTypeFilter .dash-svctype-btn').forEach(function(b){ b.classList.remove('dash-svctype-active'); });
+  var allBtn=document.querySelector('#dashTypeFilter [data-type="all"]'); if(allBtn) allBtn.classList.add('dash-svctype-active');
   document.querySelectorAll('.dash-owner-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-owner')==='all'); });
   updateDashTabsUI();
   loadDashData();
