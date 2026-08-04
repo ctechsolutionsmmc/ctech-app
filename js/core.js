@@ -38,7 +38,7 @@ function startSessionTimer(expiresAt){
 }
 
 function attachIdleListeners(){
-  ['mousemove','keydown','mousedown','touchstart','scroll'].forEach(function(ev){
+  ['keydown','mousedown','touchstart','scroll'].forEach(function(ev){
     document.addEventListener(ev, resetIdleTimer, { passive: true });
   });
   resetIdleTimer();
