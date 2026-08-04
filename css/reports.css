@@ -1277,3 +1277,49 @@ body.dark-mode .dash-other-donut-lbl b{ color:#E8EEF5; }
   .dash-three-col{ grid-template-columns:1fr; }
 }
 
+
+/* ═══════════════════════════════════════════════════
+   BUS DASHBOARD — ANİMASİYA VƏ SPARKLINE (Faza 4b)
+   ═══════════════════════════════════════════════════ */
+
+/* Stat kart canvas sparkline */
+.dash-stat-canvas{
+  width:100%; height:42px; display:block;
+  margin-top:auto; border-radius:0 0 14px 14px;
+}
+.dash-stat-sub{
+  font-size:11px; color:#8CA0BC; font-weight:600;
+  min-height:14px; margin-top:2px; margin-bottom:6px;
+  line-height:1.3;
+}
+
+/* Kateqoriya sıra — yeni layout (ikon + info + bar + say) */
+.dash-cat-row{
+  display:grid; grid-template-columns:auto 1fr 60px;
+  align-items:center; gap:12px;
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:12px;
+  padding:12px 14px; box-shadow:0 4px 12px rgba(30,68,130,.04);
+  transition:box-shadow .2s;
+}
+.dash-cat-row:hover{ box-shadow:0 8px 20px rgba(30,68,130,.10); }
+body.dark-mode .dash-cat-row{ background:#16212E; border-color:#4A6182; box-shadow:none; }
+.dash-cat-left{ display:flex; align-items:center; gap:10px; }
+.dash-cat-icon{
+  width:36px; height:36px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.dash-cat-info{ min-width:0; }
+.dash-cat-name{ font-size:13.5px; font-weight:700; color:#12233B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+body.dark-mode .dash-cat-name{ color:#E8EEF5; }
+.dash-cat-pct-lbl{ font-size:11px; font-weight:700; margin-top:2px; }
+.dash-cat-mid{ min-width:0; }
+.dash-cat-bar-wrap{ height:8px; background:#E6F1FB; border-radius:4px; overflow:hidden; }
+.dash-cat-bar{ height:100%; border-radius:4px; width:0%; } /* width animasiya ilə gəlir */
+body.dark-mode .dash-cat-bar-wrap{ background:#1C2A3D; }
+.dash-cat-right{ display:flex; justify-content:flex-end; align-items:center; }
+.dash-cat-count{ font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; color:#12233B; }
+body.dark-mode .dash-cat-count{ color:#E8EEF5; }
+
+/* Problem arc animasiya başlanğıc state */
+.dash-prob-arc{ transition:none; }
+
