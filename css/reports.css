@@ -1059,3 +1059,93 @@ body.dark-mode .tvmd-tech-search-result{ border-color:#2A3B52; color:#8CA0BC; }
   .tvmd-header{ padding:12px 14px; }
 }
 
+
+/* ═══════════════════════════════════════════════════
+   BUS DASHBOARD — YENİ ELEMENTLƏR (Faza 4)
+   ═══════════════════════════════════════════════════ */
+
+/* ── Üst filter paneli ── */
+.dash-top-filters{
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:12px 20px 0; max-width:1120px; margin:0 auto;
+}
+.dash-filter-group{ display:flex; align-items:center; gap:8px; }
+.dash-filter-label{ font-size:12px; font-weight:700; color:#8CA0BC; white-space:nowrap; }
+.dash-owner-btns{ display:flex; gap:3px; background:#F0F5FC; border-radius:9px; padding:3px; }
+.dash-owner-btn{
+  padding:5px 12px; border-radius:7px; font-size:12px; font-weight:700;
+  color:#5C7089; background:none; border:none; cursor:pointer; transition:all .15s;
+}
+.dash-owner-btn.active{ background:#2F6FED; color:#fff; }
+.dash-owner-btn:hover:not(.active){ background:#DDE9FB; color:#12233B; }
+.dash-carrier-sel{
+  padding:6px 10px; border-radius:9px; border:1.5px solid #E1EAF6;
+  background:#FFFFFF; font-size:12.5px; color:#12233B; font-weight:600;
+  cursor:pointer; outline:none;
+}
+.dash-carrier-sel:focus{ border-color:#2F6FED; }
+body.dark-mode .dash-owner-btns{ background:#1C2A3D; }
+body.dark-mode .dash-owner-btn{ color:#8FA0B8; }
+body.dark-mode .dash-owner-btn.active{ background:#2F6FED; color:#fff; }
+body.dark-mode .dash-carrier-sel{ background:#16212E; border-color:#4A6182; color:#E8EEF5; }
+
+/* ── Stat kart faiz ── */
+.dash-metric-pct{ font-size:12px; font-weight:700; margin-top:4px; min-height:16px; }
+.dash-pct-up{ color:#188A4B; }
+.dash-pct-down{ color:#DC2626; }
+.dash-pct-flat{ color:#8CA0BC; }
+
+/* ── Problem kartları (2+2 layout) ── */
+.dash-prob-grid{ display:grid; gap:12px; }
+.dash-prob-grid-2{ grid-template-columns:repeat(2,1fr); }
+.dash-prob-grid-4{ grid-template-columns:repeat(2,1fr); }
+.dash-prob-card{
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:14px;
+  padding:18px 20px; box-shadow:0 10px 24px rgba(30,68,130,.06);
+}
+body.dark-mode .dash-prob-card{ background:#16212E; border-color:#4A6182; box-shadow:none; }
+.dash-prob-top{ display:flex; align-items:center; gap:16px; margin-bottom:14px; }
+.dash-prob-info{ flex:1; min-width:0; }
+.dash-prob-name{
+  font-size:14px; font-weight:700; color:#12233B; line-height:1.4;
+  overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+}
+body.dark-mode .dash-prob-name{ color:#E8EEF5; }
+.dash-prob-count{ font-size:13px; color:#5C7089; margin-top:4px; font-weight:600; }
+.dash-prob-pct{ font-size:12px; font-weight:700; margin-top:4px; }
+.dash-prob-bar-wrap{
+  height:6px; background:#E6F1FB; border-radius:3px; overflow:hidden; margin-bottom:6px;
+}
+.dash-prob-bar{ height:100%; background:#2F6FED; border-radius:3px; transition:width .4s ease; }
+.dash-prob-bar-pct{ font-size:12px; color:#8CA0BC; font-weight:600; text-align:right; }
+
+/* ── Servis kateqoriyaları — yeni list layout ── */
+.dash-cat-list{ display:flex; flex-direction:column; gap:10px; }
+.dash-cat-row{
+  display:grid; grid-template-columns:160px 1fr 100px;
+  align-items:center; gap:12px;
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:12px;
+  padding:14px 16px; box-shadow:0 6px 16px rgba(30,68,130,.04);
+}
+body.dark-mode .dash-cat-row{ background:#16212E; border-color:#4A6182; box-shadow:none; }
+.dash-cat-name{ font-size:13.5px; font-weight:700; color:#12233B; }
+body.dark-mode .dash-cat-name{ color:#E8EEF5; }
+.dash-cat-mid{ width:100%; }
+.dash-cat-bar-wrap{ height:8px; background:#E6F1FB; border-radius:4px; overflow:hidden; }
+.dash-cat-bar{ height:100%; background:linear-gradient(90deg,#4E93FA,#2F6FED); border-radius:4px; transition:width .4s ease; }
+.dash-cat-right{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+.dash-cat-count{ font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; color:#12233B; }
+body.dark-mode .dash-cat-count{ color:#E8EEF5; }
+.dash-cat-pct{ font-size:11.5px; font-weight:700; }
+
+/* ── "Hamısını göstər" düyməsi ── */
+.dash-show-more-row{ padding:10px 0 2px; display:flex; justify-content:center; }
+.dash-show-more-btn{
+  background:none; border:1.5px solid #CFE0F7; border-radius:20px;
+  padding:7px 20px; font-size:12.5px; font-weight:700; color:#2F6FED;
+  cursor:pointer; transition:all .15s;
+}
+.dash-show-more-btn:hover{ background:#E6F1FB; }
+body.dark-mode .dash-show-more-btn{ border-color:#4A6182; color:#4E93FA; }
+body.dark-mode .dash-show-more-btn:hover{ background:#1C2A3D; }
+
