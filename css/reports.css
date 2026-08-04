@@ -1508,3 +1508,128 @@ body.dark-mode .adm-processing-box{ background:#16212E; }
 }
 body.dark-mode .adm-processing-text{ color:#E8EEF5; }
 
+
+/* ═══════════════════════════════════════════════════
+   BUS DASHBOARD — DİGƏR PROBLEM + HƏL SİYAHISI + ÜNVAN (Faza 4c)
+   ═══════════════════════════════════════════════════ */
+
+/* ── Bölmə başlıqları arası məsafə ── */
+.dash-mid-row .dash-section-title{ margin-top:0; margin-bottom:14px; }
+
+/* ── Digər Tələb/Problemlər ── */
+.dash-op-wrap{ display:flex; gap:20px; align-items:flex-start; }
+.dash-op-list{ flex:1; display:flex; flex-direction:column; gap:8px; min-width:0; }
+
+.dash-op-row{
+  display:flex; align-items:center; gap:10px;
+  background:rgba(255,255,255,0.90); border:1px solid #E1EAF6;
+  border-radius:12px; padding:11px 14px;
+  box-shadow:0 3px 10px rgba(30,68,130,.05);
+  backdrop-filter:blur(4px);
+}
+body.dark-mode .dash-op-row{ background:rgba(22,33,46,.90); border-color:#3A5070; }
+.dash-op-num{
+  width:24px; height:24px; border-radius:50%; flex-shrink:0;
+  font-size:12px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+}
+.dash-op-name{ flex:1; font-size:13px; font-weight:600; color:#12233B; min-width:0; line-height:1.35; }
+body.dark-mode .dash-op-name{ color:#E8EEF5; }
+.dash-op-badge{
+  font-size:12px; font-weight:700; padding:3px 10px;
+  border-radius:20px; white-space:nowrap; flex-shrink:0;
+}
+
+/* Digər blok */
+.dash-op-diger{
+  background:rgba(248,250,253,.95); border:1px dashed #CBD5E1;
+  border-radius:12px; padding:10px 14px;
+}
+body.dark-mode .dash-op-diger{ background:rgba(20,30,45,.90); border-color:#3A5070; }
+.dash-op-diger-head{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.dash-op-diger-items{ display:flex; flex-direction:column; gap:4px; padding-left:4px; }
+.dash-op-diger-row{ display:flex; align-items:center; gap:8px; font-size:12px; color:#5C7089; padding:3px 0; }
+.dash-op-diger-dot{ width:6px; height:6px; border-radius:50%; background:#94A3B8; flex-shrink:0; }
+.dash-op-diger-name{ flex:1; }
+.dash-op-diger-cnt{ font-weight:700; color:#8CA0BC; white-space:nowrap; }
+
+/* Donut sağ sütun */
+.dash-op-donut-col{ display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; }
+.dash-op-donut-svg{ width:180px; height:180px; }
+.dash-op-donut-lbl{ font-size:12px; color:#8CA0BC; font-weight:600; text-align:center; }
+.dash-op-donut-lbl b{ color:#12233B; }
+body.dark-mode .dash-op-donut-lbl b{ color:#E8EEF5; }
+
+/* Legend */
+.dash-op-legend{ display:flex; flex-direction:column; gap:5px; width:100%; }
+.dash-op-legend-row{ display:flex; align-items:center; gap:7px; }
+.dash-op-legend-dot{ width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.dash-op-legend-name{ font-size:11px; color:#5C7089; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+body.dark-mode .dash-op-legend-name{ color:#8FA0B8; }
+
+/* ── Həll siyahısı — vizual bar ── */
+.dash-sol-list{
+  background:rgba(255,255,255,.90); border:1px solid #E1EAF6;
+  border-radius:14px; overflow:hidden;
+  box-shadow:0 4px 16px rgba(30,68,130,.06);
+  backdrop-filter:blur(4px);
+}
+body.dark-mode .dash-sol-list{ background:rgba(22,33,46,.90); border-color:#3A5070; }
+.dash-sol-row{
+  display:grid; grid-template-columns:1fr 140px 80px;
+  align-items:center; gap:12px;
+  padding:13px 16px; border-bottom:1px solid #F0F5FC;
+}
+.dash-sol-row:last-child{ border-bottom:none; }
+body.dark-mode .dash-sol-row{ border-bottom-color:#1C2A3D; }
+.dash-sol-row-diger{ background:rgba(248,250,253,.8); }
+body.dark-mode .dash-sol-row-diger{ background:rgba(18,26,40,.6); }
+.dash-sol-left{ display:flex; align-items:flex-start; gap:10px; min-width:0; }
+.dash-sol-num{
+  width:22px; height:22px; border-radius:50%; flex-shrink:0;
+  font-size:11px; font-weight:800;
+  display:flex; align-items:center; justify-content:center; margin-top:1px;
+}
+.dash-sol-name{
+  font-size:13.5px; font-weight:600; color:#12233B; line-height:1.4;
+  overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+}
+body.dark-mode .dash-sol-name{ color:#E8EEF5; }
+.dash-sol-bar-col{ width:100%; }
+.dash-sol-bar-track{ height:8px; background:#E6F1FB; border-radius:4px; overflow:hidden; }
+body.dark-mode .dash-sol-bar-track{ background:#1C2A3D; }
+.dash-sol-bar{ height:100%; border-radius:4px; width:0%; }
+.dash-sol-right{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+.dash-sol-count{ font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; color:#12233B; }
+body.dark-mode .dash-sol-count{ color:#E8EEF5; }
+.dash-sol-pct{ font-size:11px; font-weight:700; }
+
+/* ── Servis verilən ünvan ── */
+.dash-loc-wrap2{ display:flex; gap:20px; align-items:flex-start; }
+.dash-loc-list{ flex:1; display:flex; flex-direction:column; gap:8px; min-width:0; }
+.dash-loc-row{
+  display:flex; align-items:center; gap:10px;
+  background:rgba(255,255,255,.90); border:1px solid #E1EAF6;
+  border-radius:12px; padding:12px 14px;
+  box-shadow:0 3px 10px rgba(30,68,130,.05);
+  backdrop-filter:blur(4px);
+}
+body.dark-mode .dash-loc-row{ background:rgba(22,33,46,.90); border-color:#3A5070; }
+.dash-loc-icon{
+  width:34px; height:34px; border-radius:9px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.dash-loc-info{ flex:1; min-width:0; }
+.dash-loc-name{ font-size:13.5px; font-weight:700; color:#12233B; margin-bottom:6px; }
+body.dark-mode .dash-loc-name{ color:#E8EEF5; }
+.dash-loc-bar-track{ height:6px; background:#E6F1FB; border-radius:3px; overflow:hidden; }
+body.dark-mode .dash-loc-bar-track{ background:#1C2A3D; }
+.dash-loc-bar{ height:100%; border-radius:3px; width:0%; }
+.dash-loc-right{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
+.dash-loc-count{ font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; color:#12233B; }
+body.dark-mode .dash-loc-count{ color:#E8EEF5; }
+.dash-loc-pct{
+  font-size:11px; font-weight:700; padding:2px 8px;
+  border-radius:20px; white-space:nowrap;
+}
+
