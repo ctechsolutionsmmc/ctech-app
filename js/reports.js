@@ -1007,51 +1007,115 @@ function dashRenderRadial(containerId, items, total){
   el.innerHTML=html;
 }
 
-// ── Yeni problem kartları: 24h→2 kart, digərləri→4 kart ──
-// ── "Digər Tələb/Problemlər" — sıralı siyahı + donut chart ──
+// ── "Digər Tələb/Problemlər" — rəng əlaqəli siyahı + Digər + animasiyalı donut ──
 var DONUT_COLORS=['#2F6FED','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#EC4899'];
 function dashRenderOtherProblems(containerId, items, total){
   var el=document.getElementById(containerId);
   if(!el) return;
   if(items.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
-  var show=items.slice(0,5);
-  var html='<div class="dash-other-wrap">';
-  // Sol siyahı
-  html+='<div class="dash-other-list">';
+
+  var SHOW=5;
+  var show=items.slice(0,SHOW);
+  var restItems=items.slice(SHOW);
+  var restCount=restItems.reduce(function(s,it){ return s+it.count; },0);
+
+  // Donut üçün segment məlumatları (5 əsas + Digər)
+  var chartItems=show.slice();
+  if(restCount>0) chartItems.push({name:'Digər', count:restCount});
+  var chartTotal=chartItems.reduce(function(s,it){ return s+it.count; },0)||1;
+
+  var R=90, strokeW=24, gap=2, circ=2*Math.PI*R;
+  var cx=R+strokeW/2+6, cy=R+strokeW/2+6;
+  var W=cx*2, H=cy*2;
+  var offset=0, segs='';
+  chartItems.forEach(function(it,i){
+    var frac=it.count/chartTotal;
+    var len=Math.max(frac*circ-gap,0);
+    var c=DONUT_COLORS[i%DONUT_COLORS.length];
+    segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none"'
+      +' stroke="'+c+'" stroke-width="'+strokeW+'"'
+      +' stroke-linecap="butt"'
+      +' stroke-dasharray="0 '+circ.toFixed(2)+'"'
+      +' stroke-dashoffset="'+(-offset).toFixed(2)+'"'
+      +' transform="rotate(-90 '+cx+' '+cy+')"'
+      +' class="dash-op-seg" data-len="'+len.toFixed(2)+'" data-total="'+circ.toFixed(2)+'"/>';
+    offset+=frac*circ;
+  });
+  var innerR=R-strokeW/2-2;
+
+  var html='<div class="dash-op-wrap">';
+
+  // Sol — siyahı
+  html+='<div class="dash-op-list">';
   show.forEach(function(it,i){
     var pct=total>0?Math.round(it.count/total*100):0;
     var col=DONUT_COLORS[i%DONUT_COLORS.length];
-    html+='<div class="dash-other-row">'
-      +'<span class="dash-other-dot" style="background:'+col+';">'+( i+1)+'</span>'
-      +'<span class="dash-other-name">'+escapeHtml(it.name)+'</span>'
-      +'<span class="dash-other-count">'+it.count+' <span style="color:#8CA0BC;">('+pct+'%)</span></span>'
+    html+='<div class="dash-op-row" style="border-left:3px solid '+col+';">'
+      +'<div class="dash-op-num" style="background:'+col+';color:#fff;">'+( i+1)+'</div>'
+      +'<div class="dash-op-name">'+escapeHtml(it.name)+'</div>'
+      +'<div class="dash-op-badge" style="background:'+col+'18;color:'+col+';border:1px solid '+col+'44;">'
+        +it.count+' <span style="opacity:.7;">('+pct+'%)</span>'
+      +'</div>'
       +'</div>';
   });
-  if(items.length>5){
-    html+='<div class="dash-show-more-row"><button class="dash-show-more-btn" onclick="dashToggleSection(\'otherProblems\')">Hamısını göstər →</button></div>';
+
+  // "Digər" bölməsi
+  if(restCount>0){
+    var digerPct=total>0?Math.round(restCount/total*100):0;
+    var digerCol=DONUT_COLORS[SHOW%DONUT_COLORS.length];
+    html+='<div class="dash-op-diger" style="border-left:3px solid '+digerCol+';">'
+      +'<div class="dash-op-diger-head">'
+        +'<div class="dash-op-num" style="background:'+digerCol+';color:#fff;">+</div>'
+        +'<div class="dash-op-name" style="font-weight:700;">Digər</div>'
+        +'<div class="dash-op-badge" style="background:'+digerCol+'18;color:'+digerCol+';border:1px solid '+digerCol+'44;">'
+          +restCount+' <span style="opacity:.7;">('+digerPct+'%)</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="dash-op-diger-items">';
+    restItems.forEach(function(it){
+      var p=total>0?Math.round(it.count/total*100):0;
+      html+='<div class="dash-op-diger-row">'
+        +'<span class="dash-op-diger-dot"></span>'
+        +'<span class="dash-op-diger-name">'+escapeHtml(it.name)+'</span>'
+        +'<span class="dash-op-diger-cnt">'+it.count+' ('+p+'%)</span>'
+        +'</div>';
+    });
+    html+='</div></div>';
   }
-  html+='</div>';
-  // Sağ donut chart
-  var size=110, cx=55, cy=55, R=42, C=2*Math.PI*R;
-  var donutHtml='<svg width="'+size+'" height="'+size+'" viewBox="0 0 110 110">';
-  var offset=0;
-  var shown2=show.slice(0,5);
-  shown2.forEach(function(it,i){
-    var pct=total>0?it.count/total:0;
-    var arc=C*pct;
-    var col=DONUT_COLORS[i%DONUT_COLORS.length];
-    donutHtml+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="18"'
-      +' stroke-dasharray="'+arc.toFixed(2)+' '+(C-arc).toFixed(2)+'"'
-      +' stroke-dashoffset="'+(-(offset)).toFixed(2)+'"'
-      +' transform="rotate(-90 '+cx+' '+cy+')"/>';
-    offset+=arc;
-  });
-  donutHtml+='<text x="55" y="51" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="18" fill="#12233B">'+total+'</text>';
-  donutHtml+='<text x="55" y="65" text-anchor="middle" font-family="Inter" font-size="9" fill="#8CA0BC">Ümumi</text>';
-  donutHtml+='</svg>';
-  html+='<div class="dash-other-donut">'+donutHtml+'<div class="dash-other-donut-lbl">Cəmi <b>'+total+'</b> (100%)</div></div>';
+  html+='</div>'; // /dash-op-list
+
+  // Sağ — donut
+  html+='<div class="dash-op-donut-col">'
+    +'<svg viewBox="0 0 '+W+' '+H+'" class="dash-op-donut-svg">'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="'+innerR+'" fill="rgba(247,250,254,0.9)"/>'
+      +segs
+      +'<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-family="Rajdhani" font-weight="800" font-size="30" fill="#12233B">'+total+'</text>'
+      +'<text x="'+cx+'" y="'+(cy+16)+'" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600" fill="#8CA0BC">Ümumi</text>'
+    +'</svg>'
+    +'<div class="dash-op-donut-lbl">Cəmi <b>'+total+'</b> (100%)</div>'
+    // Rəng izahı (legend)
+    +'<div class="dash-op-legend">'
+    +chartItems.map(function(it,i){
+      var c=DONUT_COLORS[i%DONUT_COLORS.length];
+      var lbl=it.name.length>22?it.name.slice(0,22)+'…':it.name;
+      return '<div class="dash-op-legend-row"><span class="dash-op-legend-dot" style="background:'+c+';"></span><span class="dash-op-legend-name">'+escapeHtml(lbl)+'</span></div>';
+    }).join('')
+    +'</div>'
+    +'</div>';
+
   html+='</div>';
   el.innerHTML=html;
+
+  // Animasiya
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.querySelectorAll('.dash-op-seg').forEach(function(seg){
+        var l=parseFloat(seg.dataset.len), t=parseFloat(seg.dataset.total);
+        seg.setAttribute('stroke-dasharray',l.toFixed(2)+' '+(t-l).toFixed(2));
+        seg.style.transition='stroke-dasharray 0.9s cubic-bezier(.2,.8,.3,1)';
+      });
+    });
+  });
 }
 
 function dashRenderProblemCards(containerId, items, total, prevItems){
@@ -1122,7 +1186,8 @@ function dashRenderRankList(containerId, items, max, headerLabel, nameHeader){
   el.innerHTML='<div class="dash-ranklist-wrap"><table class="dash-ranklist"><thead><tr><th class="dr-num-col"></th><th>'+(nameHeader||'Ad')+'</th><th class="dr-count-col">'+(headerLabel||'Servis sayı')+'</th></tr></thead><tbody>'+buildRankTableRows(top)+'</tbody></table></div>';
 }
 
-// ── Həll siyahısı: ilk 4 göstər, "Hamısını göstər" → 10 + Digər ──
+// ── Həll siyahısı: vizual bar chart + rəng nöqtəsi + Pay sütunu ──
+var SOL_COLORS=['#2F6FED','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#EC4899','#F43F5E','#14B8A6','#6366F1'];
 function dashRenderSolutionList(containerId, items, total){
   var el=document.getElementById(containerId);
   if(!el) return;
@@ -1130,31 +1195,68 @@ function dashRenderSolutionList(containerId, items, total){
   var expanded=dashExpandedSections.solutions;
   var LIMIT_SHORT=4, LIMIT_LONG=10;
   var shown=expanded?items.slice(0,LIMIT_LONG):items.slice(0,LIMIT_SHORT);
-  // "Digər" — 11-ci və sonrakıların cəmi
   var otherItems=expanded?items.slice(LIMIT_LONG):[];
   var otherCount=otherItems.reduce(function(s,it){ return s+it.count; },0);
-  var allForPct=expanded?(shown.concat(otherCount>0?[{name:'Digər',count:otherCount}]:[])):shown;
-  var grandTotal=items.reduce(function(s,it){ return s+it.count; },0);
-  var html='<div class="dash-ranklist-wrap"><table class="dash-ranklist"><thead><tr><th class="dr-num-col"></th><th>Ad</th><th class="dr-count-col" style="width:80px;">Say</th><th class="dr-count-col" style="width:70px;">Pay</th></tr></thead><tbody>';
+  var grandTotal=items.reduce(function(s,it){ return s+it.count; },0)||1;
+  var maxCount=items[0]?items[0].count:1;
+
+  var html='<div class="dash-sol-list">';
   shown.forEach(function(it,i){
-    var pct=grandTotal>0?Math.round(it.count/grandTotal*100):0;
-    html+='<tr><td><span style="width:24px;height:24px;border-radius:7px;background:#F0F5FC;color:#2F6FED;font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;">'+(i+1)+'</span></td>'
-      +'<td>'+escapeHtml(it.name)+'</td>'
-      +'<td class="dr-count-col"><span class="dash-rank-count-val">'+it.count+'</span></td>'
-      +'<td class="dr-count-col" style="color:#8CA0BC;font-size:13px;">'+pct+'%</td></tr>';
+    var pct=Math.round(it.count/grandTotal*100);
+    var barW=Math.round(it.count/maxCount*100);
+    var col=SOL_COLORS[i%SOL_COLORS.length];
+    html+='<div class="dash-sol-row">'
+      // Sol — nömrə nöqtəsi + ad
+      +'<div class="dash-sol-left">'
+        +'<div class="dash-sol-num" style="background:'+col+';color:#fff;">'+( i+1)+'</div>'
+        +'<div class="dash-sol-name" title="'+escapeHtml(it.name)+'">'+escapeHtml(it.name)+'</div>'
+      +'</div>'
+      // Orta — animasiyalı bar
+      +'<div class="dash-sol-bar-col">'
+        +'<div class="dash-sol-bar-track"><div class="dash-sol-bar" data-w="'+barW+'" style="width:0%;background:'+col+';transition:width 0.75s cubic-bezier(.2,.8,.3,1) '+(i*0.05)+'s;"></div></div>'
+      +'</div>'
+      // Sağ — say + faiz
+      +'<div class="dash-sol-right">'
+        +'<span class="dash-sol-count">'+it.count+'</span>'
+        +'<span class="dash-sol-pct" style="color:'+col+';">'+pct+'%</span>'
+      +'</div>'
+      +'</div>';
   });
+
+  // "Digər" sətri (genişlənmiş rejimdə)
   if(expanded&&otherCount>0){
-    var otherPct=grandTotal>0?Math.round(otherCount/grandTotal*100):0;
-    html+='<tr><td><span style="width:24px;height:24px;border-radius:7px;background:#FDF1E3;color:#D97706;font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;">'+(LIMIT_LONG+1)+'</span></td>'
-      +'<td style="color:#D97706;font-weight:600;">Digər</td>'
-      +'<td class="dr-count-col"><span class="dash-rank-count-val" style="color:#D97706;">'+otherCount+'</span></td>'
-      +'<td class="dr-count-col" style="color:#8CA0BC;font-size:13px;">'+otherPct+'%</td></tr>';
+    var oPct=Math.round(otherCount/grandTotal*100);
+    var oBarW=Math.round(otherCount/maxCount*100);
+    var oCol='#94A3B8';
+    html+='<div class="dash-sol-row dash-sol-row-diger">'
+      +'<div class="dash-sol-left">'
+        +'<div class="dash-sol-num" style="background:'+oCol+';color:#fff;">+</div>'
+        +'<div class="dash-sol-name" style="color:'+oCol+';">Digər ('+otherItems.length+' şablon)</div>'
+      +'</div>'
+      +'<div class="dash-sol-bar-col">'
+        +'<div class="dash-sol-bar-track"><div class="dash-sol-bar" data-w="'+oBarW+'" style="width:0%;background:'+oCol+';transition:width 0.75s;"></div></div>'
+      +'</div>'
+      +'<div class="dash-sol-right">'
+        +'<span class="dash-sol-count" style="color:'+oCol+';">'+otherCount+'</span>'
+        +'<span class="dash-sol-pct" style="color:'+oCol+';">'+oPct+'%</span>'
+      +'</div>'
+      +'</div>';
   }
-  html+='</tbody></table></div>';
+
+  html+='</div>';
   if(items.length>LIMIT_SHORT){
     html+='<div class="dash-show-more-row"><button class="dash-show-more-btn" onclick="dashToggleSolution()">'+( expanded?'Azalt ↑':'Hamısını göstər →')+'</button></div>';
   }
   el.innerHTML=html;
+
+  // Bar animasiya
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.querySelectorAll('.dash-sol-bar').forEach(function(bar){
+        bar.style.width=bar.dataset.w+'%';
+      });
+    });
+  });
 }
 function dashToggleSolution(){
   dashExpandedSections.solutions=!dashExpandedSections.solutions;
@@ -1238,49 +1340,107 @@ function dashRenderLeaders(containerId, items, max){
   el.innerHTML=html;
 }
 
-// ── "Hamısını göstər" ilə genişlənən seksiyalar ──
-// ── Servis verilən ünvan: cədvəl + donut chart ──
+// ── Servis verilən ünvan: ikon + rəng əlaqəsi + böyük animasiyalı donut ──
+function dashLocIcon(name){
+  var n=(name||'').toLowerCase();
+  if(n.indexOf('qaraj')!==-1||n.indexOf('depo')!==-1)
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+  if(n.indexOf('dayanacaq')!==-1||n.indexOf('dayanak')!==-1)
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6"/></svg>';
+  if(n.indexOf('terminal')!==-1||n.indexOf('mərkəz')!==-1||n.indexOf('merkez')!==-1)
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>';
+  if(n.indexOf('on-board')!==-1||n.indexOf('avtobus içi')!==-1||n.indexOf('avtobusda')!==-1)
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>';
+  // default — pin
+  return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+}
+
 function dashRenderLocationWithDonut(containerId, items, total){
   var el=document.getElementById(containerId);
   if(!el) return;
   if(items.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
   var show=items.slice(0,5);
-  var html='<div class="dash-loc-wrap">';
-  // Cədvəl
-  html+='<div class="dash-loc-table-wrap"><div class="dash-ranklist-wrap"><table class="dash-ranklist"><thead><tr><th class="dr-num-col"></th><th>Ünvan</th><th class="dr-count-col">Servis sayı</th><th class="dr-count-col" style="width:60px;">Pay</th></tr></thead><tbody>';
+  var maxCount=items[0].count||1;
+
+  // Donut — böyük (TVM pattern)
+  var R=90, strokeW=24, gap=2, circ=2*Math.PI*R;
+  var cx=R+strokeW/2+6, cy=R+strokeW/2+6;
+  var W=cx*2, H=cy*2;
+  var offset=0, segs='';
+  show.forEach(function(it,i){
+    var frac=total>0?it.count/total:0;
+    var len=Math.max(frac*circ-gap,0);
+    var c=DONUT_COLORS[i%DONUT_COLORS.length];
+    segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none"'
+      +' stroke="'+c+'" stroke-width="'+strokeW+'"'
+      +' stroke-linecap="butt"'
+      +' stroke-dasharray="0 '+circ.toFixed(2)+'"'
+      +' stroke-dashoffset="'+(-offset).toFixed(2)+'"'
+      +' transform="rotate(-90 '+cx+' '+cy+')"'
+      +' class="dash-loc-seg" data-len="'+len.toFixed(2)+'" data-total="'+circ.toFixed(2)+'"/>';
+    offset+=frac*circ;
+  });
+  var innerR=R-strokeW/2-2;
+
+  var html='<div class="dash-loc-wrap2">';
+
+  // Sol — ünvan siyahısı (rəng + ikon)
+  html+='<div class="dash-loc-list">';
   show.forEach(function(it,i){
     var pct=total>0?Math.round(it.count/total*100):0;
-    var barW=items[0].count>0?Math.round(it.count/items[0].count*100):0;
-    html+='<tr><td><span style="width:24px;height:24px;border-radius:7px;background:#F0F5FC;color:#2F6FED;font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center;">'+(i+1)+'</span></td>'
-      +'<td>'+escapeHtml(it.name)+'</td>'
-      +'<td class="dr-count-col"><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;"><div style="width:50px;height:5px;background:#E6F1FB;border-radius:3px;overflow:hidden;"><div style="width:'+barW+'%;height:100%;background:#2F6FED;border-radius:3px;"></div></div><span class="dash-rank-count-val">'+it.count+'</span></div></td>'
-      +'<td class="dr-count-col" style="color:#8CA0BC;font-size:12px;">'+pct+'%</td></tr>';
+    var barW=Math.round(it.count/maxCount*100);
+    var col=DONUT_COLORS[i%DONUT_COLORS.length];
+    html+='<div class="dash-loc-row" style="border-left:3px solid '+col+';">'
+      +'<div class="dash-loc-icon" style="background:'+col+'18;color:'+col+';">'+dashLocIcon(it.name)+'</div>'
+      +'<div class="dash-loc-info">'
+        +'<div class="dash-loc-name">'+escapeHtml(it.name)+'</div>'
+        +'<div class="dash-loc-bar-track"><div class="dash-loc-bar" data-w="'+barW+'" style="width:0%;background:'+col+';transition:width 0.8s cubic-bezier(.2,.8,.3,1) '+(i*0.07)+'s;"></div></div>'
+      +'</div>'
+      +'<div class="dash-loc-right">'
+        +'<span class="dash-loc-count">'+it.count+'</span>'
+        +'<span class="dash-loc-pct" style="background:'+col+'18;color:'+col+';border:1px solid '+col+'44;">'+pct+'%</span>'
+      +'</div>'
+      +'</div>';
   });
-  html+='</tbody></table></div>';
   if(items.length>5){
     html+='<div class="dash-show-more-row"><button class="dash-show-more-btn" onclick="dashToggleSection(\'locations\')">Hamısını göstər →</button></div>';
   }
-  html+='</div>';
-  // Donut
-  var size=110, cx=55, cy=55, R=42, C=2*Math.PI*R;
-  var donutHtml='<svg width="'+size+'" height="'+size+'" viewBox="0 0 110 110">';
-  var off2=0;
-  show.forEach(function(it,i){
-    var pct2=total>0?it.count/total:0;
-    var arc2=C*pct2;
-    var col2=DONUT_COLORS[i%DONUT_COLORS.length];
-    donutHtml+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+col2+'" stroke-width="18"'
-      +' stroke-dasharray="'+arc2.toFixed(2)+' '+(C-arc2).toFixed(2)+'"'
-      +' stroke-dashoffset="'+(-(off2)).toFixed(2)+'"'
-      +' transform="rotate(-90 '+cx+' '+cy+')"/>';
-    off2+=arc2;
-  });
-  donutHtml+='<text x="55" y="51" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="18" fill="#12233B">'+total+'</text>';
-  donutHtml+='<text x="55" y="65" text-anchor="middle" font-family="Inter" font-size="9" fill="#8CA0BC">Ümumi</text>';
-  donutHtml+='</svg>';
-  html+='<div class="dash-other-donut">'+donutHtml+'<div class="dash-other-donut-lbl">Cəmi <b>'+total+'</b> (100%)</div></div>';
+  html+='</div>'; // /dash-loc-list
+
+  // Sağ — donut + legend
+  html+='<div class="dash-op-donut-col">'
+    +'<svg viewBox="0 0 '+W+' '+H+'" class="dash-op-donut-svg">'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="'+innerR+'" fill="rgba(247,250,254,0.9)"/>'
+      +segs
+      +'<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-family="Rajdhani" font-weight="800" font-size="30" fill="#12233B">'+total+'</text>'
+      +'<text x="'+cx+'" y="'+(cy+16)+'" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600" fill="#8CA0BC">Ümumi</text>'
+    +'</svg>'
+    +'<div class="dash-op-donut-lbl">Cəmi <b>'+total+'</b> (100%)</div>'
+    +'<div class="dash-op-legend">'
+    +show.map(function(it,i){
+      var c=DONUT_COLORS[i%DONUT_COLORS.length];
+      var lbl=it.name.length>20?it.name.slice(0,20)+'…':it.name;
+      return '<div class="dash-op-legend-row"><span class="dash-op-legend-dot" style="background:'+c+';"></span><span class="dash-op-legend-name">'+escapeHtml(lbl)+'</span></div>';
+    }).join('')
+    +'</div>'
+    +'</div>';
+
   html+='</div>';
   el.innerHTML=html;
+
+  // Animasiya
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.querySelectorAll('.dash-loc-seg').forEach(function(seg){
+        var l=parseFloat(seg.dataset.len), t=parseFloat(seg.dataset.total);
+        seg.setAttribute('stroke-dasharray',l.toFixed(2)+' '+(t-l).toFixed(2));
+        seg.style.transition='stroke-dasharray 0.9s cubic-bezier(.2,.8,.3,1)';
+      });
+      el.querySelectorAll('.dash-loc-bar').forEach(function(bar){
+        bar.style.width=bar.dataset.w+'%';
+      });
+    });
+  });
 }
 
 function dashRenderExpandable(containerId, items, sectionKey, shortMax, headerLabel, nameHeader){
