@@ -672,6 +672,9 @@ var DASH_CATS=[
   {key:'Problem Owner', type:'multi', getOptions:function(){ return ['AYNA','BakıKart','AYNA və BakıKart']; }}
 ];
 var dashActiveChips={}, dashSubfilterState={}, dashTextFilters={}, dashCustomRange=null, dashPeriod='24h', dashAllRows=[];
+var dashOwnerFilter='all';   // 'all' | 'AYNA' | 'BakıKart'
+var dashCarrierFilter='all'; // 'all' | carrier adı
+var dashExpandedSections={solutions:false, tech:false, leaders:false, carriers:false, locations:false};
 function dashSelectedOptions(key){
   return Object.keys(dashSubfilterState).filter(function(k){ return k.indexOf(key+'|')===0 && dashSubfilterState[k]; }).map(function(k){ return k.slice(key.length+1); });
 }
@@ -683,6 +686,17 @@ var dashServiceTypeFilter='all';
 function dashGetFilteredRows(){
   var range=dashCustomRange||dashComputeRange(dashPeriod);
   return dashAllRows.filter(function(row){
+    // ── Məhsul sahibi filtri (üst dropdown) ──
+    if(dashOwnerFilter!=='all'){
+      var owner=(row['Problem Owner']||'').trim();
+      // "AYNA və BakıKart" hər ikisini əhatə edir
+      if(dashOwnerFilter==='AYNA' && owner!=='AYNA' && owner!=='AYNA və BakıKart') return false;
+      if(dashOwnerFilter==='BakıKart' && owner!=='BakıKart' && owner!=='AYNA və BakıKart') return false;
+    }
+    // ── Daşıyıcı filtri (üst dropdown) ──
+    if(dashCarrierFilter!=='all'){
+      if((row['Daşıyıcı']||'').trim()!==dashCarrierFilter) return false;
+    }
     if(dashServiceTypeFilter!=='all'){
       var t=(row['Xidmət Növü']||'').toLowerCase();
       if(dashServiceTypeFilter==='individual'&&t.indexOf('fərdi')===-1) return false;
@@ -701,6 +715,25 @@ function dashGetFilteredRows(){
     if(dashHasActiveOptions('Problem Owner')&&!dashMatchMulti(row['Problem Owner'],'Problem Owner')) return false;
     return true;
   });
+}
+
+// ── Üst dropdown filter funksiyaları ──
+function setDashOwnerFilter(val){
+  dashOwnerFilter=val;
+  document.querySelectorAll('.dash-owner-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-owner')===val); });
+  dashComputeAndRender();
+}
+function setDashCarrierFilter(val){
+  dashCarrierFilter=val;
+  dashComputeAndRender();
+}
+function buildDashCarrierDropdown(){
+  var sel=document.getElementById('dashCarrierSelect');
+  if(!sel) return;
+  var carriers=[];
+  dashAllRows.forEach(function(r){ var c=(r['Daşıyıcı']||'').trim(); if(c&&carriers.indexOf(c)===-1) carriers.push(c); });
+  carriers.sort();
+  sel.innerHTML='<option value="all">Hamısı</option>'+carriers.map(function(c){ return '<option value="'+escapeHtml(c)+'"'+(c===dashCarrierFilter?' selected':'')+'>'+escapeHtml(c)+'</option>'; }).join('');
 }
 function setDashServiceTypeFilter(type, btn){
   dashServiceTypeFilter=type;
@@ -739,6 +772,23 @@ function dashCountTech(rows){
   });
   return Object.keys(map).map(function(k){ return {name:k, count:map[k]}; }).sort(function(a,b){ return b.count-a.count; });
 }
+// Changed_Device_Type sütununu | ilə split edib hər kateqoriyanı ayrıca sayır.
+// Köhnə ticketlərdə bu sütun boş ola bilər — o zaman Servis Kat.-a baxır.
+function dashCountCategories(rows){
+  var map={};
+  rows.forEach(function(r){
+    var raw=(r['Servis Kat.']||'').trim();
+    if(!raw) return;
+    // | ilə ayrılmış çox dəyər ola bilər (Faza 3+)
+    var parts=raw.indexOf('|')!==-1 ? raw.split('|') : [raw];
+    parts.forEach(function(p){
+      p=p.trim(); if(!p) return;
+      map[p]=(map[p]||0)+1;
+    });
+  });
+  return Object.keys(map).map(function(k){ return {name:k, count:map[k]}; }).sort(function(a,b){ return b.count-a.count; });
+}
+
 function dashCountRecurringBuses(rows){
   var map={};
   rows.forEach(function(r){
@@ -749,19 +799,100 @@ function dashCountRecurringBuses(rows){
   });
   return Object.keys(map).map(function(id){ return {busId:id, plate:map[id].plate, count:map[id].count}; }).filter(function(x){ return x.count>=3; }).sort(function(a,b){ return b.count-a.count; });
 }
+// Seçili dövrə uyğun əvvəlki dövrü hesablayır (müqayisə üçün)
+function dashGetPrevRange(period, customRange){
+  if(customRange&&customRange.start&&customRange.end){
+    // Xüsusi aralıq: eyni uzunluqda əvvəlki dövr
+    var dur=customRange.end.getTime()-customRange.start.getTime();
+    return { start:new Date(customRange.start.getTime()-dur), end:new Date(customRange.start.getTime()) };
+  }
+  if(period==='all') return null;
+  var end=bakuNowDate();
+  var cur=dashComputeRange(period);
+  var dur2=end.getTime()-cur.start.getTime();
+  return { start:new Date(cur.start.getTime()-dur2), end:new Date(cur.start.getTime()) };
+}
+function dashGetPrevRows(prevRange){
+  if(!prevRange) return [];
+  return dashAllRows.filter(function(row){
+    // owner + carrier filterlərini əvvəlki dövrə də tətbiq et
+    if(dashOwnerFilter!=='all'){
+      var owner=(row['Problem Owner']||'').trim();
+      if(dashOwnerFilter==='AYNA'&&owner!=='AYNA'&&owner!=='AYNA və BakıKart') return false;
+      if(dashOwnerFilter==='BakıKart'&&owner!=='BakıKart'&&owner!=='AYNA və BakıKart') return false;
+    }
+    if(dashCarrierFilter!=='all'&&(row['Daşıyıcı']||'').trim()!==dashCarrierFilter) return false;
+    var rd=rowDate(row);
+    return rd&&rd>=prevRange.start&&rd<prevRange.end;
+  });
+}
+function dashPctChange(cur, prev){
+  if(prev===0) return cur>0?null:0; // əvvəlki dövrdə 0 idisə faiz göstərmə (sonsuzluq)
+  return Math.round((cur-prev)/prev*100);
+}
+function dashPctHtml(pct){
+  if(pct===null||pct===undefined) return '';
+  var cls=pct>0?'dash-pct-up':pct<0?'dash-pct-down':'dash-pct-flat';
+  var arrow=pct>0?'↑':pct<0?'↓':'';
+  return '<span class="'+cls+'">'+arrow+Math.abs(pct)+'%</span>';
+}
+
 function dashFixedMetrics(){
   var now=bakuNowDate();
   var todayStart=new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-  var weekStart=new Date(now);
-  weekStart.setDate(weekStart.getDate()-7);
+  var weekStart=new Date(now); weekStart.setDate(weekStart.getDate()-7);
+
+  // Cari dövrün filterlənmiş sətirləri (owner + carrier filterlərini nəzərə alır)
+  var filteredAll=dashAllRows.filter(function(r){
+    if(dashOwnerFilter!=='all'){
+      var owner=(r['Problem Owner']||'').trim();
+      if(dashOwnerFilter==='AYNA'&&owner!=='AYNA'&&owner!=='AYNA və BakıKart') return false;
+      if(dashOwnerFilter==='BakıKart'&&owner!=='BakıKart'&&owner!=='AYNA və BakıKart') return false;
+    }
+    if(dashCarrierFilter!=='all'&&(r['Daşıyıcı']||'').trim()!==dashCarrierFilter) return false;
+    return true;
+  });
+
+  var totalAll=filteredAll.length;
   var totalToday=0, totalWeek=0;
-  dashAllRows.forEach(function(r){
-    var rd=rowDate(r);
-    if(!rd) return;
+  filteredAll.forEach(function(r){
+    var rd=rowDate(r); if(!rd) return;
     if(rd>=todayStart) totalToday++;
     if(rd>=weekStart) totalWeek++;
   });
-  return {totalAll:dashAllRows.length, totalToday:totalToday, totalWeek:totalWeek};
+
+  // Müqayisə üçün əvvəlki dövr
+  var prevRange=dashGetPrevRange(dashPeriod, dashCustomRange);
+  var prevRows=dashGetPrevRows(prevRange);
+
+  // Seçilmiş tab üzrə filtered count
+  var curRange=dashCustomRange||dashComputeRange(dashPeriod);
+  var curFiltered=filteredAll.filter(function(r){
+    if(dashPeriod==='all'&&!dashCustomRange) return true;
+    var rd=rowDate(r); return rd&&rd>=curRange.start&&rd<=curRange.end;
+  });
+
+  var pctAll=dashPctChange(curFiltered.length, prevRows.length);
+  var pctToday=null, pctWeek=null;
+  // Yalnız "Hamısı" tab deyilsə bugün/həftə müqayisəsini göstər
+  if(dashPeriod!=='all'&&!dashCustomRange){
+    var prevToday=0, prevWeek=0;
+    var prevTodayStart=new Date(todayStart.getTime()-86400000);
+    var prevWeekStart=new Date(weekStart.getTime()-7*86400000);
+    prevRows.forEach(function(r){
+      var rd=rowDate(r); if(!rd) return;
+      if(rd>=prevTodayStart&&rd<todayStart) prevToday++;
+      if(rd>=prevWeekStart&&rd<weekStart) prevWeek++;
+    });
+    pctToday=dashPctChange(totalToday, prevToday);
+    pctWeek=dashPctChange(totalWeek, prevWeek);
+  }
+
+  return {
+    totalAll:totalAll, totalToday:totalToday, totalWeek:totalWeek,
+    curFilteredCount:curFiltered.length,
+    pctAll:pctAll, pctToday:pctToday, pctWeek:pctWeek
+  };
 }
 function dashRenderRadial(containerId, items, total){
   var el=document.getElementById(containerId);
@@ -773,6 +904,41 @@ function dashRenderRadial(containerId, items, total){
     var offset=C-(C*pct/100);
     html+='<div class="dash-radial-card"><svg width="68" height="68" viewBox="0 0 72 72"><circle cx="36" cy="36" r="'+R+'" fill="none" stroke="#E6F1FB" stroke-width="8"/><circle cx="36" cy="36" r="'+R+'" fill="none" stroke="#2F6FED" stroke-width="8" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 36 36)"/><text x="36" y="41" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="17" fill="#12233B">'+pct+'%</text></svg><div class="dash-radial-textbox">'+escapeHtml(it.name)+'</div><div class="dash-radial-count">'+it.count+' servis</div></div>';
   });
+  el.innerHTML=html;
+}
+
+// ── Yeni problem kartları: 24h→2 kart, digərləri→4 kart ──
+function dashRenderProblemCards(containerId, items, total, prevItems){
+  var el=document.getElementById(containerId);
+  if(!el) return;
+  // 24 saat seçildirsə 2, digərlərində 4
+  var maxShow=(dashPeriod==='24h'&&!dashCustomRange)?2:4;
+  var top=items.slice(0,maxShow);
+  if(top.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  var R=38, C=2*Math.PI*R;
+  // Əvvəlki dövr map-i
+  var prevMap={};
+  (prevItems||[]).forEach(function(it){ prevMap[it.name]=it.count; });
+  var html='<div class="dash-prob-grid dash-prob-grid-'+(maxShow===2?'2':'4')+'">';
+  top.forEach(function(it){
+    var pct=total>0?Math.round(it.count/total*100):0;
+    var offset=C-(C*pct/100);
+    var prev=prevMap[it.name]||0;
+    var pctChg=dashPctChange(it.count, prev);
+    var pctChgHtml=dashPctHtml(pctChg);
+    html+='<div class="dash-prob-card">'
+      +'<div class="dash-prob-top">'
+      +'<svg width="86" height="86" viewBox="0 0 92 92"><circle cx="46" cy="46" r="'+R+'" fill="none" stroke="#E6F1FB" stroke-width="9"/><circle cx="46" cy="46" r="'+R+'" fill="none" stroke="#2F6FED" stroke-width="9" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 46 46)"/><text x="46" y="52" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="20" fill="#12233B">'+pct+'%</text></svg>'
+      +'<div class="dash-prob-info">'
+      +'<div class="dash-prob-name">'+escapeHtml(it.name)+'</div>'
+      +'<div class="dash-prob-count">'+it.count+' servis</div>'
+      +(pctChgHtml?'<div class="dash-prob-pct">Keçən dövrə görə '+pctChgHtml+'</div>':'')
+      +'</div></div>'
+      +'<div class="dash-prob-bar-wrap"><div class="dash-prob-bar" style="width:'+pct+'%;"></div></div>'
+      +'<div class="dash-prob-bar-pct">'+pct+'%</div>'
+      +'</div>';
+  });
+  html+='</div>';
   el.innerHTML=html;
 }
 function buildRankTableRows(items, numStyle, countStyle){
@@ -788,6 +954,47 @@ function dashRenderRankList(containerId, items, max, headerLabel, nameHeader){
   if(top.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
   el.innerHTML='<div class="dash-ranklist-wrap"><table class="dash-ranklist"><thead><tr><th class="dr-num-col"></th><th>'+(nameHeader||'Ad')+'</th><th class="dr-count-col">'+(headerLabel||'Servis sayı')+'</th></tr></thead><tbody>'+buildRankTableRows(top)+'</tbody></table></div>';
 }
+
+// ── Həll siyahısı: ilk 4 göstər, "Hamısını göstər" → 10 + Digər ──
+function dashRenderSolutionList(containerId, items, total){
+  var el=document.getElementById(containerId);
+  if(!el) return;
+  if(items.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  var expanded=dashExpandedSections.solutions;
+  var LIMIT_SHORT=4, LIMIT_LONG=10;
+  var shown=expanded?items.slice(0,LIMIT_LONG):items.slice(0,LIMIT_SHORT);
+  // "Digər" — 11-ci və sonrakıların cəmi
+  var otherItems=expanded?items.slice(LIMIT_LONG):[];
+  var otherCount=otherItems.reduce(function(s,it){ return s+it.count; },0);
+  var allForPct=expanded?(shown.concat(otherCount>0?[{name:'Digər',count:otherCount}]:[])):shown;
+  var grandTotal=items.reduce(function(s,it){ return s+it.count; },0);
+  var html='<div class="dash-ranklist-wrap"><table class="dash-ranklist"><thead><tr><th class="dr-num-col"></th><th>Ad</th><th class="dr-count-col" style="width:80px;">Say</th><th class="dr-count-col" style="width:70px;">Pay</th></tr></thead><tbody>';
+  shown.forEach(function(it,i){
+    var pct=grandTotal>0?Math.round(it.count/grandTotal*100):0;
+    html+='<tr><td><span style="width:24px;height:24px;border-radius:7px;background:#F0F5FC;color:#2F6FED;font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;">'+(i+1)+'</span></td>'
+      +'<td>'+escapeHtml(it.name)+'</td>'
+      +'<td class="dr-count-col"><span class="dash-rank-count-val">'+it.count+'</span></td>'
+      +'<td class="dr-count-col" style="color:#8CA0BC;font-size:13px;">'+pct+'%</td></tr>';
+  });
+  if(expanded&&otherCount>0){
+    var otherPct=grandTotal>0?Math.round(otherCount/grandTotal*100):0;
+    html+='<tr><td><span style="width:24px;height:24px;border-radius:7px;background:#FDF1E3;color:#D97706;font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;">'+(LIMIT_LONG+1)+'</span></td>'
+      +'<td style="color:#D97706;font-weight:600;">Digər</td>'
+      +'<td class="dr-count-col"><span class="dash-rank-count-val" style="color:#D97706;">'+otherCount+'</span></td>'
+      +'<td class="dr-count-col" style="color:#8CA0BC;font-size:13px;">'+otherPct+'%</td></tr>';
+  }
+  html+='</tbody></table></div>';
+  if(items.length>LIMIT_SHORT){
+    html+='<div class="dash-show-more-row"><button class="dash-show-more-btn" onclick="dashToggleSolution()">'+( expanded?'Azalt ↑':'Hamısını göstər →')+'</button></div>';
+  }
+  el.innerHTML=html;
+}
+function dashToggleSolution(){
+  dashExpandedSections.solutions=!dashExpandedSections.solutions;
+  var filtered=dashGetFilteredRows();
+  var solutions=dashCount(filtered,'Həll',true);
+  dashRenderSolutionList('dashSolutionList', solutions, filtered.length);
+}
 function dashRenderTiles(containerId, items, max){
   var el=document.getElementById(containerId);
   var top=items.slice(0, max||8);
@@ -795,6 +1002,30 @@ function dashRenderTiles(containerId, items, max){
   var icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6"/></svg>';
   var html='';
   top.forEach(function(it){ html+='<div class="dash-tile"><div class="dash-tile-icon">'+icon+'</div><div class="dash-tile-name">'+escapeHtml(it.name)+'</div><div class="dash-tile-count">'+it.count+'</div></div>'; });
+  el.innerHTML=html;
+}
+
+// ── Servis kateqoriyaları: Changed_Device_Type | split + keçən dövrə müqayisə ──
+function dashRenderCategories(containerId, items, prevItems){
+  var el=document.getElementById(containerId);
+  if(!el) return;
+  if(items.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  var maxCount=items[0].count||1;
+  var prevMap={};
+  (prevItems||[]).forEach(function(it){ prevMap[it.name]=it.count; });
+  var html='<div class="dash-cat-list">';
+  items.forEach(function(it){
+    var barW=Math.round(it.count/maxCount*100);
+    var prev=prevMap[it.name]||0;
+    var pctChg=dashPctChange(it.count, prev);
+    var pctHtml=dashPctHtml(pctChg);
+    html+='<div class="dash-cat-row">'
+      +'<div class="dash-cat-name">'+escapeHtml(it.name)+'</div>'
+      +'<div class="dash-cat-mid"><div class="dash-cat-bar-wrap"><div class="dash-cat-bar" style="width:'+barW+'%;"></div></div></div>'
+      +'<div class="dash-cat-right"><span class="dash-cat-count">'+it.count+'</span>'+(pctHtml?'<span class="dash-cat-pct">'+pctHtml+'</span>':'')+'</div>'
+      +'</div>';
+  });
+  html+='</div>';
   el.innerHTML=html;
 }
 function dashRenderLeaders(containerId, items, max){
@@ -808,6 +1039,30 @@ function dashRenderLeaders(containerId, items, max){
     html+='<div class="dash-lead-row"><div class="dash-avatar">'+escapeHtml(initials)+'</div><div class="dash-lead-name">'+escapeHtml(it.name)+'</div><div class="dash-lead-bar-wrap"><div class="dash-lead-bar" style="width:'+pct+'%;"></div></div><div class="dash-lead-count">'+it.count+'</div></div>';
   });
   el.innerHTML=html;
+}
+
+// ── "Hamısını göstər" ilə genişlənən seksiyalar ──
+function dashRenderExpandable(containerId, items, sectionKey, shortMax, headerLabel, nameHeader){
+  var el=document.getElementById(containerId);
+  if(!el) return;
+  if(items.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
+  var expanded=dashExpandedSections[sectionKey];
+  var shown=expanded?items:items.slice(0,shortMax||4);
+  var html='<div class="dash-ranklist-wrap"><table class="dash-ranklist"><thead><tr><th class="dr-num-col"></th><th>'+(nameHeader||'Ad')+'</th><th class="dr-count-col">'+(headerLabel||'Servis sayı')+'</th></tr></thead><tbody>'+buildRankTableRows(shown)+'</tbody></table></div>';
+  if(items.length>shortMax){
+    html+='<div class="dash-show-more-row"><button class="dash-show-more-btn" onclick="dashToggleSection(\''+sectionKey+'\')">'+( expanded?'Azalt ↑':'Hamısını göstər →')+'</button></div>';
+  }
+  el.innerHTML=html;
+}
+function dashToggleSection(sectionKey){
+  dashExpandedSections[sectionKey]=!dashExpandedSections[sectionKey];
+  var filtered=dashGetFilteredRows();
+  var prevRange=dashGetPrevRange(dashPeriod,dashCustomRange);
+  var prevRows=dashGetPrevRows(prevRange);
+  if(sectionKey==='tech') dashRenderExpandable('dashTechList', dashCountTech(filtered), 'tech', 4, 'Servis sayı', 'Texnik');
+  if(sectionKey==='leaders') dashRenderExpandable('dashLeaderList', dashCount(filtered,'Qrup rəhbəri',false), 'leaders', 4, 'Servis sayı', 'Qrup Rəhbəri');
+  if(sectionKey==='carriers') dashRenderExpandable('dashCarrierList', dashCount(filtered,'Daşıyıcı',false), 'carriers', 4, 'Servis sayı', 'Daşıyıcı');
+  if(sectionKey==='locations') dashRenderExpandable('dashLocationList', dashCountLocation(filtered), 'locations', 4, 'Servis sayı', 'Ünvan');
 }
 function dashRenderRecurring(containerId, items){
   var el=document.getElementById(containerId);
@@ -841,38 +1096,53 @@ function dashRenderMobile(agg){
 }
 function dashComputeAndRender(){
   var fixed=dashFixedMetrics();
+  // Stat kartlar
   document.getElementById('dashTotalAll').textContent=fixed.totalAll;
   document.getElementById('dashTotalToday').textContent=fixed.totalToday;
   document.getElementById('dashTotalWeek').textContent=fixed.totalWeek;
+  // Müqayisə faizləri
+  var pctAllEl=document.getElementById('dashPctAll');
+  var pctTodayEl=document.getElementById('dashPctToday');
+  var pctWeekEl=document.getElementById('dashPctWeek');
+  if(pctAllEl) pctAllEl.innerHTML=dashPctHtml(fixed.pctAll);
+  if(pctTodayEl) pctTodayEl.innerHTML=dashPctHtml(fixed.pctToday);
+  if(pctWeekEl) pctWeekEl.innerHTML=dashPctHtml(fixed.pctWeek);
+
   var filtered=dashGetFilteredRows();
-  var problems=dashCount(filtered, 'Problem', false);
-  var solutions=dashCount(filtered, 'Həll', true);
-  var categories=dashCount(filtered, 'Servis Kat.', false);
+  var prevRange=dashGetPrevRange(dashPeriod,dashCustomRange);
+  var prevRows=dashGetPrevRows(prevRange);
+
+  var problems=dashCount(filtered,'Problem',false);
+  var prevProblems=dashCount(prevRows,'Problem',false);
+  var solutions=dashCount(filtered,'Həll',true);
+  var categories=dashCountCategories(filtered);
+  var prevCategories=dashCountCategories(prevRows);
   var tech=dashCountTech(filtered);
-  var leaders=dashCount(filtered, 'Qrup rəhbəri', false);
-  var carriers=dashCount(filtered, 'Daşıyıcı', false);
+  var leaders=dashCount(filtered,'Qrup rəhbəri',false);
+  var carriers=dashCount(filtered,'Daşıyıcı',false);
   var locations=dashCountLocation(filtered);
   var recurring=dashCountRecurringBuses(filtered);
-  dashRenderRadial('dashProblemGrid', problems, filtered.length);
-  dashRenderRankList('dashSolutionList', solutions, 4);
-  dashRenderTiles('dashCategoryGrid', categories, 8);
-  dashRenderLeaders('dashTechList', tech, 8);
-  dashRenderLeaders('dashLeaderList', leaders, 8);
-  dashRenderRankList('dashCarrierList', carriers, 8);
-  dashRenderRankList('dashLocationList', locations, 8);
+
+  // Genişlənmə state-ini sıfırla (tab dəyişəndə)
+  Object.keys(dashExpandedSections).forEach(function(k){ dashExpandedSections[k]=false; });
+
+  // Render
+  dashRenderProblemCards('dashProblemGrid', problems, filtered.length, prevProblems);
+  dashRenderSolutionList('dashSolutionList', solutions, filtered.length);
+  dashRenderCategories('dashCategoryGrid', categories, prevCategories);
+  dashRenderExpandable('dashTechList', tech, 'tech', 4, 'Servis sayı', 'Texnik');
+  dashRenderExpandable('dashLeaderList', leaders, 'leaders', 4, 'Servis sayı', 'Qrup Rəhbəri');
+  dashRenderExpandable('dashCarrierList', carriers, 'carriers', 4, 'Servis sayı', 'Daşıyıcı');
+  dashRenderExpandable('dashLocationList', locations, 'locations', 4, 'Servis sayı', 'Ünvan');
   dashRenderRecurring('dashRecurringPanel', recurring);
+
+  // Carrier dropdown-u yenilə
+  buildDashCarrierDropdown();
+
   dashRenderMobile({
-    totalAll:fixed.totalAll,
-    totalToday:fixed.totalToday,
-    totalWeek:fixed.totalWeek,
-    problems:problems,
-    solutions:solutions,
-    categories:categories,
-    tech:tech,
-    leaders:leaders,
-    carriers:carriers,
-    locations:locations,
-    recurring:recurring
+    totalAll:fixed.totalAll, totalToday:fixed.totalToday, totalWeek:fixed.totalWeek,
+    problems:problems, solutions:solutions, categories:categories,
+    tech:tech, leaders:leaders, carriers:carriers, locations:locations, recurring:recurring
   });
 }
 function loadDashData(){
@@ -900,8 +1170,12 @@ function openBusDashboard(){
   dashCustomRange=null;
   dashPeriod='24h';
   dashServiceTypeFilter='all';
+  dashOwnerFilter='all';
+  dashCarrierFilter='all';
+  Object.keys(dashExpandedSections).forEach(function(k){ dashExpandedSections[k]=false; });
   document.querySelectorAll('#dashTypeFilter .rpt-type-btn').forEach(function(b){ b.classList.remove('rpt-type-btn-active'); });
   var allBtn=document.querySelector('#dashTypeFilter [data-type="all"]'); if(allBtn) allBtn.classList.add('rpt-type-btn-active');
+  document.querySelectorAll('.dash-owner-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-owner')==='all'); });
   updateDashTabsUI();
   loadDashData();
 }
@@ -1120,7 +1394,7 @@ function exportDashboardExcel(){
   function addSheet(name, items, headers){ var aoa=[headers]; items.forEach(function(it){ aoa.push([it.name, it.count]); }); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name); }
   addSheet('Problem', dashCount(filtered, 'Problem', false), ['Problem','Say']);
   addSheet('Hell', dashCount(filtered, 'Həll', true), ['Hell','Say']);
-  addSheet('Kateqoriya', dashCount(filtered, 'Servis Kat.', false), ['Kateqoriya','Say']);
+  addSheet('Kateqoriya', dashCountCategories(filtered), ['Kateqoriya','Say']);
   addSheet('Texnik', dashCountTech(filtered), ['Texnik','Say']);
   addSheet('Rehber', dashCount(filtered, 'Qrup rəhbəri', false), ['Qrup Rehberi','Say']);
   addSheet('Dasiyici', dashCount(filtered, 'Daşıyıcı', false), ['Dasiyici','Say']);
