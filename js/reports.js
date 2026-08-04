@@ -801,6 +801,97 @@ function dashCountRecurringBuses(rows){
   return Object.keys(map).map(function(id){ return {busId:id, plate:map[id].plate, count:map[id].count}; }).filter(function(x){ return x.count>=3; }).sort(function(a,b){ return b.count-a.count; });
 }
 // Seçili dövrə uyğun əvvəlki dövrü hesablayır (müqayisə üçün)
+// ── Bus Dashboard — Stat kart kırıq xətt sparkline ──
+function dashDrawSparkline(canvasId, rows, color){
+  var canvas=document.getElementById(canvasId);
+  if(!canvas||!canvas.getContext) return;
+  var ctx=canvas.getContext('2d');
+  var W=canvas.offsetWidth||120, H=canvas.offsetHeight||42;
+  canvas.width=W*(window.devicePixelRatio||1);
+  canvas.height=H*(window.devicePixelRatio||1);
+  ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
+  ctx.clearRect(0,0,W,H);
+
+  // Son 7 günün günlük servis sayı
+  var now=bakuNowDate();
+  var points=[];
+  for(var i=6;i>=0;i--){
+    var dayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i,0,0,0);
+    var dayEnd=new Date(dayStart.getTime()+86400000);
+    var cnt=rows.filter(function(r){
+      var d=rowDate(r); return d&&d>=dayStart&&d<dayEnd;
+    }).length;
+    points.push(cnt);
+  }
+
+  var max=Math.max.apply(null,points)||1;
+  var min=Math.min.apply(null,points);
+  var range=(max===min)?1:(max-min);
+  var pad=4, n=points.length;
+
+  function hexToRgb(hex){
+    hex=hex.replace('#','');
+    if(hex.length===3) hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    return parseInt(hex.slice(0,2),16)+','+parseInt(hex.slice(2,4),16)+','+parseInt(hex.slice(4,6),16);
+  }
+  var rgb=hexToRgb(color||'#2F6FED');
+
+  var xs=points.map(function(_,i){ return pad+(W-pad*2)*i/(n-1); });
+  var ys=points.map(function(v){ return H-pad-(H-pad*2)*(v-min)/range; });
+
+  // Alan dolgu
+  ctx.beginPath();
+  ctx.moveTo(xs[0],ys[0]);
+  for(var j=1;j<n;j++) ctx.lineTo(xs[j],ys[j]);
+  ctx.lineTo(xs[n-1],H-pad);
+  ctx.lineTo(xs[0],H-pad);
+  ctx.closePath();
+  var grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba('+rgb+',0.15)');
+  grad.addColorStop(1,'rgba('+rgb+',0.01)');
+  ctx.fillStyle=grad;
+  ctx.fill();
+
+  // Kırıq xətt — düz, sharp (yumuşaq deyil)
+  ctx.beginPath();
+  ctx.strokeStyle='rgba('+rgb+',0.9)';
+  ctx.lineWidth=2;
+  ctx.lineJoin='miter'; // kırıq bucaq — yumuşaq round deyil
+  ctx.lineCap='square';
+  ctx.moveTo(xs[0],ys[0]);
+  for(var k=1;k<n;k++) ctx.lineTo(xs[k],ys[k]);
+  ctx.stroke();
+
+  // Nöqtələr — dəyişən yerlərdə
+  for(var m=0;m<n;m++){
+    var isDiff=(m===0)||(m===n-1)||(points[m]!==points[m-1]);
+    if(isDiff){
+      ctx.beginPath();
+      ctx.arc(xs[m],ys[m],2.5,0,2*Math.PI);
+      ctx.fillStyle='rgba('+rgb+',1)';
+      ctx.fill();
+    }
+  }
+}
+
+// Stat kart detallı statistika mətni
+function dashStatSubtext(cur, prev, period){
+  if(prev===null||prev===undefined) return '';
+  var diff=cur-prev;
+  if(diff===0) return '<span style="color:#8CA0BC;">Keçən dövrə görə dəyişiklik yoxdur</span>';
+  var sign=diff>0?'+':'';
+  var cls=diff>0?'#188A4B':'#DC2626';
+  var periodLabel={
+    '24h':'əvvəlki 24 saata',
+    'week':'keçən həftəyə',
+    'month':'keçən aya',
+    'all':''
+  }[period]||'keçən dövrə';
+  if(!periodLabel) return '';
+  return '<span style="color:'+cls+';font-weight:700;">'+sign+diff+'</span>'
+    +' <span style="color:#8CA0BC;font-size:10.5px;">'+periodLabel+' görə</span>';
+}
+
 function dashGetPrevRange(period, customRange){
   if(customRange&&customRange.start&&customRange.end){
     // Xüsusi aralıq: eyni uzunluqda əvvəlki dövr
@@ -892,7 +983,8 @@ function dashFixedMetrics(){
   return {
     totalAll:totalAll, totalToday:totalToday, totalWeek:totalWeek,
     curFilteredCount:curFiltered.length,
-    pctAll:pctAll, pctToday:pctToday, pctWeek:pctWeek
+    pctAll:pctAll, pctToday:pctToday, pctWeek:pctWeek,
+    filteredAll:filteredAll
   };
 }
 function dashRenderRadial(containerId, items, total){
@@ -963,30 +1055,51 @@ function dashRenderProblemCards(containerId, items, total, prevItems){
   var top=items.slice(0,maxShow);
   if(top.length===0){ el.innerHTML='<div class="dash-empty-txt">Bu dövr üçün qeydə alınmayıb.</div>'; return; }
   var R=38, C=2*Math.PI*R;
-  // Əvvəlki dövr map-i
   var prevMap={};
   (prevItems||[]).forEach(function(it){ prevMap[it.name]=it.count; });
   var html='<div class="dash-prob-grid dash-prob-grid-'+(maxShow===2?'2':'4')+'">';
   top.forEach(function(it){
     var pct=total>0?Math.round(it.count/total*100):0;
-    var offset=C-(C*pct/100);
     var prev=prevMap[it.name]||0;
     var pctChg=dashPctChange(it.count, prev);
     var pctChgHtml=dashPctHtml(pctChg);
+    var uid='dpc'+Math.random().toString(36).slice(2,8);
     html+='<div class="dash-prob-card">'
       +'<div class="dash-prob-top">'
-      +'<svg width="86" height="86" viewBox="0 0 92 92"><circle cx="46" cy="46" r="'+R+'" fill="none" stroke="#E6F1FB" stroke-width="9"/><circle cx="46" cy="46" r="'+R+'" fill="none" stroke="#2F6FED" stroke-width="9" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 46 46)"/><text x="46" y="52" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="20" fill="#12233B">'+pct+'%</text></svg>'
+      +'<svg width="86" height="86" viewBox="0 0 92 92">'
+        +'<circle cx="46" cy="46" r="'+R+'" fill="none" stroke="#E6F1FB" stroke-width="9"/>'
+        +'<circle cx="46" cy="46" r="'+R+'" fill="none" stroke="#2F6FED" stroke-width="9"'
+          +' stroke-linecap="round" transform="rotate(-90 46 46)"'
+          +' stroke-dasharray="0 '+C.toFixed(1)+'"'
+          +' class="dash-prob-arc" data-pct="'+pct+'" data-circ="'+C.toFixed(1)+'"/>'
+        +'<text x="46" y="52" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="20" fill="#12233B">'+pct+'%</text>'
+      +'</svg>'
       +'<div class="dash-prob-info">'
-      +'<div class="dash-prob-name">'+escapeHtml(it.name)+'</div>'
-      +'<div class="dash-prob-count">'+it.count+' servis</div>'
-      +(pctChgHtml?'<div class="dash-prob-pct">Keçən dövrə görə '+pctChgHtml+'</div>':'')
+        +'<div class="dash-prob-name">'+escapeHtml(it.name)+'</div>'
+        +'<div class="dash-prob-count">'+it.count+' servis</div>'
+        +(pctChgHtml?'<div class="dash-prob-pct">Keçən dövrə görə '+pctChgHtml+'</div>':'')
       +'</div></div>'
-      +'<div class="dash-prob-bar-wrap"><div class="dash-prob-bar" style="width:'+pct+'%;"></div></div>'
+      +'<div class="dash-prob-bar-wrap"><div class="dash-prob-bar" data-w="'+pct+'" style="width:0%;transition:width 0.8s cubic-bezier(.2,.8,.3,1);"></div></div>'
       +'<div class="dash-prob-bar-pct">'+pct+'%</div>'
       +'</div>';
   });
   html+='</div>';
   el.innerHTML=html;
+
+  // Animasiya — TVM pattern ilə eyni
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.querySelectorAll('.dash-prob-arc').forEach(function(arc){
+        var p=parseFloat(arc.dataset.pct), c=parseFloat(arc.dataset.circ);
+        var len=c*p/100;
+        arc.setAttribute('stroke-dasharray',len.toFixed(1)+' '+(c-len).toFixed(1));
+        arc.style.transition='stroke-dasharray 0.85s cubic-bezier(.2,.8,.3,1)';
+      });
+      el.querySelectorAll('.dash-prob-bar').forEach(function(bar){
+        bar.style.width=bar.dataset.w+'%';
+      });
+    });
+  });
 }
 function buildRankTableRows(items, numStyle, countStyle){
   var html='';
@@ -1060,20 +1173,50 @@ function dashRenderCategories(containerId, items, prevItems){
   var maxCount=items[0].count||1;
   var prevMap={};
   (prevItems||[]).forEach(function(it){ prevMap[it.name]=it.count; });
+
+  // Kateqoriyaya görə ikon seçimi
+  function catIcon(name){
+    var n=(name||'').toLowerCase();
+    if(n.indexOf('validator')!==-1) return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 12l3 3 5-6"/></svg>';
+    if(n.indexOf('sam')!==-1||n.indexOf('card')!==-1) return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>';
+    if(n.indexOf('distrib')!==-1||n.indexOf('toplu')!==-1) return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>';
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6"/></svg>';
+  }
+
+  var CAT_COLORS=['#2F6FED','#F59E0B','#10B981','#EF4444','#8B5CF6','#06B6D4'];
   var html='<div class="dash-cat-list">';
-  items.forEach(function(it){
+  items.forEach(function(it,i){
     var barW=Math.round(it.count/maxCount*100);
     var prev=prevMap[it.name]||0;
     var pctChg=dashPctChange(it.count, prev);
     var pctHtml=dashPctHtml(pctChg);
+    var col=CAT_COLORS[i%CAT_COLORS.length];
     html+='<div class="dash-cat-row">'
-      +'<div class="dash-cat-name">'+escapeHtml(it.name)+'</div>'
-      +'<div class="dash-cat-mid"><div class="dash-cat-bar-wrap"><div class="dash-cat-bar" style="width:'+barW+'%;"></div></div></div>'
-      +'<div class="dash-cat-right"><span class="dash-cat-count">'+it.count+'</span>'+(pctHtml?'<span class="dash-cat-pct">'+pctHtml+'</span>':'')+'</div>'
+      +'<div class="dash-cat-left">'
+        +'<div class="dash-cat-icon" style="background:'+col+'18;color:'+col+';">'+catIcon(it.name)+'</div>'
+        +'<div class="dash-cat-info">'
+          +'<div class="dash-cat-name">'+escapeHtml(it.name)+'</div>'
+          +(pctHtml?'<div class="dash-cat-pct-lbl">'+pctHtml+' keçən dövrə görə</div>':'<div class="dash-cat-pct-lbl" style="color:#8CA0BC;">0% keçən dövrə görə</div>')
+        +'</div>'
+      +'</div>'
+      +'<div class="dash-cat-mid">'
+        +'<div class="dash-cat-bar-wrap"><div class="dash-cat-bar" data-w="'+barW+'" style="width:0%;background:'+col+';transition:width 0.8s cubic-bezier(.2,.8,.3,1) '+(i*0.06)+'s;"></div></div>'
+      +'</div>'
+      +'<div class="dash-cat-right">'
+        +'<span class="dash-cat-count">'+it.count+'</span>'
+      +'</div>'
       +'</div>';
   });
   html+='</div>';
   el.innerHTML=html;
+
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.querySelectorAll('.dash-cat-bar').forEach(function(bar){
+        bar.style.width=bar.dataset.w+'%';
+      });
+    });
+  });
 }
 function dashRenderLeaders(containerId, items, max){
   var el=document.getElementById(containerId);
@@ -1191,13 +1334,32 @@ function dashComputeAndRender(){
   document.getElementById('dashTotalAll').textContent=fixed.totalAll;
   document.getElementById('dashTotalToday').textContent=fixed.totalToday;
   document.getElementById('dashTotalWeek').textContent=fixed.totalWeek;
-  // Müqayisə faizləri
+
+  // Müqayisə faizləri + detallı mətn
   var pctAllEl=document.getElementById('dashPctAll');
   var pctTodayEl=document.getElementById('dashPctToday');
   var pctWeekEl=document.getElementById('dashPctWeek');
+  var subAllEl=document.getElementById('dashSubAll');
+  var subTodayEl=document.getElementById('dashSubToday');
+  var subWeekEl=document.getElementById('dashSubWeek');
+
+  // Cari filtered count əvvəlki dövrlə müqayisəsi
+  var prevRange2=dashGetPrevRange(dashPeriod,dashCustomRange);
+  var prevRows2=dashGetPrevRows(prevRange2);
+
   if(pctAllEl) pctAllEl.innerHTML=dashPctHtml(fixed.pctAll);
   if(pctTodayEl) pctTodayEl.innerHTML=dashPctHtml(fixed.pctToday);
   if(pctWeekEl) pctWeekEl.innerHTML=dashPctHtml(fixed.pctWeek);
+  if(subAllEl) subAllEl.innerHTML=dashStatSubtext(fixed.totalAll, prevRows2.length, dashPeriod);
+  if(subTodayEl) subTodayEl.innerHTML=dashStatSubtext(fixed.totalToday, (function(){ var now=bakuNowDate(); var ys=new Date(now.getFullYear(),now.getMonth(),now.getDate()-1,0,0,0); var ye=new Date(ys.getTime()+86400000); return prevRows2.filter(function(r){ var d=rowDate(r); return d&&d>=ys&&d<ye; }).length; })(), dashPeriod);
+  if(subWeekEl) subWeekEl.innerHTML=dashStatSubtext(fixed.totalWeek, (function(){ var now=bakuNowDate(); var ws=new Date(now.getTime()-14*86400000); var we=new Date(now.getTime()-7*86400000); return prevRows2.filter(function(r){ var d=rowDate(r); return d&&d>=ws&&d<we; }).length; })(), dashPeriod);
+
+  // Sparkline canvas-lar — filterlənmiş data ilə
+  requestAnimationFrame(function(){
+    dashDrawSparkline('dashSparkAll', fixed.filteredAll, '#2F6FED');
+    dashDrawSparkline('dashSparkToday', fixed.filteredAll, '#10B981');
+    dashDrawSparkline('dashSparkWeek', fixed.filteredAll, '#8B5CF6');
+  });
 
   var filtered=dashGetFilteredRows();
   var prevRange=dashGetPrevRange(dashPeriod,dashCustomRange);
