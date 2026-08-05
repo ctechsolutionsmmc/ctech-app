@@ -116,7 +116,7 @@ function loadOngoingData(){
     ongAllRows=(d.rows||[]).filter(function(row){
       var st=(row['Status']||'').trim();
       return st==='Təhkim Edildi' || st==='Texnik Tamamladı';
-    }).sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
+    }).sort(rptCompareDesc);
     ongColumns=d.columns||[];
     applyOngoingFilters();
   }).catch(function(e){
@@ -209,8 +209,10 @@ function ongApproveClose(ticketId){
 function exportOngoingToExcel(){
   if(ongFiltered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
   if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  // Excel-də sıralama: ən köhnə ticketdən başlayıb ən yenisinə
+  var exportRows=ongFiltered.slice().sort(rptCompareAsc);
   var wsData=[ongColumns];
-  ongFiltered.forEach(function(row){ wsData.push(ongColumns.map(function(c){ return row[c]||''; })); });
+  exportRows.forEach(function(row){ wsData.push(ongColumns.map(function(c){ return row[c]||''; })); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Davam Edən Servis');
@@ -239,6 +241,23 @@ function rptSortKey(row){
   var ts=new Date(iso).getTime();
   return isNaN(ts)?0:ts;
 }
+// Sıralama köməkçiləri — eyni tarix/saatda Ticket ID nömrəsinə görə sabit sıralama.
+// Tarix/saat Report_Date + Report_Time ("Tarix" + "Saat" sütunları) üzərindədir.
+function rptTicketNum(row){
+  var m=String(row['Ticket ID']||'').match(/(\d+)$/);
+  return m?parseInt(m[1],10):0;
+}
+function makeRptCompare(sortKeyFn){
+  return function(a,b){
+    var k=sortKeyFn(a)-sortKeyFn(b);
+    if(k!==0) return k;
+    return rptTicketNum(a)-rptTicketNum(b);
+  };
+}
+var rptCompareAsc=makeRptCompare(rptSortKey);
+var rptCompareDesc=function(a,b){ return rptCompareAsc(b,a); };
+var tvmRptCompareAsc=makeRptCompare(tvmRptSortKey);
+var tvmRptCompareDesc=function(a,b){ return tvmRptCompareAsc(b,a); };
 var rptDaysBack = 90;
 function loadReportData(){
   document.getElementById('rptTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
@@ -249,7 +268,7 @@ function loadReportData(){
       document.getElementById('rptTableBody').innerHTML='<tr><td colspan="6"><div class="rpt-empty">Xəta: '+(d.message||'məlumat gəlmədi')+'</div></td></tr>';
       return;
     }
-    rptAllRows=(d.rows||[]).filter(function(row){ return (row['Status']||'').trim()==='Bağlandı'; }).sort(function(a,b){ return rptSortKey(b)-rptSortKey(a); });
+    rptAllRows=(d.rows||[]).filter(function(row){ return (row['Status']||'').trim()==='Bağlandı'; }).sort(rptCompareDesc);
     rptColumns=d.columns||[];
     var hiddenCount = (d.totalCount||0) - rptAllRows.length;
     var hintEl = document.getElementById('rptOldHint');
@@ -484,7 +503,7 @@ function loadTvmReportData(){
       document.getElementById('tvmRptTableBody').innerHTML='<tr><td colspan="5"><div class="rpt-empty">Xəta: '+(d.message||'məlumat gəlmədi')+'</div></td></tr>';
       return;
     }
-    tvmRptAllRows=(d.rows||[]).slice().sort(function(a,b){ return tvmRptSortKey(b)-tvmRptSortKey(a); });
+    tvmRptAllRows=(d.rows||[]).slice().sort(tvmRptCompareDesc);
     tvmRptColumns=d.columns||[];
     var hiddenCount = (d.totalCount||0) - tvmRptAllRows.length;
     var hintEl = document.getElementById('tvmRptOldHint');
@@ -621,8 +640,10 @@ function exportTvmToExcel(){
   if(tvmRptFiltered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
   if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
   var cols=tvmRptColumns;
+  // Excel-də sıralama: ən köhnə ticketdən başlayıb ən yenisinə
+  var exportRows=tvmRptFiltered.slice().sort(tvmRptCompareAsc);
   var wsData=[cols];
-  tvmRptFiltered.forEach(function(row){ wsData.push(cols.map(function(c){ return row[c]||''; })); });
+  exportRows.forEach(function(row){ wsData.push(cols.map(function(c){ return row[c]||''; })); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'TVM Report');
@@ -1569,7 +1590,8 @@ function dashComputeAndRender(){
 function loadDashData(){
   var ov=document.getElementById('dashLoading');
   ov.classList.add('open');
-  var reportPromise=fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData'})}).then(function(r){ return r.json(); });
+  // Faza 1.5: raw data əvəzinə DASHBOARD_CACHE keşindən oxuyuruq
+  var reportPromise=fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardData', device:'BUS', requesterEmail: currentUser?currentUser.email:''})}).then(function(r){ return r.json(); });
   var formPromise=(bsFormData&&bsFormData.carriers)?Promise.resolve(bsFormData):fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){ return r.json(); }).then(function(d){ if(d.status==='OK') bsFormData=d; return bsFormData; });
   Promise.all([reportPromise, formPromise]).then(function(results){
     var d=results[0];
@@ -1831,8 +1853,10 @@ function exportToExcel(){
   if(rptFiltered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
   if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
   var cols=rptColumns;
+  // Excel-də sıralama: ən köhnə ticketdən başlayıb ən yenisinə (Report_Date + Saat artan)
+  var exportRows=rptFiltered.slice().sort(rptCompareAsc);
   var wsData=[cols];
-  rptFiltered.forEach(function(row){ wsData.push(cols.map(function(c){ return row[c]||''; })); });
+  exportRows.forEach(function(row){ wsData.push(cols.map(function(c){ return row[c]||''; })); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'BUS Report');
@@ -3852,7 +3876,8 @@ function updateTvmDashTabsUI(){
 
 function loadTvmDashData(){
   document.getElementById('dashLoading').style.display='flex';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData'})})
+  // Faza 1.5: raw data əvəzinə DASHBOARD_CACHE keşindən oxuyuruq
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardData', device:'TVM', requesterEmail: currentUser?currentUser.email:''})})
   .then(function(r){ return r.json(); })
   .then(function(d){
     document.getElementById('dashLoading').style.display='none';
