@@ -52,7 +52,7 @@ function openBusRequest(){
 function brRenderTicketBadge(){
   var badge=document.getElementById('brTicketBadge');
   if(badge && brNextTicketId){
-    badge.innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+brNextTicketId+'</span>';
+    badge.innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+escapeHtml(brNextTicketId)+'</span>';
   }
 }
 
@@ -127,9 +127,14 @@ function brRenderRegistryDropdown(matches){
     dd.innerHTML='<div class="bs-registry-empty">Uyğun D.Q.N. tapılmadı — məlumatları əl ilə daxil edin</div>';
   } else {
     dd.innerHTML=matches.slice(0,8).map(function(m){
-      return '<div class="bs-registry-item" data-dqn="'+(m.dqn||'')+'" data-id="'+(m.id||'')+'" data-carrier="'+(m.carrier||'')+'" data-model="'+(m.model||'')+'">'
-        +'<span class="reg-id">'+(m.dqn||'—')+'</span>'
-        +'<span class="reg-meta">BUS ID: '+(m.id||'—')+' · '+(m.carrier||'—')+' · '+(m.model||'—')+'</span></div>';
+      // FAZA 2 (XSS): reyestr məlumatları istifadəçi tərəfindən yazılır — hamısı escape olunur
+      var dqnE=escapeHtml(m.dqn||'');
+      var idE=escapeHtml(m.id||'');
+      var carrierE=escapeHtml(m.carrier||'');
+      var modelE=escapeHtml(m.model||'');
+      return '<div class="bs-registry-item" data-dqn="'+dqnE+'" data-id="'+idE+'" data-carrier="'+carrierE+'" data-model="'+modelE+'">'
+        +'<span class="reg-id">'+(dqnE||'—')+'</span>'
+        +'<span class="reg-meta">BUS ID: '+(idE||'—')+' · '+(carrierE||'—')+' · '+(modelE||'—')+'</span></div>';
     }).join('');
     Array.from(dd.querySelectorAll('.bs-registry-item')).forEach(function(el){
       el.addEventListener('click', function(e){
