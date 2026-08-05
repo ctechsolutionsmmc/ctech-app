@@ -74,6 +74,68 @@ function loadSession(){
   }catch(e){ return null; }
 }
 
+// ── FAZA 2: Token əsaslı auth ──
+// Login-də backend token qaytarır (checkUser) və o, saveSession vasitəsilə
+// sessiyada saxlanılır. Bütün API sorğularına buradan avtomatik əlavə olunur.
+function getAuthToken(){
+  if(currentUser && currentUser.token) return currentUser.token;
+  var s = loadSession();
+  return (s && s.user && s.user.token) ? s.user.token : null;
+}
+
+// AUTH_EXPIRED yoxlaması ağır oxuma aksiyalarında iki dəfə JSON.parse
+// etməsin deyə onlar atlanır (token bitdikdə onlar sadəcə xəta qaytarır;
+// login ekranı növbəti yazma əməliyyatında çıxır).
+var AUTH_EXPIRED_SKIP_ACTIONS = { getReportData:1, getTvmReportData:1, getDashboardData:1, getFormData:1, getTvmFormData:1, getNextTicketIds:1, getUsersData:1, getBusManagementData:1, getTvmManagementData:1, getCollectivesAdminData:1, getValidatorSNList:1, getSamCardSNList:1, getAdminListData:1 };
+
+// window.fetch-i bükür: hər API sorğusuna token əlavə edir və sessiya
+// bitibsə (AUTH_EXPIRED) istifadəçini login-ə yönləndirir.
+var _coreFetch = window.fetch.bind(window);
+window.fetch = function(url, opts){
+  opts = opts || {};
+  var token = getAuthToken();
+  var action = '';
+  if(token && opts.body && typeof opts.body === 'string'){
+    try{
+      var payload = JSON.parse(opts.body);
+      if(payload && typeof payload === 'object'){
+        action = payload.action || '';
+        if(!payload.token){
+          payload.token = token;
+          opts.body = JSON.stringify(payload);
+        }
+      }
+    }catch(parseErr){}
+  }
+  var p = _coreFetch(url, opts);
+  if(!token || !action || AUTH_EXPIRED_SKIP_ACTIONS[action]) return p;
+  return p.then(function(res){
+    try{
+      var ct = res.headers.get('content-type') || '';
+      if(ct.indexOf('application/json') !== -1){
+        return res.clone().json().then(function(d){
+          if(d && d.status === 'AUTH_EXPIRED'){ sessionExpired(); }
+          return res;
+        }).catch(function(){ return res; });
+      }
+    }catch(ctErr){}
+    return res;
+  });
+};
+
+function sessionExpired(){
+  clearSession();
+  currentUser = null;
+  showLoginError('Sessiya müddəti bitib. Zəhmət olmasa yenidən daxil olun.');
+  try{
+    if(typeof routerHideAll === 'function') routerHideAll();
+    var lv = document.getElementById('loginView');
+    if(lv) lv.style.display = (window.innerWidth <= 900) ? 'block' : 'flex';
+    try{ history.replaceState({ route:'login' }, '', window.location.pathname); }catch(hErr){}
+    if(typeof ROUTER_READY !== 'undefined') ROUTER_READY = false;
+  }catch(e){}
+}
+
 // ── Login xəta modalı ──
 function showLoginError(msg){
   var el = document.getElementById('loginErrorText');
@@ -133,9 +195,10 @@ function login(){
         startSessionTimer(expiresAt);
       });
     }
-    else if(result.status==='WRONG_PASSWORD'){ showLoadingFail('Şifrə yanlışdır'); }
     else if(result.status==='LOCKED'){ showLoadingFail(result.message||'Hesabınız müvəqqəti bloklanmışdır.'); }
-    else { showLoadingFail(result.debug?'Giriş rədd edildi:\n'+result.debug:'Bu hesab üçün giriş icazəsi yoxdur'); }
+    // FAZA 2: yanlış şifrə və naməlum email EYNİ cavabı (DENIED) alır —
+    // email enumeration bağlıdır, ona görə mesaj da vahiddir.
+    else { showLoadingFail('Email və ya şifrə yanlışdır'); }
   })
   .catch(function(e){ showLoadingFail('Şəbəkə xətası: '+e.message); });
 }
