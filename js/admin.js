@@ -17,18 +17,28 @@ function admHideProcessing(){
   if(ov){ ov.classList.remove('open'); setTimeout(function(){ ov.style.display='none'; },300); }
 }
 
-// ── Robust fetch: JSON xətasını tutub aydın mesaj verir ──
-function admFetch(payload){
+// ── Robust fetch: GAS HTML xəta səhifəsi qaytaranda avtomatik 1 dəfə yenidən cəhd edir.
+// Keçici GAS xətaları (deploy dəyişikliyi/limit/soyuq başlanğıc) öz-özünə düzəlir —
+// "Unexpected token '<'" xətası əvəzinə avtomatik təkrar cəhd, əl ilə refresh lazım olmur. ──
+function admFetch(payload, retries){
+  if(retries===undefined) retries=2;
   return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){
-    var ct=r.headers.get('content-type')||'';
-    if(ct.indexOf('application/json')===-1&&ct.indexOf('text/plain')===-1){
-      // HTML cavab gəldi — Apps Script deploy xətası
-      return r.text().then(function(html){
-        throw new Error('Server xətası (Apps Script yenidən deploy edilməlidir). Cavab: '+html.slice(0,120));
-      });
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    var first=(txt||'').replace(/^\s+/,'').charAt(0);
+    if(first==='{'||first==='['){
+      try{ return JSON.parse(txt); }catch(e){}
     }
-    return r.json();
+    // Cavab JSON deyil — GAS HTML xəta səhifəsi qaytarıb (deploy/limit/avtorizasiya).
+    // Keçicidirsə artan gözləmə ilə (0.9s → 2s) təkrar cəhd et:
+    if(retries>0){
+      var delay=retries===2?900:2000;
+      return new Promise(function(res){ setTimeout(res, delay); })
+        .then(function(){ return admFetch(payload, retries-1); });
+    }
+    var m=(txt||'').match(/<title>([^<]*)<\/title>/i);
+    var reason=m?m[1].trim():'Server müvəqqəti cavab vermədi';
+    throw new Error('Server xətası ('+reason+'). Səhifəni yeniləyib yenidən cəhd edin.');
   });
 }
 
@@ -98,8 +108,7 @@ function admUsersDebouncedRender(){ clearTimeout(admUsersSearchDebounceTimer); a
 function loadAdminUsers(){
   var body=document.getElementById('admUsrTableBody');
   if(body) body.innerHTML='<tr><td colspan="5"><div class="adm-empty">Yüklənir...</div></td></tr>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getUsersData', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'getUsersData', requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){
       if(body) body.innerHTML='<tr><td colspan="5"><div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div></td></tr>';
@@ -281,8 +290,7 @@ function submitUserModal(){
     ? { action:'updateUser', userId:admUsrEditingId, data:{fullName:fullName, email:email, password:password, role:role, status:status}, requesterEmail: currentUser?currentUser.email:'' }
     : { action:'addUser', data:{fullName:fullName, email:email, password:password, role:role, status:status}, requesterEmail: currentUser?currentUser.email:'' };
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admFetch(payload)
   .then(function(d){
     btn.disabled=false; btn.textContent=origText;
     if(d.status!=='OK'){
@@ -318,8 +326,7 @@ function admOpenDeleteConfirm(text, actionFn, opts){
 }
 function openDeleteConfirm(userId, name){
   admOpenDeleteConfirm('"'+name+'" istifadəçisini silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'deleteUser', userId:userId, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    return admFetch({action:'deleteUser', userId:userId, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
       loadAdminUsers();
@@ -332,8 +339,7 @@ function admUnlockUser(userId){
   admOpenDeleteConfirm(
     '"'+name+'" istifadəçisinin hesabını blokdan çıxarmaq istədiyinizə əminsiniz?',
     function(){
-      return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'unlockUser', userId:userId, requesterEmail: currentUser?currentUser.email:''})})
-      .then(function(r){ return r.json(); })
+      return admFetch({action:'unlockUser', userId:userId, requesterEmail: currentUser?currentUser.email:''})
       .then(function(d){
         if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
         // Dərhal lokal state-i yenilə (server refetch-i gözləmədən UI-da əks olunsun)
@@ -367,7 +373,7 @@ function admConfirmDelete(){
 function admExportUsers(){
   var filtered=admGetFilteredUsers();
   if(filtered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ admExportUsers(); }); return; }
   var cols=['Full Name','Email','Role','Status'];
   var wsData=[cols];
   filtered.forEach(function(u){ wsData.push([u.fullName, u.email, u.role, u.status]); });
@@ -389,8 +395,7 @@ function admGuestType(role){ return (role||'').toLowerCase().indexOf('bakikart')
 function loadAdminGuests(){
   var body=document.getElementById('admGstTableBody');
   if(body) body.innerHTML='<tr><td colspan="6"><div class="adm-empty">Yüklənir...</div></td></tr>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getUsersData', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'getUsersData', requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){
       if(body) body.innerHTML='<tr><td colspan="6"><div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div></td></tr>';
@@ -524,8 +529,7 @@ function submitGuestModal(){
     ? { action:'updateUser', userId:admGstEditingId, data:{fullName:fullName, email:email, password:password, role:role, status:status}, requesterEmail: currentUser?currentUser.email:'' }
     : { action:'addUser', data:{fullName:fullName, email:email, password:password, role:role, status:status}, requesterEmail: currentUser?currentUser.email:'' };
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admFetch(payload)
   .then(function(d){
     btn.disabled=false; btn.textContent='Save';
     if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
@@ -559,8 +563,7 @@ function switchTvmSubtab(key, btn){
 function loadTvmManagementData(){
   var body=document.getElementById('admTvmRegTableBody');
   if(body) body.innerHTML='<tr><td colspan="4"><div class="adm-empty">Yüklənir...</div></td></tr>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmManagementData', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'getTvmManagementData', requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){
       if(body) body.innerHTML='<tr><td colspan="4"><div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div></td></tr>';
@@ -677,8 +680,7 @@ function submitTvmRegistryModal(){
     ? { action:'updateTvmRegistryEntry', originalId:admTvmRegEditingId, data:{id:id, location:location, serviceLocation:serviceLocation}, requesterEmail: currentUser?currentUser.email:'' }
     : { action:'addTvmRegistryEntry', data:{id:id, location:location, serviceLocation:serviceLocation}, requesterEmail: currentUser?currentUser.email:'' };
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admFetch(payload)
   .then(function(d){
     btn.disabled=false; btn.textContent=origText;
     if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
@@ -692,8 +694,7 @@ function submitTvmRegistryModal(){
 }
 function admDeleteTvmRegistry(id){
   admOpenDeleteConfirm('"'+id+'" TVM cihazını silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'deleteTvmRegistryEntry', id:id, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    return admFetch({action:'deleteTvmRegistryEntry', id:id, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
       loadTvmManagementData();
@@ -703,7 +704,7 @@ function admDeleteTvmRegistry(id){
 function admExportTvmRegistry(){
   var filtered=admGetFilteredTvmRegistry();
   if(filtered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ admExportTvmRegistry(); }); return; }
   var wsData=[['TVM İD','Lokasiya','Servis Lokasiyası']];
   filtered.forEach(function(r){ wsData.push([r.id, r.location, r.serviceLocation]); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
@@ -747,8 +748,7 @@ function admReloadListSource(sheetName){
   else { if(typeof loadTvmManagementData==='function') loadTvmManagementData(); }
 }
 function admMoveTvmListItem(sheetName, value, direction){
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'moveTvmListItem', sheetName:sheetName, value:value, direction:direction, requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'moveTvmListItem', sheetName:sheetName, value:value, direction:direction, requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
     admReloadListSource(sheetName);
@@ -786,8 +786,7 @@ function submitTvmListModal(){
     ? { action:'updateTvmListItem', sheetName:admTvmListEditingSheet, oldValue:admTvmListEditingValue, newValue:value, requesterEmail: currentUser?currentUser.email:'' }
     : { action:'addTvmListItem', sheetName:admTvmListEditingSheet, value:value, requesterEmail: currentUser?currentUser.email:'' };
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admFetch(payload)
   .then(function(d){
     btn.disabled=false; btn.textContent=origText;
     if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
@@ -802,8 +801,7 @@ function submitTvmListModal(){
 function admDeleteTvmListItem(sheetName, value){
   var label=ADM_TVM_SHEET_LABEL[sheetName]||'dəyəri';
   admOpenDeleteConfirm('"'+value+'" '+label+'ni silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'deleteTvmListItem', sheetName:sheetName, value:value, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    return admFetch({action:'deleteTvmListItem', sheetName:sheetName, value:value, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
       admReloadListSource(sheetName);
@@ -814,8 +812,7 @@ function admDeleteTvmListItem(sheetName, value){
 function loadAdminTechnicians(){
   var listEl=document.getElementById('admTechList');
   if(listEl) listEl.innerHTML='<div class="adm-empty">Yüklənir...</div>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getAdminListData', sheetName:'TECHNICALS', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'getAdminListData', sheetName:'TECHNICALS', requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){ if(listEl) listEl.innerHTML='<div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div>'; return; }
     admTechAll=d.items||[];
@@ -826,8 +823,7 @@ function loadAdminTechnicians(){
 function loadAdminLeaders(){
   var listEl=document.getElementById('admLeadersList');
   if(listEl) listEl.innerHTML='<div class="adm-empty">Yüklənir...</div>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getAdminListData', sheetName:'TEAM_LEADERS', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'getAdminListData', sheetName:'TEAM_LEADERS', requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){ if(listEl) listEl.innerHTML='<div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div>'; return; }
     admLeadersAll=d.items||[];
@@ -1027,7 +1023,7 @@ function admDeleteBusRegistry(id){
 function admExportBusRegistry(){
   var filtered=admGetFilteredBusRegistry();
   if(filtered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ admExportBusRegistry(); }); return; }
   var wsData=[['BUS ID','D.Q.N.','Daşıyıcı','Model']];
   filtered.forEach(function(r){ wsData.push([r.id, r.dqn, r.carrier, r.model]); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
@@ -1093,8 +1089,7 @@ function admBulkDeleteValidatorSN(){
   var snList = Object.keys(admValSnSelected);
   if(snList.length===0) return;
   admOpenDeleteConfirm(snList.length+' Validator SN silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'bulkDeleteValidatorSN', snList:snList, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    return admFetch({action:'bulkDeleteValidatorSN', snList:snList, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
       admValSnClearSelection();
@@ -1106,8 +1101,7 @@ function admBulkDeleteValidatorSN(){
 
 function admDeleteValidatorSN(sn){
   admOpenDeleteConfirm('"'+sn+'" SN-ni silmək istədiyinizə əminsiniz?', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'deleteValidatorSN', sn:sn, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    return admFetch({action:'deleteValidatorSN', sn:sn, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
       delete admValSnSelected[sn];
@@ -1145,8 +1139,7 @@ function submitValidatorSNModal(){
     ? { action:'updateValidatorSN', oldSn:admValSnEditingOld, newSn:val, requesterEmail: currentUser?currentUser.email:'' }
     : { action:'addValidatorSN', sn:val, requesterEmail: currentUser?currentUser.email:'' };
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admFetch(payload)
   .then(function(d){
     btn.disabled=false; btn.textContent=origText;
     if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
@@ -1216,8 +1209,7 @@ function admBulkDeleteSamCardSN(){
   var snList = Object.keys(admSamSnSelected);
   if(snList.length===0) return;
   admOpenDeleteConfirm(snList.length+' SAM Card SN silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'bulkDeleteSamCardSN', snList:snList, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    return admFetch({action:'bulkDeleteSamCardSN', snList:snList, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
       admSamSnClearSelection();
@@ -1229,8 +1221,7 @@ function admBulkDeleteSamCardSN(){
 
 function admDeleteSamCardSN(sn){
   admOpenDeleteConfirm('"'+sn+'" SN-ni silmək istədiyinizə əminsiniz?', function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'deleteSamCardSN', sn:sn, requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
+    return admFetch({action:'deleteSamCardSN', sn:sn, requesterEmail: currentUser?currentUser.email:''})
     .then(function(d){
       if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
       delete admSamSnSelected[sn];
@@ -1268,8 +1259,7 @@ function submitSamCardSNModal(){
     ? { action:'updateSamCardSN', oldSn:admSamSnEditingOld, newSn:val, requesterEmail: currentUser?currentUser.email:'' }
     : { action:'addSamCardSN', sn:val, requesterEmail: currentUser?currentUser.email:'' };
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
-  .then(function(r){ return r.json(); })
+  admFetch(payload)
   .then(function(d){
     btn.disabled=false; btn.textContent=origText;
     if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
@@ -1455,12 +1445,7 @@ function openCollectives() {
   var content = document.getElementById('collectivesContent');
   loader.style.display = 'flex';
   content.style.display = 'none';
-  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'getCollectivesData' })
-  })
-  .then(function(r) { return r.json(); })
+  admFetch({ action: 'getCollectivesData' })
   .then(function(d) {
     if (d.status !== 'OK') {
       alert('Xəta: ' + (d.message || 'Məlumat yüklənə bilmədi'));
@@ -1574,12 +1559,7 @@ function loadAdminCollectives() {
   var body = document.getElementById('admClTableBody');
   if (body) body.innerHTML = '<tr><td colspan="4"><div class="adm-empty">Yüklənir...</div></td></tr>';
 
-  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'getCollectivesAdminData', requesterEmail: currentUser ? currentUser.email : '' })
-  })
-  .then(function(r) { return r.json(); })
+  admFetch({ action: 'getCollectivesAdminData', requesterEmail: currentUser ? currentUser.email : '' })
   .then(function(d) {
     if (d.status !== 'OK') {
       if (body) body.innerHTML = '<tr><td colspan="4"><div class="adm-empty">Xəta: ' + escapeHtml(d.message || '') + '</div></td></tr>';
@@ -1664,7 +1644,7 @@ function admClGoPage(p){ if(p<1) return; admClCurrentPage=p; admRenderCollective
 function admExportCollectives(){
   var filtered=admGetFilteredCollectives();
   if(filtered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ admExportCollectives(); }); return; }
   var wsData=[['Full Name','Vəzifə','Qrup']];
   filtered.forEach(function(emp){ wsData.push([emp.name, emp.title, emp.group]); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
@@ -1730,12 +1710,7 @@ function submitCollectiveModal() {
     ? { action: 'updateCollectiveMember', oldName: admCollectivesEditingName, data: { name: name, title: title, group: group }, requesterEmail: currentUser ? currentUser.email : '' }
     : { action: 'addCollectiveMember', data: { name: name, title: title, group: group }, requesterEmail: currentUser ? currentUser.email : '' };
 
-  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
-  })
-  .then(function(r) { return r.json(); })
+  admFetch(payload)
   .then(function(d) {
     btn.disabled = false;
     btn.textContent = origText;
@@ -1757,12 +1732,7 @@ function submitCollectiveModal() {
 
 function admDeleteCollectiveMember(name) {
   admOpenDeleteConfirm('"' + name + '" əməkdaşını silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.', function() {
-    return fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'deleteCollectiveMember', name: name, requesterEmail: currentUser ? currentUser.email : '' })
-    })
-    .then(function(r) { return r.json(); })
+    return admFetch({ action: 'deleteCollectiveMember', name: name, requesterEmail: currentUser ? currentUser.email : '' })
     .then(function(d) {
       if (d.status !== 'OK') {
         alert(d.message || 'Xəta baş verdi');
@@ -1777,8 +1747,7 @@ function admDeleteCollectiveMember(name) {
 function loadTelegramTemplates(){
   var wrap=document.getElementById('admTgTemplatesList');
   wrap.innerHTML='<div class="adm-empty">Yüklənir...</div>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTelegramTemplates', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'getTelegramTemplates', requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){ wrap.innerHTML='<div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div>'; return; }
     wrap.innerHTML=(d.templates||[]).map(function(t){
@@ -1802,8 +1771,7 @@ function saveTelegramTemplate(key){
   var template=textEl.value;
   var active=activeEl.checked;
 
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'updateTelegramTemplate', key:key, template:template, active:active, requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){ return r.json(); })
+  admFetch({action:'updateTelegramTemplate', key:key, template:template, active:active, requesterEmail: currentUser?currentUser.email:''})
   .then(function(d){
     if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
     alert('Şablon saxlanıldı');

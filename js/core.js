@@ -362,6 +362,31 @@ function toggleTheme(){ if(window.innerWidth>=901)return; var isDark=!document.b
 // ── Köməkçi ──
 function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// ── Excel kitabxanası (xlsx) — yalnız "Export" düyməsi basılanda yüklənir ──
+// Əvvəllər hər səhifə açılışında <head>-də sinxron yüklənirdi (~900KB) və
+// ilk göstərilməni BLOCK edirdi. İndi lazım olanda, birdəfəlik yüklənir və
+// sonrakı Export-lar üçün brauzer keşində qalır.
+var _xlsxLoading = null;
+function ensureXlsx(cb){
+  if(typeof XLSX!=='undefined'){ if(cb) cb(); return; }
+  if(!_xlsxLoading){
+    _xlsxLoading = new Promise(function(resolve, reject){
+      var s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload=function(){ resolve(); };
+      s.onerror=function(){ reject(new Error('xlsx load failed')); };
+      document.head.appendChild(s);
+    });
+  }
+  if(cb){
+    _xlsxLoading.then(cb).catch(function(){
+      // Uğursuz yüklənməni keşləmə — növbəti cəhddə yenidən yükləməyə çalış
+      _xlsxLoading = null;
+      alert('Excel kitabxanası yüklənə bilmədi. İnternet bağlantısını yoxlayıb yenidən cəhd edin.');
+    });
+  }
+}
+
 // ── Service Worker təmizlənməsi ──
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations().then(function(regs){
