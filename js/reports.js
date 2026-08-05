@@ -208,7 +208,7 @@ function ongApproveClose(ticketId){
 }
 function exportOngoingToExcel(){
   if(ongFiltered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ exportOngoingToExcel(); }); return; }
   // Excel-də sıralama: ən köhnə ticketdən başlayıb ən yenisinə
   var exportRows=ongFiltered.slice().sort(rptCompareAsc);
   var wsData=[ongColumns];
@@ -638,7 +638,7 @@ function closeTvmDetail(){
 }
 function exportTvmToExcel(){
   if(tvmRptFiltered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ exportTvmToExcel(); }); return; }
   var cols=tvmRptColumns;
   // Excel-də sıralama: ən köhnə ticketdən başlayıb ən yenisinə
   var exportRows=tvmRptFiltered.slice().sort(tvmRptCompareAsc);
@@ -1835,7 +1835,7 @@ function renderDashModalResults(){
   document.getElementById('dashModalResultsBody').innerHTML=html;
 }
 function exportDashboardExcel(){
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ exportDashboardExcel(); }); return; }
   var filtered=dashGetFilteredRows();
   var wb=XLSX.utils.book_new();
   function addSheet(name, items, headers){ var aoa=[headers]; items.forEach(function(it){ aoa.push([it.name, it.count]); }); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name); }
@@ -1855,7 +1855,7 @@ function exportDashboardExcel(){
 }
 function exportToExcel(){
   if(rptFiltered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ exportToExcel(); }); return; }
   var cols=rptColumns;
   // Excel-də sıralama: ən köhnə ticketdən başlayıb ən yenisinə (Report_Date + Saat artan)
   var exportRows=rptFiltered.slice().sort(rptCompareAsc);
@@ -3286,51 +3286,53 @@ function loadHomeDashStats(){
     badge.style.display = 'flex';
     setTimeout(function(){ badge.style.display = 'none'; }, 2500);
   }
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if(d.status!=='OK') return;
+  // ── Paralel: konfiqurasiya və statistik məlumat EYNİ ANDA çəkilir.
+  // Əvvəlki versiya ardıcıl idi (config → sonra data) — indi bir raund
+  // şəbəkə gediş-gəlişi qənaət olunur və kartlar daha tez dolur.
+  var cfgP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
+    .then(function(r){ return r.json(); })
+    .catch(function(){ return {status:'ERR'}; });
+  var dataP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:1})})
+    .then(function(r){ return r.json(); })
+    .catch(function(){ return {status:'ERR'}; });
+  Promise.all([cfgP, dataP]).then(function(res){
+    var d=res[0], rd=res[1];
+    if(!d || d.status!=='OK') return;
     var config=d.config||[];
     var titleEls=Array.from(document.querySelectorAll('.ctd-stat-card .ctd-stat-label'));
     config.forEach(function(c, idx){ if(titleEls[idx]) titleEls[idx].textContent=c.title; });
-
-    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:1})})
-    .then(function(r){return r.json();})
-    .then(function(rd){
-      if(rd.status!=='OK') return;
-      var rows=rd.rows||[];
-      var todayStr=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baku',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date()).split('/').join('.');
-      var valueEls=[document.getElementById('dashStatOpen'),document.getElementById('dashStatToday'),document.getElementById('dashStatTech')];
-      config.forEach(function(c, idx){
-        if(c.metric==='bus_open'){
-          var v=rows.filter(function(r){
-            var st=(r['Status']||'').trim();
-            return st==='Təhkim Edildi' || st==='Texnik Tamamladı';
-          }).length;
-          setHomeDashSlotValue(idx, v);
-        } else if(c.metric==='bus_today'){
-          var v2=rows.filter(function(r){return (r['Tarix']||'').trim()===todayStr;}).length;
-          setHomeDashSlotValue(idx, v2);
-        } else if(c.metric==='bus_active_tech'){
-          var names={};
-          rows.forEach(function(r){
-            if((r['Tarix']||'').trim()!==todayStr) return;
-            if(r['1. Texnik']) names[r['1. Texnik'].trim()]=true;
-            if(r['2. Texnik']) names[r['2. Texnik'].trim()]=true;
-          });
-          setHomeDashSlotValue(idx, Object.keys(names).length);
-        } else if(c.metric==='bus_latest'){
-          if(rows.length>0){
-            var latest=rows[0];
-            var timeEl=document.getElementById('dashStatLatestTime');
-            var infoEl=document.getElementById('dashStatLatestInfo');
-            if(timeEl) timeEl.textContent=latest['Tarix']||'—';
-            if(infoEl) infoEl.textContent=(latest['Daşıyıcı']||'')+' · '+(latest['D.Q.N.']||'');
-          }
+    if(!rd || rd.status!=='OK') return;
+    var rows=rd.rows||[];
+    var todayStr=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baku',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date()).split('/').join('.');
+    config.forEach(function(c, idx){
+      if(c.metric==='bus_open'){
+        var v=rows.filter(function(r){
+          var st=(r['Status']||'').trim();
+          return st==='Təhkim Edildi' || st==='Texnik Tamamladı';
+        }).length;
+        setHomeDashSlotValue(idx, v);
+      } else if(c.metric==='bus_today'){
+        var v2=rows.filter(function(r){return (r['Tarix']||'').trim()===todayStr;}).length;
+        setHomeDashSlotValue(idx, v2);
+      } else if(c.metric==='bus_active_tech'){
+        var names={};
+        rows.forEach(function(r){
+          if((r['Tarix']||'').trim()!==todayStr) return;
+          if(r['1. Texnik']) names[r['1. Texnik'].trim()]=true;
+          if(r['2. Texnik']) names[r['2. Texnik'].trim()]=true;
+        });
+        setHomeDashSlotValue(idx, Object.keys(names).length);
+      } else if(c.metric==='bus_latest'){
+        if(rows.length>0){
+          var latest=rows[0];
+          var timeEl=document.getElementById('dashStatLatestTime');
+          var infoEl=document.getElementById('dashStatLatestInfo');
+          if(timeEl) timeEl.textContent=latest['Tarix']||'—';
+          if(infoEl) infoEl.textContent=(latest['Daşıyıcı']||'')+' · '+(latest['D.Q.N.']||'');
         }
-      });
-    }).catch(function(){});
-  }).catch(function(){});
+      }
+    });
+  });
 }
 function setHomeDashSlotValue(idx, val){
   var ids=['dashStatOpen','dashStatToday','dashStatTech'];
@@ -3987,6 +3989,7 @@ function tvmSearchTech(){
 }
 
 function exportTvmDashboardExcel(){
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ exportTvmDashboardExcel(); }); return; }
   var rows=tvmDashGetFilteredRows();
   if(rows.length===0){ alert('Export üçün məlumat yoxdur'); return; }
   var cols=['Ticket ID','Tarix','Bildirilmə Saatı','TVM SN','TVM Lokasiya','Problem','Həll','Köhnə SN','Yeni SN','Başlanğıc','Bitiş','Servis Lokasiyası','Texnik','Qrup rəhbəri'];
