@@ -63,7 +63,7 @@ function renderDD(key){
     if(isMulti){
       div.innerHTML='<div class="bs-dd-check">'+(isSelected?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M4 12l6 6L20 6"/></svg>':'')+'</div><span>'+item+'</span>';
     } else {
-      div.innerHTML=(isSelected?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F6FED" stroke-width="2.5"><path d="M4 12l6 6L20 6"/></svg>':'<div style="width:14px"></div>')+'<span>'+item+'</span>';
+      div.innerHTML=(isSelected?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F6FED" stroke-width="2.5"><path d="M4 12l6 6L20 6"/></svg>':'<div style="width:14px"></div>')+'<span>'+escapeHtml(item)+'</span>';
     }
     div.addEventListener('click',function(e){e.stopPropagation();selectDDItem(key,item);});
     listEl.appendChild(div);
@@ -217,7 +217,7 @@ function preloadBusData(callback){
       var tid=d.nextTicketId||'BUS-00001'; bsNextTicketId=tid;
       var badge=document.getElementById('bsTicketBadge');
       if(badge&&!bsEditMode&&document.getElementById('busServiceView').style.display!=='none'){
-        badge.innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+tid+'</span>';
+        badge.innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+escapeHtml(tid)+'</span>';
       }
     }
   }).catch(function(){});
@@ -260,7 +260,7 @@ function loadFastTicketIds(){
       bsNextTicketId=d.bus;
       var bsView=document.getElementById('busServiceView');
       if(!bsEditMode && bsView && bsView.style.display!=='none'){
-        document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+bsNextTicketId+'</span>';
+        document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+escapeHtml(bsNextTicketId)+'</span>';
       }
     }
     if(d.tvm){
@@ -268,7 +268,7 @@ function loadFastTicketIds(){
       var tvmView=document.getElementById('tvmServiceView');
       if(!tvmEditMode && tvmView && tvmView.style.display!=='none'){
         var badge=document.getElementById('tvmTicketBadge');
-        if(badge) badge.innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+tvmNextTicketId+'</span>';
+        if(badge) badge.innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+escapeHtml(tvmNextTicketId)+'</span>';
       }
     }
   })
@@ -292,7 +292,7 @@ function openBusService(){
   var draft=loadBsDraft(); if(draft){offerBsDraftRestore(draft);}
   var btn=document.getElementById('bsSubmitBtn'); if(btn)btn.textContent='Göndər';
   if(bsNextTicketId){
-    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+bsNextTicketId+'</span>';
+    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+escapeHtml(bsNextTicketId)+'</span>';
   } else {
     document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#B0C4E0;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">yüklənir...</span>';
   }
@@ -353,7 +353,7 @@ function openBusServiceForEdit(ticketId){
     document.getElementById('busReportView').style.display='none';
     document.getElementById('busServiceView').style.display='block';
     document.getElementById('busServiceView').scrollTop=0;
-    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#D97706;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">REDAKTƏ: '+d.ticketId+'</span>';
+    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#D97706;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">REDAKTƏ: '+escapeHtml(d.ticketId)+'</span>';
     var btn=document.getElementById('bsSubmitBtn'); if(btn)btn.textContent='Yadda saxla';
     document.getElementById('bs_date').value=d.report_date_raw||'';
     document.getElementById('bs_requester').value=d.requester_name||'';
@@ -461,7 +461,7 @@ function openTechComplete(ticketId){
     document.getElementById('busReportView').style.display='none';
     document.getElementById('busServiceView').style.display='block';
     document.getElementById('busServiceView').scrollTop=0;
-    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#D97706;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">SERVİSİ TAMAMLA: '+d.ticketId+'</span>';
+    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#D97706;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">SERVİSİ TAMAMLA: '+escapeHtml(d.ticketId)+'</span>';
     var btn=document.getElementById('bsSubmitBtn'); if(btn)btn.textContent='Tamamla';
     document.getElementById('bs_date').value=d.report_date_raw||'';
     document.getElementById('bs_requester').value=d.requester_name||'';
@@ -510,7 +510,7 @@ function openLeaderComplete(ticketId){
     document.getElementById('busOngoingView').style.display='none';
     document.getElementById('busServiceView').style.display='block';
     document.getElementById('busServiceView').scrollTop=0;
-    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#188A4B;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">TƏSDİQLƏ VƏ BAĞLA: '+d.ticketId+'</span>';
+    document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#188A4B;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">TƏSDİQLƏ VƏ BAĞLA: '+escapeHtml(d.ticketId)+'</span>';
     var btn=document.getElementById('bsSubmitBtn'); if(btn)btn.textContent='Təsdiqlə və Bağla';
     document.getElementById('bs_date').value=d.report_date_raw||'';
     document.getElementById('bs_requester').value=d.requester_name||'';
@@ -608,10 +608,14 @@ function renderBusRegistryDropdown(matches){
     dd.innerHTML = '<div class="bs-registry-empty">Uyğun D.Q.N. tapılmadı — məlumatları əl ilə daxil edin</div>';
   } else {
     dd.innerHTML = matches.slice(0, 8).map(function(m){
-      var carrierAttr = m.carrier || '';
-      return '<div class="bs-registry-item" data-dqn="' + (m.dqn || '') + '" data-id="' + (m.id || '') + '" data-carrier="' + carrierAttr + '" data-model="' + (m.model || '') + '">' +
-        '<span class="reg-id">' + (m.dqn || '—') + '</span>' +
-        '<span class="reg-meta">BUS ID: ' + (m.id || '—') + ' · ' + (m.carrier || '—') + ' · ' + (m.model || '—') + '</span>' +
+      // FAZA 2 (XSS): reyestr məlumatları istifadəçi tərəfindən yazılır — hamısı escape olunur
+      var dqnE = escapeHtml(m.dqn || '');
+      var idE = escapeHtml(m.id || '');
+      var carrierE = escapeHtml(m.carrier || '');
+      var modelE = escapeHtml(m.model || '');
+      return '<div class="bs-registry-item" data-dqn="' + dqnE + '" data-id="' + idE + '" data-carrier="' + carrierE + '" data-model="' + modelE + '">' +
+        '<span class="reg-id">' + (dqnE || '—') + '</span>' +
+        '<span class="reg-meta">BUS ID: ' + (idE || '—') + ' · ' + (carrierE || '—') + ' · ' + (modelE || '—') + '</span>' +
         '</div>';
     }).join('');
     
@@ -624,7 +628,7 @@ function renderBusRegistryDropdown(matches){
           carrier: el.getAttribute('data-carrier'),
           model: el.getAttribute('data-model')
         };
-        console.log('🔍 Seçilən match:', match);
+      
         if(match.dqn) selectBusRegistryMatch(match);
       });
     });
@@ -633,7 +637,7 @@ function renderBusRegistryDropdown(matches){
 }
 
 function selectBusRegistryMatch(match){
-  console.log('🔍 selectBusRegistryMatch çağırıldı:', match);
+
   
   var plateEl = document.getElementById('bs_plate');
   var busidEl = document.getElementById('bs_busid');
@@ -644,7 +648,7 @@ function selectBusRegistryMatch(match){
   
   if(match.carrier){
     var cleanCarrier = match.carrier.replace(/^"|"$/g, '').trim();
-    console.log('✅ Təmizlənmiş daşıyıcı:', cleanCarrier);
+
     
     bsSelected.carrier = cleanCarrier;
     
@@ -668,7 +672,7 @@ function selectBusRegistryMatch(match){
   }
   
   if(match.model){
-    console.log('✅ Model təyin edilir:', match.model);
+
     bsSelected.brand = match.model;
     
     var bLbl = document.getElementById('bs_brand_lbl');
@@ -695,7 +699,7 @@ function selectBusRegistryMatch(match){
   bsFormDirty = true;
   scheduleBsDraftSave();
   
-  console.log('✅ Tamamlandı - bsSelected:', bsSelected);
+
 }
   
 function lockRegistryFields(){
