@@ -367,7 +367,7 @@ function admConfirmDelete(){
 function admExportUsers(){
   var filtered=admGetFilteredUsers();
   if(filtered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ admExportUsers(); }); return; }
   var cols=['Full Name','Email','Role','Status'];
   var wsData=[cols];
   filtered.forEach(function(u){ wsData.push([u.fullName, u.email, u.role, u.status]); });
@@ -703,7 +703,7 @@ function admDeleteTvmRegistry(id){
 function admExportTvmRegistry(){
   var filtered=admGetFilteredTvmRegistry();
   if(filtered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ admExportTvmRegistry(); }); return; }
   var wsData=[['TVM İD','Lokasiya','Servis Lokasiyası']];
   filtered.forEach(function(r){ wsData.push([r.id, r.location, r.serviceLocation]); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
@@ -1027,7 +1027,7 @@ function admDeleteBusRegistry(id){
 function admExportBusRegistry(){
   var filtered=admGetFilteredBusRegistry();
   if(filtered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ admExportBusRegistry(); }); return; }
   var wsData=[['BUS ID','D.Q.N.','Daşıyıcı','Model']];
   filtered.forEach(function(r){ wsData.push([r.id, r.dqn, r.carrier, r.model]); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
@@ -1664,7 +1664,7 @@ function admClGoPage(p){ if(p<1) return; admClCurrentPage=p; admRenderCollective
 function admExportCollectives(){
   var filtered=admGetFilteredCollectives();
   if(filtered.length===0){ alert('Export üçün məlumat yoxdur'); return; }
-  if(typeof XLSX==='undefined'){ alert('Excel kitabxanası yüklənməyib'); return; }
+  if(typeof XLSX==='undefined'){ ensureXlsx(function(){ admExportCollectives(); }); return; }
   var wsData=[['Full Name','Vəzifə','Qrup']];
   filtered.forEach(function(emp){ wsData.push([emp.name, emp.title, emp.group]); });
   var ws=XLSX.utils.aoa_to_sheet(wsData);
