@@ -1590,8 +1590,12 @@ function dashComputeAndRender(){
 function loadDashData(){
   var ov=document.getElementById('dashLoading');
   ov.classList.add('open');
-  // Faza 1.5: raw data əvəzinə DASHBOARD_CACHE keşindən oxuyuruq
-  var reportPromise=fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardData', device:'BUS', requesterEmail: currentUser?currentUser.email:''})}).then(function(r){ return r.json(); });
+  // Faza 1.5: raw data əvəzinə DASHBOARD_CACHE keşindən oxuyuruq.
+  // Keş aksiyası backend-də hələ yoxdursa (deploy edilməyibsə) köhnə yolla yüklə — dashboard heç vaxt sınmasın
+  var reportPromise=fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardData', device:'BUS', requesterEmail: currentUser?currentUser.email:''})}).then(function(r){ return r.json(); }).then(function(d){
+    if(!d || d.status!=='OK') return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData'})}).then(function(r){ return r.json(); });
+    return d;
+  });
   var formPromise=(bsFormData&&bsFormData.carriers)?Promise.resolve(bsFormData):fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){ return r.json(); }).then(function(d){ if(d.status==='OK') bsFormData=d; return bsFormData; });
   Promise.all([reportPromise, formPromise]).then(function(results){
     var d=results[0];
@@ -3876,12 +3880,18 @@ function updateTvmDashTabsUI(){
 
 function loadTvmDashData(){
   document.getElementById('dashLoading').style.display='flex';
-  // Faza 1.5: raw data əvəzinə DASHBOARD_CACHE keşindən oxuyuruq
+  // Faza 1.5: raw data əvəzinə DASHBOARD_CACHE keşindən oxuyuruq.
+  // Keş aksiyası backend-də hələ yoxdursa (deploy edilməyibsə) köhnə yolla yüklə — dashboard heç vaxt sınmasın
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardData', device:'TVM', requesterEmail: currentUser?currentUser.email:''})})
   .then(function(r){ return r.json(); })
   .then(function(d){
     document.getElementById('dashLoading').style.display='none';
-    if(d.status!=='OK') return;
+    if(!d || d.status!=='OK'){
+      return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData'})}).then(function(r){ return r.json(); }).then(function(fb){
+        tvmDashAllRows=(fb.rows||[]).slice().sort(function(a,b){ var da=tvmRowDate(a),db=tvmRowDate(b); return (db?db.getTime():0)-(da?da.getTime():0); });
+        tvmDashComputeAndRender();
+      });
+    }
     tvmDashAllRows=(d.rows||[]).slice().sort(function(a,b){ var da=tvmRowDate(a),db=tvmRowDate(b); return (db?db.getTime():0)-(da?da.getTime():0); });
     tvmDashComputeAndRender();
   })
