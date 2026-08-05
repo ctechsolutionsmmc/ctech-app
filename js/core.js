@@ -343,6 +343,12 @@ function toggleUserMenu(){ var dd=document.getElementById('ctdUserDropdown'); if
 function signOut(){
   closeMenu();
 
+  // FAZA 2: backend tokenini dərhal ləğv et — oğurlanmış token çıxışdan sonra işləməsin
+  var outTok = getAuthToken();
+  if(outTok){
+    try{ fetch(API_URL,{ method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'logout', token:outTok}) }).catch(function(){}); }catch(loErr){}
+  }
+
   // "Çıxış..." vidjeti göstər — mövcud dashLoading overlay-i yenidən istifadə edirik,
   // mətnini müvəqqəti dəyişib sonra geri qaytarırıq ki, başqa yerlərdə ("Hazırlanır...")
   // istifadə olunan mətnə təsir etməsin.
