@@ -76,6 +76,11 @@ function renderDD(key){
   }
 }
 
+// Bütün dropdown siyahılarını yenidən render et (yeni getFormData gələndə çağırılır).
+function renderAllDDs(){
+  Object.keys(ddMeta).forEach(function(k){ renderDD(k); });
+}
+
 function getListForKey(key){
   var map={
     carrier:bsFormData.carriers||[],
@@ -197,7 +202,7 @@ function getTimeInputValue(id){
 }
 function setTimeInputValue(id,hhmm){ var el=document.getElementById(id); if(el&&hhmm)el.value=hhmm; }
 function getTimeValue(){ return getTimeInputValue('bs_time_lbl'); }
-function fillAllDDs(data){ bsFormData=data; }
+function fillAllDDs(data){ bsFormData=data; if(typeof renderAllDDs==='function') renderAllDDs(); }
 
 var bsEditMode=false, bsEditTicketId=null, bsReturnTarget='dashboard', bsCompletionMode=false, bsLeaderCloseMode=false;
 
@@ -219,6 +224,8 @@ function preloadBusData(callback){
       if(badge&&!bsEditMode&&document.getElementById('busServiceView').style.display!=='none'){
         badge.innerHTML='<span style="display:inline-flex;align-items:center;background:#2F6FED;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">'+escapeHtml(tid)+'</span>';
       }
+      // Yeni siyahılar gələndə dropdown-ları yenilə — admin paneldəki dəyişiklik dərhal görünsün.
+      if(typeof renderAllDDs==='function') renderAllDDs();
     }
   }).catch(function(){});
 }
@@ -307,6 +314,8 @@ function loadBusFormData(){
     if(d.status!=='OK')return;
     bsFormData=d;
     if(!bsNextTicketId) bsNextTicketId = d.nextTicketId||'BUS-00001';
+    // Yeni siyahılar gələndə açıq dropdown-ları da yenilə — köhnə şablonlar görünməsin.
+    if(typeof renderAllDDs==='function') renderAllDDs();
   })
   .catch(function(){
     bsFormData={
@@ -340,8 +349,11 @@ function setTimeLabel(which,hhmm){
 
 function openBusServiceForEdit(ticketId){
   var ov=document.getElementById('busOpenOverlay'); ov.style.display='flex';
-  var ensureFormData=(bsFormData&&bsFormData.carriers)?Promise.resolve(bsFormData):
-    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK'){bsFormData=d;bsNextTicketId=d.nextTicketId||bsNextTicketId;} return bsFormData; });
+  // HƏMİŞƏ təzə form məlumatı çək — admin paneldə şablon dəyişilibsə, köhnə
+  // bsFormData keşi istifadə olunmasın (köhnə siyahılar görünməsin).
+  var ensureFormData=
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK'){bsFormData=d;bsNextTicketId=d.nextTicketId||bsNextTicketId;} return bsFormData; })
+    .catch(function(){ return bsFormData; }); // şəbəkə xətası olarsa, keşlə davam et
   ensureFormData.then(function(){
     return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getServiceById',ticketId:ticketId})}).then(function(r){return r.json();});
   }).then(function(d){
@@ -447,8 +459,10 @@ function submitBusService(){
 
 function openTechComplete(ticketId){
   var ov=document.getElementById('busOpenOverlay'); ov.style.display='flex';
-  var ensureFormData=(bsFormData&&bsFormData.carriers)?Promise.resolve(bsFormData):
-    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK'){bsFormData=d;} return bsFormData; });
+  // HƏMİŞƏ təzə form məlumatı çək — admin dəyişiklikləri köhnə bsFormData-da görünməz.
+  var ensureFormData=
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK'){bsFormData=d;} return bsFormData; })
+    .catch(function(){ return bsFormData; }); // şəbəkə xətası olarsa, keşlə davam et
   ensureFormData.then(function(){
     return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getServiceById',ticketId:ticketId})}).then(function(r){return r.json();});
   }).then(function(d){
@@ -496,8 +510,10 @@ var BS_STAGE1_LOCKABLE_IDS=['bs_date','bs_time_lbl','bs_requester','bs_phone','b
 // ticket birbaşa TAMAMLANIR və bağlanır (leaderCompleteAndCloseTicket).
 function openLeaderComplete(ticketId){
   var ov=document.getElementById('busOpenOverlay'); ov.style.display='flex';
-  var ensureFormData=(bsFormData&&bsFormData.carriers)?Promise.resolve(bsFormData):
-    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK'){bsFormData=d;} return bsFormData; });
+  // HƏMİŞƏ təzə form məlumatı çək — admin dəyişiklikləri köhnə bsFormData-da görünməz.
+  var ensureFormData=
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK'){bsFormData=d;} return bsFormData; })
+    .catch(function(){ return bsFormData; }); // şəbəkə xətası olarsa, keşlə davam et
   ensureFormData.then(function(){
     return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getServiceById',ticketId:ticketId})}).then(function(r){return r.json();});
   }).then(function(d){
