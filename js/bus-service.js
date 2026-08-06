@@ -356,6 +356,19 @@ function openBusServiceForEdit(ticketId){
   }).catch(function(){ ov.style.display='none'; alert('Şəbəkə xətası: ticket yüklənə bilmədi'); });
 }
 
+// Seçilən həllərin QISA HƏLLƏRİNİ (BUS_SOLUTIONS C sütunu = Service_Category)
+// qaytarır — Q sütunu üçün. Həllin qısa həlli yoxdursa, həllin özü yazılır.
+// Təkrarlananlar bir dəfə sayılır.
+function deriveShortSolutions(){
+  var cats=(bsFormData&&bsFormData.solutionCategories)||{};
+  var seen={}, out=[];
+  (bsSelected.solution||[]).forEach(function(s){
+    var v=String(cats[s]||'').trim()||s;
+    if(v&&!seen[v]){ seen[v]=1; out.push(v); }
+  });
+  return out;
+}
+
 function submitBusService(){
   if(!document.getElementById('bs_date').value){alert('Tarix daxil edin');return;}
   if(getTimeValue()===''){alert('Saat seçin');return;}
@@ -389,7 +402,7 @@ function submitBusService(){
     brand_model:bsSelected.brand,
     problem:bsSelected.problem,
     solution:bsSelected.solution,
-    changed_device_type:bsSelected.solution||[], // Qısa Həllər (Q sütunu) — seçilən həllər yazılır
+    changed_device_type:deriveShortSolutions(), // Qısa Həllər (Q sütunu) — seçilən həllərin C-dəki qısa həlləri
     old_sn:bsSelected.oldSn.join(' | '),
     new_sn:bsSelected.newSn.join(' | '),
     service_start_time:startVal,
