@@ -9,14 +9,13 @@ var bsFormData = {};
 var bsFormDirty = false;
 var bsNextTicketId = '';
 var bsRegistryLocked = false;
-var bsSelected = { carrier:'', brand:'', problem:'', solution:[], equipment:[], location:'', tech1:'', tech2:'', leader:'', tvm_fault:[], tvm_solution:[], tvm_tech:'', tvm_leader:'', oldSn:[], newSn:[] };
+var bsSelected = { carrier:'', brand:'', problem:'', solution:[], location:'', tech1:'', tech2:'', leader:'', tvm_fault:[], tvm_solution:[], tvm_tech:'', tvm_leader:'', oldSn:[], newSn:[] };
 var activeDDKey = null;
 
 var ddMeta = {
   carrier:   { lbl:'bs_carrier_lbl',   list:'dd_carrier_list',   multi:false, onSelect:null },
   brand:     { lbl:'bs_brand_lbl',     list:'dd_brand_list',     multi:false, onSelect:null },
   system:    { lbl:'bs_system_lbl',    list:'dd_system_list',    multi:false, onSelect:null },
-  equipment: { lbl:'bs_equipment_lbl', list:'dd_equipment_list', multi:true,  onSelect:onEquipmentSelect },
   problem:   { lbl:'bs_problem_lbl',   list:'dd_problem_list',   multi:false, onSelect:onProblemSelect },
   solution:  { lbl:'bs_solution_lbl',  list:'dd_solution_list',  multi:true,  onSelect:onSolutionSelect },
   location:  { lbl:'bs_location_lbl',  list:'dd_location_list',  multi:false, onSelect:onLocationSelect },
@@ -85,7 +84,6 @@ function getListForKey(key){
   var map={
     carrier:bsFormData.carriers||[],
     brand:bsFormData.busModels||[],
-    equipment:bsFormData.busEquipment||[],
     problem:bsFormData.busProblems||[],
     solution:bsFormData.solutions||[],
     location:bsFormData.locations||[],
@@ -129,36 +127,7 @@ function updateMultiLabel(key){
 }
 
 function onProblemSelect(item){}
-function onSolutionSelect(item){ updateSolutionChips(); syncEquipmentFromSolution(); }
-function onEquipmentSelect(item){ updateEquipmentChips(); }
-
-function updateEquipmentChips(){
-  var arr=bsSelected.equipment;
-  var chips=document.getElementById('bs_equipment_chips');
-  if(!chips) return;
-  chips.innerHTML='';
-  arr.forEach(function(a){
-    var c=document.createElement('span'); c.className='bs-chip';
-    c.textContent=a.length>32?a.slice(0,32)+'…':a;
-    chips.appendChild(c);
-  });
-}
-
-// Həll seçimi dəyişəndə solutionCategories xəritəsindən kateqoriyaları avtomatik əlavə edir.
-// Mövcud əl ilə seçilmiş kateqoriyalara TOXUNMUR — yalnız yenilərini əlavə edir.
-// Silinmə: istifadəçi əl ilə aparır (checkbox-u söndürür).
-function syncEquipmentFromSolution(){
-  var cats = bsFormData && bsFormData.solutionCategories;
-  if(!cats) return;
-  bsSelected.solution.forEach(function(sol){
-    var cat = cats[sol];
-    if(cat && bsSelected.equipment.indexOf(cat) === -1){
-      bsSelected.equipment.push(cat);
-    }
-  });
-  updateMultiLabel('equipment');
-  updateEquipmentChips();
-}
+function onSolutionSelect(item){ updateSolutionChips(); }
 function onLocationSelect(item){
   var isDigar=item.toLowerCase().indexOf('digər')!==-1;
   document.getElementById('bs_location_note_wrap').style.display=isDigar?'block':'none';
@@ -236,7 +205,7 @@ function resetBusFormFields(){
   bsCompletionMode=false;
   bsLeaderCloseMode=false;
   if(typeof bsLockStage1Fields==='function') bsLockStage1Fields(false);
-  bsSelected={carrier:'',brand:'',problem:'',solution:[],equipment:[],location:'',tech1:'',tech2:'',leader:'',oldSn:[],newSn:[]};
+  bsSelected={carrier:'',brand:'',problem:'',solution:[],location:'',tech1:'',tech2:'',leader:'',oldSn:[],newSn:[]};
   Object.keys(ddMeta).forEach(function(k){
     var m=ddMeta[k]; var el=document.getElementById(m.lbl);
     if(el){
@@ -247,7 +216,6 @@ function resetBusFormFields(){
   });
   ['bs_requester','bs_phone','bs_route','bs_busid','bs_plate','bs_note','bs_location_note'].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=''; });
   document.getElementById('bs_solution_chips').innerHTML='';
-  var eqChips=document.getElementById('bs_equipment_chips'); if(eqChips) eqChips.innerHTML='';
   var oldSnInput=document.getElementById('bs_old_sn'); if(oldSnInput) oldSnInput.value='';
   var newSnInput=document.getElementById('bs_new_sn'); if(newSnInput) newSnInput.value='';
   if(typeof busSnRenderChips==='function'){ busSnRenderChips('old'); busSnRenderChips('new'); }
@@ -323,7 +291,6 @@ function loadBusFormData(){
       busModels:['BMC','BYD','Daewoo','Isuzu','Karsan','Otokar','Iveco','King-Long','Dragon','Digər'],
       busProblems:['Validator ödəniş kartını qəbul etmir','Validator açılmır','Validator elektrik almır','Digər'],
       solutions:['Validator dəyişdirildi','Problem aşkar olunmadı','Elektrik söndürülüb-yandırıldı','Digər'],
-      busEquipment:['Validator','SAM Card','Ethernet Cable','RJ45','Broket','Avtobus elektrik problemi','Demontaj','Montaj','Təmir sonrası baxış','Call center vasitəsilə uzaqdan servis','Route-Update','Distributions'],
       systems:['LIT','LIT-2'],
       locations:['Daşıyıcı qarajı','Son dayanacaq','Dayanacaq','Digər'],
       technicians:['Tural Əmmədov','Amil İbrahimov','Rövşən Nurəhmədov','Sənan Nuriyev','Surxay Qasımov','Hikmət Musazadə'],
@@ -384,8 +351,6 @@ function openBusServiceForEdit(ticketId){
     setDDValue('tech1',d.technician_1); if(d.technician_2)setDDValue('tech2',d.technician_2); setDDValue('leader',d.team_leader);
     bsSelected.solution=Array.isArray(d.solution)?d.solution.slice():[];
     updateMultiLabel('solution'); updateSolutionChips();
-    bsSelected.equipment=Array.isArray(d.changed_device_type)?d.changed_device_type.slice():(d.changed_device_type?[d.changed_device_type]:[]);
-    updateMultiLabel('equipment'); updateEquipmentChips();
     document.getElementById('bs_location_note_wrap').style.display=(d.service_location||'').toLowerCase().indexOf('digər')!==-1?'block':'none';
     bsFormDirty=false;
   }).catch(function(){ ov.style.display='none'; alert('Şəbəkə xətası: ticket yüklənə bilmədi'); });
@@ -402,7 +367,6 @@ function submitBusService(){
   if(!bsSelected.problem){alert('Müraciət/Problemi seçin');return;}
   if(bsSelected.problem.toLowerCase().indexOf('digər')!==-1&&!document.getElementById('bs_note').value.trim()){alert('Problem üçün qeyd yazın');return;}
   if(bsSelected.solution.length===0){alert('Həll / Açıqlama seçin');return;}
-  if(!bsSelected.equipment||!bsSelected.equipment.length){alert('Servis Kategoriyasını seçin');return;}
   if(typeof busSnCheckOldNewConflict==='function' && busSnCheckOldNewConflict()){ alert('Köhnə və Yeni cihaz SN eyni ola bilməz'); return; }
   if(techCheckDuplicate('tech1','tech2')){ alert('1. Texnik və 2. Texnik eyni ola bilməz'); return; }
   var startVal=getTimeInputValue('bs_start_lbl'); var endVal=getTimeInputValue('bs_end_lbl');
@@ -424,9 +388,8 @@ function submitBusService(){
     license_plate:document.getElementById('bs_plate').value,
     brand_model:bsSelected.brand,
     problem:bsSelected.problem,
-    request:bsSelected.problem,
     solution:bsSelected.solution,
-    changed_device_type:bsSelected.equipment||[],
+    changed_device_type:bsSelected.solution||[], // Qısa Həllər (Q sütunu) — seçilən həllər yazılır
     old_sn:bsSelected.oldSn.join(' | '),
     new_sn:bsSelected.newSn.join(' | '),
     service_start_time:startVal,
@@ -494,8 +457,6 @@ function openTechComplete(ticketId){
     setDDValue('tech1',d.technician_1); if(d.technician_2)setDDValue('tech2',d.technician_2); setDDValue('leader',d.team_leader);
     bsSelected.solution=Array.isArray(d.solution)?d.solution.slice():[];
     updateMultiLabel('solution'); updateSolutionChips();
-    bsSelected.equipment=Array.isArray(d.changed_device_type)?d.changed_device_type.slice():(d.changed_device_type?[d.changed_device_type]:[]);
-    updateMultiLabel('equipment'); updateEquipmentChips();
     document.getElementById('bs_location_note_wrap').style.display=(d.service_location||'').toLowerCase().indexOf('digər')!==-1?'block':'none';
     bsFormDirty=false;
     bsLockStage1Fields(true);
@@ -545,8 +506,6 @@ function openLeaderComplete(ticketId){
     setDDValue('tech1',d.technician_1); if(d.technician_2)setDDValue('tech2',d.technician_2); setDDValue('leader',d.team_leader);
     bsSelected.solution=Array.isArray(d.solution)?d.solution.slice():[];
     updateMultiLabel('solution'); updateSolutionChips();
-    bsSelected.equipment=Array.isArray(d.changed_device_type)?d.changed_device_type.slice():(d.changed_device_type?[d.changed_device_type]:[]);
-    updateMultiLabel('equipment'); updateEquipmentChips();
     document.getElementById('bs_location_note_wrap').style.display=(d.service_location||'').toLowerCase().indexOf('digər')!==-1?'block':'none';
     bsFormDirty=false;
     // DİQQƏT: Leader/Admin üçün Stage-1 sahələr KİLİDLƏNMİR — bütün formu redaktə edə bilər
@@ -971,10 +930,6 @@ function restoreBsDraft(draft){
     if(k === 'solution'){
       updateMultiLabel('solution');
       updateSolutionChips();
-    } else if(k === 'equipment'){
-      if(!Array.isArray(bsSelected.equipment)) bsSelected.equipment=[];
-      updateMultiLabel('equipment');
-      updateEquipmentChips();
     } else if(bsSelected[k]){
       setDDValue(k, bsSelected[k]);
     }
