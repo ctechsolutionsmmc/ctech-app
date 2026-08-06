@@ -3268,7 +3268,7 @@ function submitDashboardConfig(){
     if(titleEl) c.title=titleEl.value.trim()||c.title;
     if(metricEl) c.metric=metricEl.value;
   });
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveDashboardConfig', config:admHomeDashConfig, requesterEmail: currentUser?currentUser.email:''})})
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'updateDashboardConfig', config:admHomeDashConfig, requesterEmail: currentUser?currentUser.email:''})})
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.status!=='OK'){ errEl.textContent=d.message||'Xəta baş verdi'; errEl.style.display='block'; return; }
