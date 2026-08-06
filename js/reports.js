@@ -422,7 +422,7 @@ function _renderBusDetail(ticketId, row){
   DV_FIELD_MAP.forEach(function(sec){
     var rowsHtml='';
     sec.rows.forEach(function(pair){
-      var val=row[pair[1]];
+      var val=(pair[1]==='Qısa Həllər')?dashQisa(row):row[pair[1]];
       if(!val) return;
       rowsHtml+='<div class="dv-row"><span class="dv-label">'+escapeHtml(pair[0])+'</span><span class="dv-value">'+escapeHtml(val)+'</span></div>';
     });
@@ -689,7 +689,7 @@ var DASH_CATS=[
   {key:'Qrup Rəhbəri', type:'multi', getOptions:function(){ return bsFormData.leaders||[]; }},
   {key:'Texnik', type:'multi', getOptions:function(){ return bsFormData.technicians||[]; }},
   {key:'Servis verilən Ünvan', type:'multi', getOptions:function(){ return bsFormData.locations||[]; }},
-  {key:'Qısa Həllər', type:'multi', getOptions:function(){ return bsFormData.solutions||[]; }},
+  {key:'Qısa Həllər', type:'multi', getOptions:function(){ return bsFormData.busEquipment||[]; }},
   {key:'Problem Owner', type:'multi', getOptions:function(){ return ['AYNA','BakıKart','AYNA və BakıKart']; }}
 ];
 var dashActiveChips={}, dashSubfilterState={}, dashTextFilters={}, dashCustomRange=null, dashPeriod='24h', dashAllRows=[];
@@ -732,7 +732,7 @@ function dashGetFilteredRows(){
     if(dashHasActiveOptions('Qrup Rəhbəri')&&!dashMatchMulti(row['Qrup rəhbəri'],'Qrup Rəhbəri')) return false;
     if(dashHasActiveOptions('Texnik')&&!(dashMatchMulti(row['1. Texnik'],'Texnik')||dashMatchMulti(row['2. Texnik'],'Texnik'))) return false;
     if(dashHasActiveOptions('Servis verilən Ünvan')&&!dashMatchLocation(row['Servis yeri'],'Servis verilən Ünvan')) return false;
-    if(dashHasActiveOptions('Qısa Həllər')&&!dashMatchMulti(row['Qısa Həllər'],'Qısa Həllər')) return false;
+    if(dashHasActiveOptions('Qısa Həllər')&&!dashMatchMulti(dashQisa(row),'Qısa Həllər')) return false;
     if(dashHasActiveOptions('Problem Owner')&&!dashMatchMulti(row['Problem Owner'],'Problem Owner')) return false;
     return true;
   });
@@ -794,12 +794,18 @@ function dashCountTech(rows){
   });
   return Object.keys(map).map(function(k){ return {name:k, count:map[k]}; }).sort(function(a,b){ return b.count-a.count; });
 }
+// Q sütununun açarı: köhnə backend 'Servis Kat.' qaytarır, yeni 'Qısa Həllər'.
+// Hər ikisi ilə işlə — dashboard heç vaxt boş qalmasın.
+function dashQisa(row){
+  return (row && (row['Qısa Həllər'] || row['Servis Kat.'])) || '';
+}
+
 // Changed_Device_Type sütununu | ilə split edib hər kateqoriyanı ayrıca sayır.
 // Köhnə ticketlərdə bu sütun boş ola bilər — o zaman Qısa Həllər-ə baxır.
 function dashCountCategories(rows){
   var map={};
   rows.forEach(function(r){
-    var raw=(r['Qısa Həllər']||'').trim();
+    var raw=dashQisa(r).trim();
     if(!raw) return;
     // | ilə ayrılmış çox dəyər ola bilər (Faza 3+)
     var parts=raw.indexOf('|')!==-1 ? raw.split('|') : [raw];
