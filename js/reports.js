@@ -380,7 +380,7 @@ var DV_FIELD_MAP=[
   {section:'Müraciət məlumatları',rows:[['Tarix','Tarix'],['Saat','Saat'],['Müraciət edən','Müraciət edən'],['Telefon','Telefon']]},
   {section:'Avtobus məlumatları',rows:[['Marşrut №','Marşrut №'],['BUS ID','BUS ID'],['Daşıyıcı','Daşıyıcı'],['D.Q.N.','D.Q.N.'],['Marka/Model','Marka/Model'],['Sistem','Sistem']]},
   {section:'Servis məlumatları',rows:[['Problem','Problem'],['Həll','Həll'],['Qeyd','Qeyd']]},
-  {section:'Servis Kateqoriyası',rows:[['Servis Kat.','Servis Kat.'],['Köhnə SN','Köhnə SN'],['Yeni SN','Yeni SN']]},
+  {section:'Qısa Həllər',rows:[['Qısa Həllər','Qısa Həllər'],['Köhnə SN','Köhnə SN'],['Yeni SN','Yeni SN']]},
   {section:'Servis vaxtı və yeri',rows:[['Başlanğıc','Başlanğıc'],['Bitiş','Bitiş'],['Servis yeri','Servis yeri']]},
   {section:'Texnik heyət',rows:[['1. Texnik','1. Texnik'],['2. Texnik','2. Texnik'],['Qrup rəhbəri','Qrup rəhbəri']]}
 ];
@@ -689,7 +689,7 @@ var DASH_CATS=[
   {key:'Qrup Rəhbəri', type:'multi', getOptions:function(){ return bsFormData.leaders||[]; }},
   {key:'Texnik', type:'multi', getOptions:function(){ return bsFormData.technicians||[]; }},
   {key:'Servis verilən Ünvan', type:'multi', getOptions:function(){ return bsFormData.locations||[]; }},
-  {key:'Servis Kateqoriyaları', type:'multi', getOptions:function(){ return bsFormData.busEquipment||[]; }},
+  {key:'Qısa Həllər', type:'multi', getOptions:function(){ return bsFormData.solutions||[]; }},
   {key:'Problem Owner', type:'multi', getOptions:function(){ return ['AYNA','BakıKart','AYNA və BakıKart']; }}
 ];
 var dashActiveChips={}, dashSubfilterState={}, dashTextFilters={}, dashCustomRange=null, dashPeriod='24h', dashAllRows=[];
@@ -732,7 +732,7 @@ function dashGetFilteredRows(){
     if(dashHasActiveOptions('Qrup Rəhbəri')&&!dashMatchMulti(row['Qrup rəhbəri'],'Qrup Rəhbəri')) return false;
     if(dashHasActiveOptions('Texnik')&&!(dashMatchMulti(row['1. Texnik'],'Texnik')||dashMatchMulti(row['2. Texnik'],'Texnik'))) return false;
     if(dashHasActiveOptions('Servis verilən Ünvan')&&!dashMatchLocation(row['Servis yeri'],'Servis verilən Ünvan')) return false;
-    if(dashHasActiveOptions('Servis Kateqoriyaları')&&!dashMatchMulti(row['Servis Kat.'],'Servis Kateqoriyaları')) return false;
+    if(dashHasActiveOptions('Qısa Həllər')&&!dashMatchMulti(row['Qısa Həllər'],'Qısa Həllər')) return false;
     if(dashHasActiveOptions('Problem Owner')&&!dashMatchMulti(row['Problem Owner'],'Problem Owner')) return false;
     return true;
   });
@@ -795,11 +795,11 @@ function dashCountTech(rows){
   return Object.keys(map).map(function(k){ return {name:k, count:map[k]}; }).sort(function(a,b){ return b.count-a.count; });
 }
 // Changed_Device_Type sütununu | ilə split edib hər kateqoriyanı ayrıca sayır.
-// Köhnə ticketlərdə bu sütun boş ola bilər — o zaman Servis Kat.-a baxır.
+// Köhnə ticketlərdə bu sütun boş ola bilər — o zaman Qısa Həllər-ə baxır.
 function dashCountCategories(rows){
   var map={};
   rows.forEach(function(r){
-    var raw=(r['Servis Kat.']||'').trim();
+    var raw=(r['Qısa Həllər']||'').trim();
     if(!raw) return;
     // | ilə ayrılmış çox dəyər ola bilər (Faza 3+)
     var parts=raw.indexOf('|')!==-1 ? raw.split('|') : [raw];
@@ -1295,7 +1295,7 @@ function dashRenderTiles(containerId, items, max){
   el.innerHTML=html;
 }
 
-// ── Servis kateqoriyaları: Changed_Device_Type | split + keçən dövrə müqayisə ──
+// ── Qısa həllər (Q sütunu): | split + keçən dövrə müqayisə ──
 function dashRenderCategories(containerId, items, prevItems){
   var el=document.getElementById(containerId);
   if(!el) return;
@@ -1507,7 +1507,7 @@ function dashRenderMobile(agg){
   var html='';
   html+=dashMobileSection('Ən çox rast gəlinən problem', agg.problems, 4);
   html+=dashMobileSection('Ən çox rast gəlinən həll', agg.solutions, 4);
-  html+=dashMobileSection('Servis kateqoriyaları', agg.categories, 8);
+  html+=dashMobileSection('Qısa həllər', agg.categories, 8);
   html+=dashMobileSection('Texnik fəaliyyəti', agg.tech, 8);
   html+=dashMobileSection('Qrup rəhbəri fəaliyyəti', agg.leaders, 8);
   html+=dashMobileSection('Daşıyıcı firma üzrə statistika', agg.carriers, 8);
@@ -1829,7 +1829,7 @@ function renderDashModalResults(){
   if(dashActiveChips['Qrup Rəhbəri']) html+=dashPivotBlock('Qrup Rəhbəri üzrə bölgü', dashCount(filtered, 'Qrup rəhbəri', false), 'Servis sayı', 'Qrup Rəhbəri');
   if(dashActiveChips['Texnik']) html+=dashPivotBlock('Texnik üzrə bölgü', dashCountTech(filtered), 'Servis sayı', 'Texnik');
   if(dashActiveChips['Servis verilən Ünvan']) html+=dashPivotBlock('Servis verilən ünvan üzrə bölgü', dashCountLocation(filtered), 'Servis sayı', 'Ünvan');
-  if(dashActiveChips['Servis Kateqoriyaları']) html+=dashPivotBlock('Servis kateqoriyası üzrə bölgü', dashCount(filtered, 'Servis Kat.', false), 'Servis sayı', 'Kateqoriya');
+  if(dashActiveChips['Qısa Həllər']) html+=dashPivotBlock('Qısa həllər üzrə bölgü', dashCountCategories(filtered), 'Servis sayı', 'Qısa Həll');
   if(!activeAny) html+=dashPivotBlock('Ən çox rast gəlinən problem (ümumi baxış)', dashCount(filtered, 'Problem', false).slice(0,4), 'Servis sayı', 'Problem');
   html+='<div style="font-size:12px;color:#8CA0BC;line-height:1.5;">Tam hesabat əsas Dashboard səhifəsində də yeniləndi.</div>';
   document.getElementById('dashModalResultsBody').innerHTML=html;
@@ -1841,7 +1841,7 @@ function exportDashboardExcel(){
   function addSheet(name, items, headers){ var aoa=[headers]; items.forEach(function(it){ aoa.push([it.name, it.count]); }); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name); }
   addSheet('Problem', dashCount(filtered, 'Problem', false), ['Problem','Say']);
   addSheet('Hell', dashCount(filtered, 'Həll', true), ['Hell','Say']);
-  addSheet('Kateqoriya', dashCountCategories(filtered), ['Kateqoriya','Say']);
+  addSheet('Qısa Həllər', dashCountCategories(filtered), ['Qısa Həllər','Say']);
   addSheet('Texnik', dashCountTech(filtered), ['Texnik','Say']);
   addSheet('Rehber', dashCount(filtered, 'Qrup rəhbəri', false), ['Qrup Rehberi','Say']);
   addSheet('Dasiyici', dashCount(filtered, 'Daşıyıcı', false), ['Dasiyici','Say']);
@@ -2073,7 +2073,6 @@ function ensureBulkFormData(callback, force){
 function bkFillSelects(){
   var d = bsFormData || {};
   bkFillSel('bk_carrier', d.carriers, 'Seçin');
-  bkFillSel('bk_category', d.busEquipment, 'Seçin');
   bkFillSel('bk_location', d.locations, 'Seçin (könüllü)');
   bkFillSel('bk_leader', d.leaders, 'Seçin');
   
@@ -2181,7 +2180,7 @@ function bkCollectData(){
     report_date: bkSelectedDate ? bkDateIso(bkSelectedDate) : '',
     service_start_time: bkGetTime('bk_start_time'),
     service_end_time: bkGetTime('bk_end_time'),
-    changed_device_type: document.getElementById('bk_category').value,
+    changed_device_type: document.getElementById('bk_solution_tmpl').value.trim(), // Qısa Həllər (Q sütunu)
     service_location: document.getElementById('bk_location').value,
     service_location_note: document.getElementById('bk_location_note') ? document.getElementById('bk_location_note').value : '',
     request_template: document.getElementById('bk_request_tmpl').value.trim(),
@@ -2207,7 +2206,6 @@ function bkValidate(data){
   if(!data.report_date) return 'Servis tarixi seçilməyib';
   if(!data.service_start_time) return 'Servis başlanğıc saatı düzgün deyil';
   if(!data.service_end_time) return 'Servis bitiş saatı düzgün deyil';
-  if(!data.changed_device_type) return 'Servis kateqoriyası seçilməyib';
   if(!data.request_template) return 'Tələb (şablon) mətni boşdur';
   if(!data.solution_template) return 'Həll (şablon) mətni boşdur';
   if(!data.team_leader) return 'Qrup rəhbəri seçilməyib';
@@ -2332,7 +2330,7 @@ function resetBulkForm(){
   bkFormDirty = false;
   bkClosePreview();
   bkPreviewData = null;
-  ['bk_carrier','bk_category','bk_location','bk_tech1','bk_tech2','bk_leader'].forEach(function(id){
+  ['bk_carrier','bk_location','bk_tech1','bk_tech2','bk_leader'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.value = '';
   });
