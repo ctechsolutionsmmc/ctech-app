@@ -196,6 +196,7 @@
 .adm-pill-purple{ background:#EFE7FB; color:#6E3FD1; }
 .adm-pill-green { background:#E5F6ED; color:#188A4B; }
 .adm-pill-amber { background:#FFF5E6; color:#B8730A; }
+.adm-pill-teal  { background:#E3F5F2; color:#0E8C7A; }
 .adm-status{ display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; }
 .adm-status::before{ content:""; width:7px; height:7px; border-radius:50%; }
 .adm-status-active{ color:#188A4B; }
