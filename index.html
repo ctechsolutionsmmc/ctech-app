@@ -2160,18 +2160,7 @@
 
     <!-- Cihaz dəyişimi -->
     <div class="bs-section bs-section-servis">
-      <div class="bs-section-title">Servis Kategoriyası</div>
-      <div class="bs-field">
-        <label class="bs-label">Servis Kategoriyası *</label>
-        <div class="bs-inline-dd" id="dd_equipment">
-          <button type="button" class="bs-picker-btn" id="bs_equipment_btn" onclick="toggleDD('equipment')">
-            <span id="bs_equipment_lbl" style="color:#9AACC4;">Seçin (çoxlu seçim)</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dd_equipment_arrow"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="bs-dd-list" id="dd_equipment_list"></div>
-        </div>
-        <div class="bs-chips" id="bs_equipment_chips"></div>
-      </div>
+      <div class="bs-section-title">Cihaz dəyişimi</div>
       <div class="bs-row">
         <div class="bs-field" style="position:relative;">
           <label class="bs-label">Köhnə cihaz SN <span class="bs-label-hint">(Validator və ya SAM Card, birdən çox əlavə edilə bilər)</span></label>
@@ -2563,8 +2552,6 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
               <input type="text" inputmode="numeric" maxlength="5" id="bk_end_time" placeholder="--:--" oninput="bkFormatTime(this)">
             </div>
-            <label class="bk-label" style="margin-top:10px;">Servis kateqoriyası *</label>
-            <select class="bk-select" id="bk_category"><option value="">Seçin</option></select>
             <label class="bk-label" style="margin-top:10px;">Servis ünvanı</label>
             <select class="bk-select" id="bk_location"><option value="">Seçin (könüllü)</option></select>
             <div id="bk_location_note_wrap" style="display:none;margin-top:8px;">
