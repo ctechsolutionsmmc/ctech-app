@@ -551,6 +551,11 @@ function confirmExit(){
     closeBusBulk();
     return;
   }
+  if(bsConfirmMode==='tvmRequest'){
+    trFormDirty=false;
+    closeTvmRequest();
+    return;
+  }
   if(!bsEditMode)clearBsDraft();
   var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
   var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');

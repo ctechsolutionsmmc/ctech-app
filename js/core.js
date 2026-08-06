@@ -245,7 +245,7 @@ function showDashboard(){
   if(!clockStarted){ clockStarted=true; updateClock(); setInterval(updateClock,1000); }
 }
 
-function getAccessLevel(role){ var r=(role||'').toLowerCase(); if(r.indexOf('admin')!==-1)return'admin'; if(r.indexOf('guest')!==-1)return'guest'; if(r.indexOf('team')!==-1||r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1)return'leader'; return'technician'; }
+function getAccessLevel(role){ var r=(role||'').toLowerCase(); if(r.indexOf('admin')!==-1)return'admin'; if(r.indexOf('call center')!==-1||r.indexOf('callcenter')!==-1)return'callcenter'; if(r.indexOf('guest')!==-1)return'guest'; if(r.indexOf('team')!==-1||r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1)return'leader'; return'technician'; }
 function isGuestBakikart(role){ return (role||'').toLowerCase().indexOf('bakikart')!==-1; }
 
 function applyAccessLevel(){
@@ -285,6 +285,29 @@ function applyAccessLevel(){
     return;
   }
 
+  // ── CALL CENTER — Bus əməliyyatları + TVM service/request + real-time hesabatlar ──
+  // Dashboard (BUS/TVM) və Admin panel GİZLİ;
+  // Bus: Yeni müraciət / Yeni servis / Davam edən / Toplu idxal GÖRÜNÜR;
+  // TVM: Yeni müraciət / Yeni servis GÖRÜNÜR, TVM dashboard GİZLİ.
+  if(level==='callcenter'){
+    var ccHero=document.getElementById('ctdHero'); if(ccHero) ccHero.classList.remove('guest-hero');
+    document.getElementById('dashboardsSection').style.display='none';
+    document.getElementById('reportsSection').style.display='block';
+    document.getElementById('adminMenuItem').style.display='none';
+    var ccAdminBtn=document.getElementById('ctdAdminBtn'); if(ccAdminBtn) ccAdminBtn.style.display='none';
+    var ccBrBtn=document.getElementById('ctdBrBtn'); if(ccBrBtn) ccBrBtn.style.display='flex';
+    var ccBulkBtn=document.getElementById('ctdBulkBtn'); if(ccBulkBtn) ccBulkBtn.style.display='flex';
+    var ccBrQuick=document.getElementById('busRequestQuickBtn');
+    if(ccBrQuick) ccBrQuick.style.display=(window.innerWidth>=901)?'inline-flex':'none';
+    var ccTvmMod=document.getElementById('ctdTvmServiceModule'); if(ccTvmMod) ccTvmMod.style.display='';
+    var ccTvmDash=document.getElementById('ctdTvmDashTile'); if(ccTvmDash) ccTvmDash.style.display='none';
+    var ccTvmRpt=document.getElementById('ctdTvmRptTile'); if(ccTvmRpt) ccTvmRpt.style.display='';
+    var ccBusDashW=document.getElementById('ctdBusDashWidget'); if(ccBusDashW) ccBusDashW.style.display='none';
+    var ccBusRptW=document.getElementById('ctdBusRptWidget'); if(ccBusRptW) ccBusRptW.style.display='';
+    var ccGuestCards=document.getElementById('guestDashboardCards'); if(ccGuestCards) ccGuestCards.style.display='none';
+    return;
+  }
+
   document.getElementById('dashboardsSection').style.display=(level==='technician'||window.innerWidth<901)?'none':'block';
   document.getElementById('reportsSection').style.display='block';
   var ctdHeroN=document.getElementById('ctdHero'); if(ctdHeroN) ctdHeroN.classList.remove('guest-hero');
@@ -299,6 +322,12 @@ function applyAccessLevel(){
   var collBtnN=document.getElementById('ctdCollectivesBtn'); if(collBtnN) collBtnN.style.display='';
   var subWN=document.getElementById('ctdSubwelcome'); if(subWN) subWN.textContent='Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.';
   var guestCardsN=document.getElementById('guestDashboardCards'); if(guestCardsN) guestCardsN.style.display='none';
+  // Call Center sessiyasından qalan gizlətmələri sıfırla (rol dəyişəndə)
+  var ccTvmModN=document.getElementById('ctdTvmServiceModule'); if(ccTvmModN) ccTvmModN.style.display='';
+  var ccTvmDashN=document.getElementById('ctdTvmDashTile'); if(ccTvmDashN) ccTvmDashN.style.display='';
+  var ccTvmRptN=document.getElementById('ctdTvmRptTile'); if(ccTvmRptN) ccTvmRptN.style.display='';
+  var ccBusDashWN=document.getElementById('ctdBusDashWidget'); if(ccBusDashWN) ccBusDashWN.style.display='';
+  var ccBusRptWN=document.getElementById('ctdBusRptWidget'); if(ccBusRptWN) ccBusRptWN.style.display='';
 
   document.getElementById('adminMenuItem').style.display=(isLeaderOrAdmin && window.innerWidth>=901)?'flex':'none';
   var brBtn=document.getElementById('busRequestQuickBtn');

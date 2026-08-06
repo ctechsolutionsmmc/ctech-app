@@ -12,7 +12,7 @@ var _rawFns = {}; // hər wrap olunan funksiyanın ORİJİNAL (bir dəfə çağ�
 var ALL_VIEWS = [
   'loginView','dashboardView','busServiceView','tvmServiceView',
   'busReportView','tvmReportView','busDashboardView','tvmDashboardView','busOngoingView',
-  'busRequestView','busBulkView','adminPanelView','notifView',
+  'busRequestView','tvmRequestView','busBulkView','adminPanelView','notifView',
   'collectivesView','busDetailView','tvmDetailView'
 ];
 
@@ -22,14 +22,15 @@ function routerGetMap(){
     'dashboard':     { open: _openDashboardRaw,                                       needsAuth: true },
     'bus-service':   { open: function(){ _callRaw('startBusService'); },              needsAuth: true },
     'tvm-service':   { open: function(){ _callRaw('openTvmService'); },               needsAuth: true },
+    'tvm-request':   { open: function(){ _callRaw('openTvmRequest'); },               needsAuth: true, desktopOnly: true },
     'bus-report':    { open: function(){ _callRaw('openBusReport'); },                needsAuth: true },
     'tvm-report':    { open: function(){ _callRaw('openTvmReport'); },                needsAuth: true },
-    'bus-dashboard': { open: function(){ _callRaw('openBusDashboard'); },             needsAuth: true, desktopOnly: true },
-    'tvm-dashboard': { open: function(){ _callRaw('openTvmDashboard'); },             needsAuth: true, desktopOnly: true },
+    'bus-dashboard': { open: function(){ _callRaw('openBusDashboard'); },             needsAuth: true, desktopOnly: true, denyCallCenter: true },
+    'tvm-dashboard': { open: function(){ _callRaw('openTvmDashboard'); },             needsAuth: true, desktopOnly: true, denyCallCenter: true },
     'bus-ongoing':   { open: function(){ _callRaw('openBusOngoing'); },               needsAuth: true },
     'bus-request':   { open: function(){ _callRaw('openBusRequest'); },               needsAuth: true, desktopOnly: true },
     'bus-bulk':      { open: function(){ _callRaw('openBusBulk'); },                  needsAuth: true, desktopOnly: true },
-    'admin':         { open: function(){ _callRaw('openAdminPanel'); },               needsAuth: true, desktopOnly: true },
+    'admin':         { open: function(){ _callRaw('openAdminPanel'); },               needsAuth: true, desktopOnly: true, denyCallCenter: true },
     'notifications': { open: function(){ _callRaw('openNotifications'); },            needsAuth: true, mobileOnly: true },
     'collectives':   { open: function(){ _callRaw('openCollectives'); },              needsAuth: true, desktopOnly: true }
   };
@@ -100,6 +101,13 @@ function routerNavigate(route, pushToHistory){
       return;
     }
     if(r.mobileOnly && window.innerWidth >= 901){
+      _isNavigating = false;
+      routerNavigate('dashboard', pushToHistory);
+      return;
+    }
+    // Call Center rolu üçün qadağan olunmuş bölmələr (dashboards, admin panel) —
+    // birbaşa URL/hash ilə açma cəhdlərində də bloklanır.
+    if(r.denyCallCenter && currentUser && getAccessLevel(currentUser.role) === 'callcenter'){
       _isNavigating = false;
       routerNavigate('dashboard', pushToHistory);
       return;
@@ -182,6 +190,7 @@ function _findActiveAttemptHomeFn(){
     { viewId:'busServiceView', fn:'attemptBusHome' },
     { viewId:'tvmServiceView', fn:'attemptTvmHome' },
     { viewId:'busRequestView', fn:'attemptBusRequestHome' },
+    { viewId:'tvmRequestView', fn:'attemptTvmRequestHome' },
     { viewId:'busBulkView',    fn:'attemptBusBulkHome' }
   ];
   for(var i=0;i<mapping.length;i++){
@@ -234,6 +243,7 @@ function initRouter(){
     openTvmDashboard:       'tvm-dashboard',
     openBusOngoing:         'bus-ongoing',
     openBusRequest:         'bus-request',
+    openTvmRequest:         'tvm-request',
     openBusBulk:            'bus-bulk',
     openAdminPanel:         'admin',
     openNotifications:      'notifications',
@@ -301,7 +311,7 @@ function initRouter(){
   } catch(e){ console.error('[ROUTER] goHome wrap xətası:', e); }
 
   // ── "Bağla / X" funksiyaları — URL-i və tarixçəni sinxronlaşdır ──
-  var simpleCloseFns = ['closeCollectives','closeBusRequest','closeNotifications','closeAdminPanel','closeTvmDashboard'];
+  var simpleCloseFns = ['closeCollectives','closeBusRequest','closeTvmRequest','closeNotifications','closeAdminPanel','closeTvmDashboard'];
   simpleCloseFns.forEach(function(fnName){
     try{
       if(typeof window[fnName] === 'function'){
@@ -349,7 +359,7 @@ function initRouter(){
         _sdOrig.apply(this, arguments);
         if(ROUTER_READY){
           var hash = _getHashFromUrl();
-          var validRoutes = ['bus-service','tvm-service','bus-report','tvm-report',
+          var validRoutes = ['bus-service','tvm-service','tvm-request','bus-report','tvm-report',
                              'bus-dashboard','bus-ongoing','bus-request','bus-bulk',
                              'admin','notifications','collectives'];
           if(hash && hash !== 'dashboard' && hash !== 'login' && validRoutes.indexOf(hash.split('/')[0]) !== -1){
@@ -394,7 +404,7 @@ var ONCLICK_HASH_MAP = {
   'openTvmService':'tvm-service','openBusReport':'bus-report',
   'openTvmReport':'tvm-report','openBusDashboard':'bus-dashboard',
   'openBusOngoing':'bus-ongoing','openBusRequest':'bus-request',
-  'openBusBulk':'bus-bulk','openAdminPanel':'admin',
+  'openTvmRequest':'tvm-request','openBusBulk':'bus-bulk','openAdminPanel':'admin',
   'openNotifications':'notifications','openCollectives':'collectives'
 };
 

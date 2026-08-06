@@ -166,7 +166,8 @@ function renderOngoingTable(){
     return;
   }
   var visible=ongFiltered.slice(0,ongShownCount);
-  var canApprove = getAccessLevel(currentUser.role)!=='technician';
+  var _apprLevel = getAccessLevel(currentUser.role);
+  var canApprove = (_apprLevel!=='technician' && _apprLevel!=='callcenter');
   var html='';
   visible.forEach(function(row){
     var ticketId=escapeHtml(row['Ticket ID']||'');
@@ -1613,6 +1614,10 @@ function loadDashData(){
 function updateDashTabsUI(){ document.querySelectorAll('#dashTabs .dash-tab').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-period')===dashPeriod); }); }
 function openBusDashboard(){
   if(window.innerWidth < 901){
+    if(typeof routerNavigate === 'function') routerNavigate('dashboard', true);
+    return;
+  }
+  if(currentUser && getAccessLevel(currentUser.role) === 'callcenter'){
     if(typeof routerNavigate === 'function') routerNavigate('dashboard', true);
     return;
   }
@@ -3910,6 +3915,10 @@ function loadTvmDashData(){
 
 function openTvmDashboard(){
   if(window.innerWidth < 901){
+    if(typeof routerNavigate === 'function') routerNavigate('dashboard', true);
+    return;
+  }
+  if(currentUser && getAccessLevel(currentUser.role) === 'callcenter'){
     if(typeof routerNavigate === 'function') routerNavigate('dashboard', true);
     return;
   }

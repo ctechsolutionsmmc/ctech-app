@@ -133,6 +133,7 @@ function loadAdminUsers(){
 function admRoleClass(role){
   var r=(role||'').toLowerCase();
   if(r.indexOf('admin')!==-1) return 'adm-pill-blue';
+  if(r.indexOf('call center')!==-1||r.indexOf('callcenter')!==-1) return 'adm-pill-teal';
   if(r.indexOf('guest')!==-1) return 'adm-pill-amber';
   if(r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1) return 'adm-pill-purple';
   if(r.indexOf('technician')!==-1||r.indexOf('texnik')!==-1) return 'adm-pill-green';
@@ -141,6 +142,7 @@ function admRoleClass(role){
 function admRoleCategory(role){
   var r=(role||'').toLowerCase();
   if(r.indexOf('admin')!==-1) return 'admin';
+  if(r.indexOf('call center')!==-1||r.indexOf('callcenter')!==-1) return 'call center';
   if(r.indexOf('guest')!==-1) return 'guest';
   if(r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1) return 'group leader';
   if(r.indexOf('technician')!==-1||r.indexOf('texnik')!==-1) return 'technician';
@@ -251,9 +253,10 @@ function openUserModal(userId){
   ov.style.display='flex'; ov.classList.add('open');
 }
 function admRoleExactMatch(role){
-  var opts=['Admin','Group Leader','Technician','User'];
+  var opts=['Admin','Group Leader','Technician','Call Center','User'];
   var cat=admRoleCategory(role);
   if(cat==='admin') return 'Admin';
+  if(cat==='call center') return 'Call Center';
   if(cat==='group leader') return 'Group Leader';
   if(cat==='technician') return 'Technician';
   return 'User';
