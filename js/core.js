@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════
 
 // ── Qlobal dəyişənlər ──
-var API_URL = "https://script.google.com/macros/s/AKfycbytFqFdrsHqKrD2YnurKsXATyjAMLbFAtV3gEcLxmPF_DjfGk2A9yyBrhs7XgoM-uYcbw/exec";
+var API_URL = "https://script.google.com/macros/s/AKfycby7rOjeLccsAlKPRlmeuysbNkHGijAqfXqZGZ2W9X1IbLgSa7d0RKez6l3pkPwlrVCdsw/exec";
 var currentUser = null;
 var SESSION_KEY = "ctech_session";
 var clockStarted = false;
