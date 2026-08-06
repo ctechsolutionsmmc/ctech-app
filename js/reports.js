@@ -2180,7 +2180,11 @@ function bkCollectData(){
     report_date: bkSelectedDate ? bkDateIso(bkSelectedDate) : '',
     service_start_time: bkGetTime('bk_start_time'),
     service_end_time: bkGetTime('bk_end_time'),
-    changed_device_type: document.getElementById('bk_solution_tmpl').value.trim(), // Qısa Həllər (Q sütunu)
+    changed_device_type: (function(){ // Qısa Həllər (Q sütunu) — seçilən həllin C-dəki qısa həlli
+      var solTxt=document.getElementById('bk_solution_tmpl').value.trim();
+      var cats=(typeof bsFormData!=='undefined'&&bsFormData.solutionCategories)||{};
+      return String(cats[solTxt]||'').trim()||solTxt;
+    })(),
     service_location: document.getElementById('bk_location').value,
     service_location_note: document.getElementById('bk_location_note') ? document.getElementById('bk_location_note').value : '',
     request_template: document.getElementById('bk_request_tmpl').value.trim(),
