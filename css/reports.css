@@ -1643,3 +1643,405 @@ body.dark-mode .dash-loc-count{ color:#E8EEF5; }
   border-radius:20px; white-space:nowrap;
 }
 
+/* ════════════════════════════════════════════════════════════
+   FAZA 4 — DASHBOARD PREMIUM POLISH (BUS + TVM)
+   Vizual cilalama: yumşaq fon, laylı kölgələr, hover qaldırma,
+   mikro-interaksiyalar, boş/loading state-ləri, mobil təkmilləşmə.
+   Heç bir JS/HTML strukturu dəyişmir — yalnız vizual qat.
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Ümumi fon: yumşaq göy-boz gradyan ── */
+#busDashboardView, #tvmDashboardView{
+  background:linear-gradient(180deg,#F5F9FE 0%, #EEF3FB 45%, #E9F0F9 100%);
+}
+body.dark-mode #busDashboardView,
+body.dark-mode #tvmDashboardView{
+  background:linear-gradient(180deg,#0C1420 0%, #0A111C 100%);
+}
+
+/* ── Header: şüşə effekti + alt kölgə ── */
+.dash-header, .tvmd-header{
+  box-shadow:0 1px 0 rgba(30,68,130,.04), 0 10px 26px rgba(30,68,130,.07);
+}
+body.dark-mode .dash-header,
+body.dark-mode .tvmd-header{
+  box-shadow:0 1px 0 rgba(0,0,0,.2), 0 10px 26px rgba(0,0,0,.35);
+}
+
+/* ── Başlıqlar: akcent zolağı ── */
+.dash-section-title{
+  display:flex; align-items:center; gap:8px;
+}
+.dash-section-title::before{
+  content:""; width:4px; height:16px; border-radius:3px; flex-shrink:0;
+  background:linear-gradient(180deg,#4E93FA,#2F6FED);
+}
+body.dark-mode .dash-section-title::before{
+  background:linear-gradient(180deg,#5B9BF5,#2F6FED);
+}
+.tvmd-section-label{
+  display:flex; align-items:center; gap:8px;
+}
+.tvmd-section-label::before{
+  content:""; width:4px; height:15px; border-radius:3px; flex-shrink:0;
+  background:linear-gradient(180deg,#4E93FA,#2F6FED);
+}
+body.dark-mode .tvmd-section-label::before{
+  background:linear-gradient(180deg,#5B9BF5,#2F6FED);
+}
+
+/* ── Açılış animasiyası (view hər dəfə göstəriləndə) ── */
+@keyframes dashFadeUp{
+  from{ opacity:0; transform:translateY(12px); }
+  to{ opacity:1; transform:none; }
+}
+#busDashboardView .dash-container,
+#tvmDashboardView .tvmd-container{
+  animation:dashFadeUp .42s cubic-bezier(.2,.8,.3,1) both;
+}
+
+/* ── Stat kartlar (BUS): ağ, laylı kölgə, hover qaldırma ── */
+.dash-stat-card{
+  border:1px solid #E3ECF8;
+  background:#FFFFFF;
+  box-shadow:0 1px 2px rgba(16,32,64,.05), 0 10px 28px rgba(16,32,64,.06);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.dash-stat-card:hover{
+  transform:translateY(-3px);
+  border-color:#C9DAF3;
+  box-shadow:0 4px 10px rgba(16,32,64,.06), 0 20px 44px rgba(16,32,64,.12);
+}
+body.dark-mode .dash-stat-card{
+  background:#141F30; border-color:#2A3B52;
+  box-shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.25);
+}
+body.dark-mode .dash-stat-card:hover{
+  border-color:#3E5578;
+  box-shadow:0 20px 44px rgba(0,0,0,.4);
+}
+
+/* Dəyər pop effekti */
+@keyframes dashValPop{
+  0%{ transform:scale(.92); opacity:0; }
+  100%{ transform:scale(1); opacity:1; }
+}
+.dash-stat-val{ animation:dashValPop .38s cubic-bezier(.2,.8,.3,1) both; }
+.dash-stat-lbl{ letter-spacing:.25px; }
+.dash-stat-pct{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.dash-stat-canvas{ margin-top:auto; border-radius:10px 10px 0 0; }
+
+/* ── Filter kartları + selects ── */
+.dash-filter-card{
+  border:1px solid #E3ECF8;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 8px 22px rgba(16,32,64,.05);
+  transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.dash-filter-card:hover{
+  transform:translateY(-2px);
+  border-color:#C9DAF3;
+  box-shadow:0 4px 10px rgba(16,32,64,.05), 0 14px 30px rgba(16,32,64,.09);
+}
+body.dark-mode .dash-filter-card{
+  background:#141F30; border-color:#2A3B52;
+  box-shadow:none;
+}
+.dash-filter-select:focus{
+  border-color:#2F6FED;
+  box-shadow:0 0 0 3px rgba(47,111,237,.14);
+}
+.dash-filter-card-label{ letter-spacing:.3px; }
+
+/* ── Tabs / segment pill-ləri ── */
+.dash-tabs, .tvmd-tabs{
+  box-shadow:inset 0 1px 2px rgba(16,32,64,.05);
+}
+.dash-tab, .tvmd-tab{
+  transition:all .16s ease;
+}
+.dash-tab:hover, .tvmd-tab:hover{ color:#12233B; }
+body.dark-mode .dash-tab:hover, body.dark-mode .tvmd-tab:hover{ color:#E8EEF5; }
+.dash-tab.active{
+  background:linear-gradient(135deg,#4E93FA,#2F6FED);
+  box-shadow:0 3px 10px rgba(47,111,237,.32);
+}
+.tvmd-tab.active{
+  background:#FFFFFF; color:#2F6FED;
+  box-shadow:0 2px 8px rgba(30,68,130,.14);
+}
+body.dark-mode .tvmd-tab.active{
+  background:#1C2A3D; color:#8FB4EA;
+}
+
+/* Xidmət növü filteri — premium pill */
+.dash-svctype-tabs{
+  background:#EEF3FB;
+  box-shadow:inset 0 1px 2px rgba(16,32,64,.05);
+}
+.dash-svctype-btn.dash-svctype-active{
+  box-shadow:0 4px 14px rgba(47,111,237,.35);
+}
+
+/* ── Problem kartları ── */
+.dash-prob-card{
+  border:1px solid #E3ECF8;
+  background:#FFFFFF;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 8px 22px rgba(16,32,64,.05);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.dash-prob-card:hover{
+  transform:translateY(-2px);
+  border-color:#C9DAF3;
+  box-shadow:0 4px 10px rgba(16,32,64,.05), 0 16px 32px rgba(16,32,64,.10);
+}
+body.dark-mode .dash-prob-card{
+  background:#141F30; border-color:#2A3B52;
+  box-shadow:none;
+}
+body.dark-mode .dash-prob-card:hover{ border-color:#3E5578; }
+
+/* ── Siyahı sətirləri: sağa sürüşmə + kölgə ── */
+.dash-op-row, .dash-other-row, .dash-cat-row, .dash-loc-row,
+.dash-sol-row, .dash-op-diger, .dash-lead-row{
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+}
+.dash-op-row:hover, .dash-other-row:hover, .dash-cat-row:hover,
+.dash-loc-row:hover, .dash-sol-row:hover, .dash-lead-row:hover{
+  transform:translateX(3px);
+  border-color:#C9DAF3;
+  box-shadow:0 8px 20px rgba(16,32,64,.08);
+}
+body.dark-mode .dash-op-row:hover, body.dark-mode .dash-other-row:hover,
+body.dark-mode .dash-cat-row:hover, body.dark-mode .dash-loc-row:hover,
+body.dark-mode .dash-sol-row:hover, body.dark-mode .dash-lead-row:hover{
+  border-color:#3E5578;
+  box-shadow:0 8px 20px rgba(0,0,0,.3);
+}
+.dash-op-badge, .dash-loc-pct, .dash-cat-pct, .dash-sol-pct{
+  transition:transform .15s ease;
+}
+.dash-op-row:hover .dash-op-badge,
+.dash-loc-row:hover .dash-loc-pct,
+.dash-cat-row:hover .dash-cat-pct,
+.dash-sol-row:hover .dash-sol-pct{ transform:scale(1.06); }
+
+/* ── Cədvəl sətirləri (ranklist) ── */
+.dash-ranklist tbody tr td{ transition:background .12s ease; }
+.dash-ranklist tbody tr:hover td{ background:#F4F9FE; }
+body.dark-mode .dash-ranklist tbody tr:hover td{ background:#16212E; }
+
+/* ── Həll siyahısı ── */
+.dash-sol-list{
+  border:1px solid #E3ECF8;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 8px 22px rgba(16,32,64,.05);
+}
+body.dark-mode .dash-sol-list{
+  background:#141F30; border-color:#2A3B52;
+  box-shadow:none;
+}
+/* ── Alert panel (təkrarlanan avtobuslar) ── */
+.dash-alert-panel{
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 8px 22px rgba(16,32,64,.05);
+}
+body.dark-mode .dash-alert-panel{ box-shadow:none; }
+
+/* ── Düymələr ── */
+.dash-excel-btn, .tvmd-excel-btn, .dash-search-btn{
+  box-shadow:0 6px 16px rgba(47,111,237,.24);
+  transition:transform .13s ease, box-shadow .16s ease, filter .16s ease;
+}
+.dash-excel-btn:hover, .tvmd-excel-btn:hover, .dash-search-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 24px rgba(47,111,237,.34);
+  filter:brightness(1.05);
+}
+.dash-excel-btn:active, .tvmd-excel-btn:active, .dash-search-btn:active{
+  transform:translateY(0) scale(.97);
+}
+.dash-range-btn{
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.dash-range-btn:hover{
+  transform:translateY(-2px);
+  border-color:#2F6FED;
+  box-shadow:0 10px 24px rgba(47,111,237,.14);
+}
+.dash-show-more-btn:hover{
+  transform:translateY(-1px);
+  background:#E6F1FB;
+  box-shadow:0 4px 12px rgba(47,111,237,.2);
+}
+.dash-reset-btn:hover{ background:#E8EFF9; color:#12233B; }
+.dash-close-btn:hover{ filter:brightness(1.1); }
+
+/* ── TVM metrik kartları ── */
+.tvmd-metric-card{
+  border:1px solid #E3ECF8;
+  background:#FFFFFF;
+  box-shadow:0 1px 2px rgba(16,32,64,.05), 0 10px 28px rgba(16,32,64,.06);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.tvmd-metric-card:hover{
+  transform:translateY(-3px);
+  border-color:#C9DAF3;
+  box-shadow:0 4px 10px rgba(16,32,64,.06), 0 20px 44px rgba(16,32,64,.12);
+}
+body.dark-mode .tvmd-metric-card{
+  background:#141F30; border-color:#2A3B52;
+  box-shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.25);
+}
+body.dark-mode .tvmd-metric-card:hover{ border-color:#3E5578; }
+.tvmd-metric-value{ animation:dashValPop .38s cubic-bezier(.2,.8,.3,1) both; }
+.tvmd-metric-icon-wrap{ transition:transform .18s ease; }
+.tvmd-metric-card:hover .tvmd-metric-icon-wrap{ transform:scale(1.08); }
+.tvmd-sparkline-wrap{ margin-top:auto; padding-top:8px; }
+
+/* Trend — pill badge */
+.tvmd-metric-trend.up,
+.tvmd-metric-trend.down{
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 9px; border-radius:20px; font-weight:700;
+  width:fit-content; max-width:100%;
+}
+.tvmd-metric-trend.up{ background:#E5F6ED; color:#188A4B; }
+.tvmd-metric-trend.down{ background:#FDF1E3; color:#D97706; }
+body.dark-mode .tvmd-metric-trend.up{ background:#12301F; color:#4CD98A; }
+body.dark-mode .tvmd-metric-trend.down{ background:#33230E; color:#F5A94C; }
+
+/* ── TVM lokasiya kartları ── */
+.tvm-loc-card, .tvmd-donut-card, .tvmd-bottom-card{
+  border:1px solid #E3ECF8;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 10px 26px rgba(16,32,64,.06);
+  transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.tvm-loc-card:hover, .tvmd-donut-card:hover, .tvmd-bottom-card:hover{
+  transform:translateY(-2px);
+  border-color:#C9DAF3;
+  box-shadow:0 4px 10px rgba(16,32,64,.05), 0 16px 34px rgba(16,32,64,.10);
+}
+body.dark-mode .tvm-loc-card, body.dark-mode .tvmd-donut-card,
+body.dark-mode .tvmd-bottom-card{
+  background:#141F30; border-color:#2A3B52;
+  box-shadow:none;
+}
+body.dark-mode .tvm-loc-card:hover, body.dark-mode .tvmd-donut-card:hover,
+body.dark-mode .tvmd-bottom-card:hover{ border-color:#3E5578; }
+
+/* TVM texnik cədvəli */
+.tvmd-tech-table tbody tr{ transition:background .12s ease; }
+.tvmd-tech-table tbody tr:hover{ background:#F4F9FE; }
+body.dark-mode .tvmd-tech-table tbody tr:hover{ background:#16212E; }
+.tvmd-tech-table tbody tr td:first-child{ border-radius:8px 0 0 8px; }
+.tvmd-tech-table tbody tr td:last-child{ border-radius:0 8px 8px 0; }
+
+/* ── Boş state ── */
+.dash-empty-txt{
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  background:#F7FAFD; border:1.5px dashed #D8E6F5; border-radius:12px;
+  padding:20px 16px; font-size:13.5px; color:#8CA0BC; line-height:1.5;
+}
+.dash-empty-txt::before{
+  content:""; width:8px; height:8px; border-radius:50%; flex-shrink:0;
+  background:#C7D5E8; box-shadow:0 0 0 4px rgba(199,213,232,.22);
+}
+body.dark-mode .dash-empty-txt{
+  background:#131E2D; border-color:#2A3B52; color:#6B84A0;
+}
+
+/* ── Loading overlay: yumşaq buğlanmış fon + pulse mətn ── */
+.dash-loading-overlay{
+  background:rgba(245,249,254,.55);
+  backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px);
+}
+body.dark-mode .dash-loading-overlay{ background:rgba(12,20,32,.6); }
+@keyframes dashLoadPulse{
+  0%,100%{ opacity:.55; }
+  50%{ opacity:1; }
+}
+.dash-loading-text{
+  letter-spacing:.25px;
+  animation:dashLoadPulse 1.3s ease-in-out infinite;
+}
+
+/* ── Modal ── */
+.dash-modal{
+  border:1px solid #E3ECF8;
+  box-shadow:0 40px 90px rgba(10,25,55,.28);
+}
+body.dark-mode .dash-modal{ border-color:#2A3B52; }
+.dash-modal-head{ background:#F8FAFD; }
+body.dark-mode .dash-modal-head{ background:#16212E; }
+.dcal-day{ transition:background .12s ease, transform .12s ease; }
+.dcal-day:hover{ background:#E6F1FB; transform:scale(1.05); }
+
+/* ── Mobil təkmilləşdirmələr ── */
+.dash-m-metrics{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+  background:#FFFFFF; border:1px solid #E1EAF6; border-radius:16px;
+  padding:14px; margin-bottom:16px; font-size:12px; line-height:1.4;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 8px 22px rgba(16,32,64,.05);
+}
+.dash-m-metrics div{
+  background:#F7FAFD; border:1px solid #E8EFF9; border-radius:12px;
+  padding:10px 8px; text-align:center; color:#5C7089; font-weight:600;
+}
+.dash-m-metrics b{
+  display:block; font-family:'Rajdhani',sans-serif;
+  font-size:22px; color:#12233B; margin-top:2px;
+}
+body.dark-mode .dash-m-metrics{
+  background:#141F30; border-color:#2A3B52;
+}
+body.dark-mode .dash-m-metrics div{
+  background:#1C2A3D; border-color:#2A3B52; color:#93A4BC;
+}
+body.dark-mode .dash-m-metrics b{ color:#E8EEF5; }
+.dash-m-card-empty{
+  border:1.5px dashed #D8E6F5; background:#F7FAFD;
+}
+body.dark-mode .dash-m-card-empty{
+  background:#131E2D; border-color:#2A3B52;
+}
+
+/* Orta enlik: metrik/üst sıra yığılır */
+@media(max-width:1100px){
+  .tvmd-metrics-row{ grid-template-columns:repeat(2,1fr); }
+  .dash-top-row{ grid-template-columns:repeat(3,1fr); }
+  .dash-top-row .dash-range-btn{ grid-column:span 1; min-height:80px; }
+}
+@media(max-width:700px){
+  .dash-top-row{ grid-template-columns:1fr 1fr; }
+  .dash-prob-grid-2, .dash-prob-grid-4{ grid-template-columns:1fr; }
+  .dash-op-wrap{ flex-direction:column; }
+  .dash-loc-wrap, .dash-loc-wrap2{ flex-direction:column; }
+  .dash-three-col{ grid-template-columns:1fr; }
+  .tvmd-loc-row{ grid-template-columns:1fr; }
+  .tvmd-bottom-row{ grid-template-columns:1fr; }
+  .dash-op-donut-svg{ width:140px; height:140px; }
+  .dash-m-metrics{ grid-template-columns:1fr; }
+}
+
+/* ── Accessibility: focus halqası ── */
+.dash-tab:focus-visible, .tvmd-tab:focus-visible,
+.dash-range-btn:focus-visible, .tvmd-filter-card:focus-visible,
+.dash-svctype-btn:focus-visible{
+  outline:2px solid #2F6FED; outline-offset:2px;
+}
+
+/* ── Hərəkət azaldılması istəyi ── */
+@media (prefers-reduced-motion: reduce){
+  .dash-stat-card, .tvmd-metric-card, .dash-prob-card,
+  .dash-filter-card, .tvm-loc-card, .tvmd-donut-card, .tvmd-bottom-card,
+  .dash-op-row, .dash-other-row, .dash-cat-row, .dash-loc-row,
+  .dash-sol-row, .dash-lead-row, .dash-range-btn, .dash-tab, .tvmd-tab,
+  .dash-stat-val, .tvmd-metric-value, .dash-metric-icon-wrap,
+  .dash-op-badge, .dash-loc-pct, .dash-cat-pct, .dash-sol-pct{
+    transition:none !important;
+    animation:none !important;
+    transform:none !important;
+  }
+  #busDashboardView .dash-container, #tvmDashboardView .tvmd-container{
+    animation:none !important;
+  }
+}
+
