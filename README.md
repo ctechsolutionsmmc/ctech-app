@@ -9,7 +9,9 @@ CTECH Service Platform — Bus/TVM texniki servis idarəetmə sistemi.
 | **BUS Gündəlik** | Hər səhər **09:00** | Dünən 08:00 → bu gün 08:00 | `sendBusDailyReport` |
 | **BUS Həftəlik** | Hər **bazar ertəsi 09:10** | Əvvəlki təqvim həftəsi (BE 00:00 → Bazar 24:00) | `sendBusWeeklyReport` |
 | **BUS Aylıq** | Hər **ayın 1-i 09:15** | Bitmiş təqvim ayı (01.XX → son gün, 31/30/28/29 avtomatik) | `sendBusMonthlyReport` |
-| **TVM** | 09:05 | — | `sendTvmDailyReport` (növbəti mərhələdə əlavə olunacaq) |
+| **TVM Gündəlik** | Hər səhər **09:05** | Dünən 08:00 → bu gün 08:00 | `sendTvmDailyReport` |
+| **TVM Həftəlik** | Hər **bazar ertəsi 09:10** | Əvvəlki təqvim həftəsi | `sendTvmWeeklyReport` |
+| **TVM Aylıq** | Hər **ayın 1-i 09:15** | Bitmiş təqvim ayı | `sendTvmMonthlyReport` |
 
 - Məlumat **DASHBOARD_CACHE** keşindən oxunur — əsas database yüklənmir.
 - Servis "Tarix" xanası + Başlanğıc/Bitiş saatları ilə (real təqvim + saat üzrə) hesablanır: **əsas meyar BİTİŞ saatıdır** — bitişi aralığa düşən "tamamlanmış" servislər daxil edilir (ikiqat sayılmır). Bitiş boşdursa, Başlanğıca baxılır.
@@ -21,7 +23,7 @@ CTECH Service Platform — Bus/TVM texniki servis idarəetmə sistemi.
    ```
    migrateTelegramTemplatesForDailyReports()
    ```
-   `Telegram_Templates` sheet-ə `bus_daily_report`, `bus_weekly_report`, `bus_monthly_report` şablonlarını əlavə edir (mövcud redaktələrə toxunmur). Şablon mətni admin panel → **Telegram Templates** bölməsindən redaktə oluna bilər.
+   `Telegram_Templates` sheet-ə `bus_daily_report`, `bus_weekly_report`, `bus_monthly_report`, `tvm_daily_report`, `tvm_weekly_report`, `tvm_monthly_report`, `app_update_log`, `app_update_report` şablonlarını əlavə edir (mövcud redaktələrə toxunmur). Şablon mətni admin panel → **Telegram Templates** bölməsindən redaktə oluna bilər.
 
 2. **Qrup chat ID-sini qeyd edin** — Script Properties → `TELEGRAM_REPORT_CHAT_ID` (Services-REPORT qrupunun chat id-si). Yoxdursa `TELEGRAM_CHAT_ID` işləyir.
 
@@ -31,9 +33,22 @@ CTECH Service Platform — Bus/TVM texniki servis idarəetmə sistemi.
    ```
    (və ya yeni adla: `setupReportTriggers()`). Hamısını silmək üçün: `deleteDailyReportTriggers()` / `deleteReportTriggers()`.
 
-4. **Test** — istənilən vaxt funksiyaları ▶ Run edərək dərhal göndərin: `sendBusDailyReport()`, `sendBusWeeklyReport()`, `sendBusMonthlyReport()`.
+4. **Test** — istənilən vaxt funksiyaları ▶ Run edərək dərhal göndərin: `sendBusDailyReport()`, `sendBusWeeklyReport()`, `sendBusMonthlyReport()`, `sendTvmDailyReport()`, `sendTvmWeeklyReport()`, `sendTvmMonthlyReport()`.
 
-### Placeholder-lar (üç şablon da eyni dəst)
+### TVM hesabatlarının bölmələri
+
+TVM hesabatları BUS ilə eyni pəncərə məntiqini işlədir (əsas meyar bitiş saatı), lakin TVM-yə uyğun bölmələrlə: `{topProblems}` (sayı ≥2 olan problemlər), `{topSolutions}` (həll kateqoriyaları), `{tvmLocations}` (TVM lokasiyaları), `{serviceLocations}` (servis lokasiyaları), `{topTechnicians}` ("Texnik" sahəsindən, | , ; ayırıcıları ilə), `{topLeaders}` (qrup rəhbərləri).
+
+### Update-Log (Database-LOG qrupuna)
+
+Cihaz yenilənməsi istifadəçi tərəfindən təsdiqlənəndə `js/app-update.js` backend-ə `logAppUpdate` çağırır — `APP_UPDATES` sheet-ə sətir yazılır və **Database-LOG (CTECH)** qrupuna canlı bildiriş göndərilir (`app_update_log` şablonu — admin paneldən redaktə olunur).
+
+- **Canlı bildiriş** — hər təsdiqlənmədə: versiya, istifadəçi (ad + email), tarix/saat, yenilənmə mesajı, ümumi yenilənmə sayı.
+- **24 saatlıq hesabat** — `sendAppUpdateReport()` (▶ Run və ya API `action="sendAppUpdateReport"`): son 24 saatda neçə yenilənmə, versiya üzrə say, istifadəçi üzrə say (ad + say), son 10 yenilənmə siyahısı. `app_update_report` şablonu ilə göndərilir.
+- Qrup chat ID-si: Script Properties → `TELEGRAM_LOG_CHAT_ID` (yoxdursa `TELEGRAM_CHAT_ID` işləyir).
+- `APP_UPDATES` sheet-i lazım olduqda avtomatik yaradılır — əlavə quraşdırma tələb olunmur.
+
+### Placeholder-lar (BUS: üç şablon da eyni dəst)
 
 `{dateRange}` `{windowStart}` `{windowEnd}` `{totalCount}` `{validatorChanged}` `{samChanged}` `{ethernetCount}` `{rjCount}` `{topProblems}` `{topTechnicians}` `{topLeaders}` `{montajByCarrier}` `{demontajByCarrier}` `{distributionsByCarrier}` `{routeUpdateByCarrier}` `{topCarriers}` `{topAddresses}` `{ownerAyna}` `{ownerBakikart}` `{ownerBoth}`
 

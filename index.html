@@ -31,16 +31,16 @@
 <meta name="apple-mobile-web-app-title" content="CTECH Service">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
-<link rel="stylesheet" href="css/base.css?v=4.1">
-<link rel="stylesheet" href="css/login.css?v=4.1">
-<link rel="stylesheet" href="css/dashboard.css?v=4.1">
-<link rel="stylesheet" href="css/ctd.css?v=4.1">
-<link rel="stylesheet" href="css/bus-service.css?v=4.1">
-<link rel="stylesheet" href="css/reports.css?v=4.1">
-<link rel="stylesheet" href="css/admin.css?v=4.1">
-<link rel="stylesheet" href="css/collectives.css?v=4.1">
-<link rel="stylesheet" href="css/notif.css?v=4.1">
-<link rel="stylesheet" href="css/update.css?v=4.1">
+<link rel="stylesheet" href="css/base.css?v=4.2">
+<link rel="stylesheet" href="css/login.css?v=4.2">
+<link rel="stylesheet" href="css/dashboard.css?v=4.2">
+<link rel="stylesheet" href="css/ctd.css?v=4.2">
+<link rel="stylesheet" href="css/bus-service.css?v=4.2">
+<link rel="stylesheet" href="css/reports.css?v=4.2">
+<link rel="stylesheet" href="css/admin.css?v=4.2">
+<link rel="stylesheet" href="css/collectives.css?v=4.2">
+<link rel="stylesheet" href="css/notif.css?v=4.2">
+<link rel="stylesheet" href="css/update.css?v=4.2">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>
   (function(){
@@ -1125,7 +1125,12 @@
           <strong>📊 BUS Gündəlik 24 saatlıq hesabat (bus_daily_report — hər səhər 09:00, dünən 08:00 → bu gün 08:00):</strong><br>
           <code>{dateRange}</code> <code>{windowStart}</code> <code>{windowEnd}</code> <code>{totalCount}</code> <code>{validatorChanged}</code> <code>{samChanged}</code> <code>{ethernetCount}</code> <code>{rjCount}</code> <code>{topProblems}</code> <code>{topTechnicians}</code> <code>{topLeaders}</code> <code>{montajByCarrier}</code> <code>{demontajByCarrier}</code> <code>{distributionsByCarrier}</code> <code>{routeUpdateByCarrier}</code> <code>{topCarriers}</code> <code>{topAddresses}</code> <code>{ownerAyna}</code> <code>{ownerBakikart}</code> <code>{ownerBoth}</code><br><br>
           <strong>📅 BUS Həftəlik (bus_weekly_report — hər bazar ertəsi 09:10, əvvəlki təqvim həftəsi) və 🗓 BUS Aylıq (bus_monthly_report — hər ayın 1-i 09:15, bitmiş təqvim ayı):</strong><br>
-          Eyni placeholder-lar + məhsul sahibi: <code>{ownerAyna}</code> <code>{ownerBakikart}</code> <code>{ownerBoth}</code>
+          Eyni placeholder-lar + məhsul sahibi: <code>{ownerAyna}</code> <code>{ownerBakikart}</code> <code>{ownerBoth}</code><br><br>
+          <strong>🖥 TVM hesabatları (tvm_daily_report — hər səhər 09:05, tvm_weekly_report — bazar ertəsi 09:10, tvm_monthly_report — ayın 1-i 09:15):</strong><br>
+          <code>{dateRange}</code> <code>{windowStart}</code> <code>{windowEnd}</code> <code>{totalCount}</code> <code>{topProblems}</code> <code>{topSolutions}</code> <code>{tvmLocations}</code> <code>{serviceLocations}</code> <code>{topTechnicians}</code> <code>{topLeaders}</code><br><br>
+          <strong>🔄 Update-Log (Database-LOG qrupuna):</strong><br>
+          <code>app_update_log</code> (canlı bildiriş — istifadəçi yenilənməni təsdiqləyəndə): <code>{version}</code> <code>{userName}</code> <code>{userEmail}</code> <code>{dateTime}</code> <code>{changes}</code> <code>{totalUpdates}</code><br>
+          <code>app_update_report</code> (24 saatlıq hesabat — <code>sendAppUpdateReport()</code>): <code>{dateRange}</code> <code>{windowStart}</code> <code>{windowEnd}</code> <code>{totalUpdates}</code> <code>{versionCounts}</code> <code>{userCounts}</code> <code>{recentUpdates}</code>
         </div>
         <div id="admTgTemplatesList"><div class="adm-empty">Yüklənir...</div></div>
       </div>
@@ -2890,7 +2895,7 @@
   </div>
 </div>
 
-<script src="js/app-update.js?v=4.1"></script>
+<script src="js/app-update.js?v=4.2"></script>
 <script src="js/core.js"></script>
 <script src="js/bus-request.js"></script>
 <script src="js/admin.js"></script>

@@ -86,7 +86,7 @@ function getAuthToken(){
 // AUTH_EXPIRED yoxlaması ağır oxuma aksiyalarında iki dəfə JSON.parse
 // etməsin deyə onlar atlanır (token bitdikdə onlar sadəcə xəta qaytarır;
 // login ekranı növbəti yazma əməliyyatında çıxır).
-var AUTH_EXPIRED_SKIP_ACTIONS = { getReportData:1, getTvmReportData:1, getDashboardData:1, getFormData:1, getTvmFormData:1, getNextTicketIds:1, getUsersData:1, getBusManagementData:1, getTvmManagementData:1, getCollectivesAdminData:1, getValidatorSNList:1, getSamCardSNList:1, getAdminListData:1 };
+var AUTH_EXPIRED_SKIP_ACTIONS = { getReportData:1, getTvmReportData:1, getDashboardData:1, getFormData:1, getTvmFormData:1, getNextTicketIds:1, getUsersData:1, getBusManagementData:1, getTvmManagementData:1, getCollectivesAdminData:1, getValidatorSNList:1, getSamCardSNList:1, getAdminListData:1, logAppUpdate:1 };
 
 // window.fetch-i bükür: hər API sorğusuna token əlavə edir və sessiya
 // bitibsə (AUTH_EXPIRED) istifadəçini login-ə yönləndirir.

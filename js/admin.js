@@ -1757,8 +1757,10 @@ function loadTelegramTemplates(){
       var safeKey=t.key.replace(/'/g,'');
       var badge='';
       if(t.key==='bus_daily_report'||t.key==='tvm_daily_report') badge=' <span class="adm-tg-daily-badge">📊 Gündəlik 24 saat</span>';
-      else if(t.key==='bus_weekly_report') badge=' <span class="adm-tg-daily-badge">📅 Həftəlik</span>';
-      else if(t.key==='bus_monthly_report') badge=' <span class="adm-tg-daily-badge">🗓 Aylıq</span>';
+      else if(t.key==='bus_weekly_report'||t.key==='tvm_weekly_report') badge=' <span class="adm-tg-daily-badge">📅 Həftəlik</span>';
+      else if(t.key==='bus_monthly_report'||t.key==='tvm_monthly_report') badge=' <span class="adm-tg-daily-badge">🗓 Aylıq</span>';
+      else if(t.key==='app_update_log') badge=' <span class="adm-tg-daily-badge">🔄 Update-Log (canlı)</span>';
+      else if(t.key==='app_update_report') badge=' <span class="adm-tg-daily-badge">📊 Update Hesabatı</span>';
       return '<div class="adm-tg-card">'
         +'<div class="adm-tg-card-head">'
         +'<div class="adm-tg-card-title">'+escapeHtml(t.label)+badge+'</div>'

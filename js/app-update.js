@@ -162,6 +162,9 @@
       var btn = document.getElementById('updBtn');
       if(btn){
         btn.onclick = function(){
+          // Update-log: bu yenilənməni backend-ə bildir (Database-LOG qrupuna canlı gedir).
+          // Səssizdir — uğursuz olsa belə istifadəçini narahat etmir.
+          try{ reportUpdateToBackend(version); }catch(luErr){}
           lockBody(false);
           var o = overlayEl(); if(o) o.style.display = 'none';
           // Səhifəni keşsiz yenidən yüklə → sessiya qorunur, əsas menyu açılır
@@ -169,6 +172,28 @@
           window.location.href = window.location.pathname + sep + 'u=' + Date.now();
         };
       }
+    }
+
+    // Yenilənməni backend-ə bildirir — APP_UPDATES sheet-ə yazılır və
+    // Database-LOG (CTECH) qrupuna canlı bildiriş göndərilir. Səssizdir.
+    function reportUpdateToBackend(version){
+      var api = (typeof API_URL === 'string') ? API_URL : null;
+      if(!api) return;
+      var payload = {
+        action: 'logAppUpdate',
+        version: String(version || ''),
+        message: 'Cihaz yenilənməsi təsdiqləndi (v' + version + ')'
+      };
+      // İstifadəçi email-i sessiyadan; token-i core.js fetch wrapper-i avtomatik əlavə edir
+      try{
+        var s = JSON.parse(localStorage.getItem('ctech_session') || 'null');
+        if(s && s.user && s.user.email) payload.userEmail = s.user.email;
+      }catch(e){}
+      fetch(api, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).catch(function(){});
     }
 
     function onBytes(url, recv, total){
