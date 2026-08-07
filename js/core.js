@@ -305,6 +305,7 @@ function applyAccessLevel(){
     var ccBusDashW=document.getElementById('ctdBusDashWidget'); if(ccBusDashW) ccBusDashW.style.display='none';
     var ccBusRptW=document.getElementById('ctdBusRptWidget'); if(ccBusRptW) ccBusRptW.style.display='';
     var ccGuestCards=document.getElementById('guestDashboardCards'); if(ccGuestCards) ccGuestCards.style.display='none';
+    var ccOngBtn=document.getElementById('tvmOngoingQuickBtn'); if(ccOngBtn) ccOngBtn.style.display=(window.innerWidth<901)?'block':'none';
     return;
   }
 
@@ -330,6 +331,9 @@ function applyAccessLevel(){
   var ccBusRptWN=document.getElementById('ctdBusRptWidget'); if(ccBusRptWN) ccBusRptWN.style.display='';
 
   document.getElementById('adminMenuItem').style.display=(isLeaderOrAdmin && window.innerWidth>=901)?'flex':'none';
+  // TVM "Davam edən servis" düyməsi (mobil kartda) — texnik üçün gizli, call center/leader/admin üçün görünür
+  var tvmOngBtn=document.getElementById('tvmOngoingQuickBtn');
+  if(tvmOngBtn) tvmOngBtn.style.display=(level!=='technician' && window.innerWidth<901)?'block':'none';
   var brBtn=document.getElementById('busRequestQuickBtn');
   if(brBtn){
     var showBr=isLeaderOrAdmin && window.innerWidth>=901;

@@ -69,8 +69,13 @@ function submitTvmService(){
       ic.style.display = 'none';
       if(result.status === 'OK'){
         var wasEdit = tvmEditMode;
+        var backTarget = tvmReturnTarget;
         closeTvmService();
-        if(wasEdit && typeof loadTvmReportData === 'function') loadTvmReportData();
+        if(wasEdit){
+          // Haradan açılıbsa həmin bölməni yenilə: davam edən servis və ya report
+          if(backTarget === 'ongoing' && typeof loadTvmOngoingData === 'function'){ loadTvmOngoingData(); }
+          else if(typeof loadTvmReportData === 'function'){ loadTvmReportData(); }
+        }
       }
     }, 1800);
   })
