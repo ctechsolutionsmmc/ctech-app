@@ -2091,3 +2091,556 @@ body.dark-mode .dash-m-card-empty{
   }
 }
 
+/* ════════════════════════════════════════════════════════════
+   FAZA 4.1 — BUS DASHBOARD MODERN REDESIGN (YALNIZ BUS)
+   Geniş container, bölmə panel-ləri, nömrələnmiş bölmələr,
+   böyük boşluqlar, zəngin kartlar, hover mikro-interaksiyalar.
+   Hər şey #busDashboardView altında — TVM dashboard təsirlənmir.
+   JS/HTML ID və event-lər toxunulmur.
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Canvas: geniş + rahat məsafə ── */
+#busDashboardView .dash-container{
+  max-width:1440px;
+  padding:26px 34px 70px;
+  counter-reset:dashSec;
+}
+
+/* ── Bölmə paneli: hər bölmə ayrı kart-qrup kimi ── */
+#busDashboardView .dash-panel{
+  background:#FFFFFF;
+  border:1px solid #E2EBF7;
+  border-radius:18px;
+  padding:24px 26px 26px;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 12px 30px rgba(16,32,64,.05);
+  margin-top:24px;
+  transition:box-shadow .2s ease, border-color .2s ease;
+}
+#busDashboardView .dash-panel:hover{
+  border-color:#C9DAF3;
+  box-shadow:0 2px 4px rgba(16,32,64,.05), 0 20px 44px rgba(16,32,64,.09);
+}
+
+/* ── Bölmə başlıqları: nömrə rozeti + ad (avtomatik sayğac) ── */
+#busDashboardView .dash-panel .dash-section-title{
+  counter-increment:dashSec;
+  display:flex; align-items:center; gap:12px;
+  margin:0 0 20px;
+  font-family:'Rajdhani',sans-serif;
+  font-size:16.5px; font-weight:700; letter-spacing:.7px;
+  text-transform:uppercase;
+  color:#12233B;
+}
+#busDashboardView .dash-panel .dash-section-title::before{
+  content:counter(dashSec, decimal-leading-zero);
+  display:flex; align-items:center; justify-content:center;
+  width:32px; height:32px; border-radius:10px; flex-shrink:0;
+  background:linear-gradient(135deg,#4E93FA,#2F6FED);
+  color:#fff; font-size:13px; font-weight:700; letter-spacing:0;
+  box-shadow:0 5px 12px rgba(47,111,237,.28);
+}
+
+/* ── Üst sıra: filtrlər + KPI kartları + tarix düyməsi ── */
+#busDashboardView .dash-top-row{
+  grid-template-columns:230px 230px 1fr 1fr 1fr 112px;
+  gap:18px;
+  margin-bottom:4px;
+}
+
+/* İki/üç sütunlu bölmə sıraları — rahat məsafə */
+#busDashboardView .dash-mid-row{ gap:24px; }
+#busDashboardView .dash-three-col{ gap:24px; }
+
+/* Filter kartları */
+#busDashboardView .dash-filter-card{
+  padding:18px 18px;
+  border-radius:16px;
+  border:1.5px solid #E3ECF8;
+  background:#FFFFFF;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 10px 26px rgba(16,32,64,.06);
+}
+#busDashboardView .dash-filter-card-label{
+  font-size:11.5px; font-weight:700; color:#7C8FAA;
+  text-transform:uppercase; letter-spacing:.4px;
+  display:flex; align-items:center; gap:6px;
+  margin-bottom:13px;
+}
+#busDashboardView .dash-filter-card-sel{ position:relative; }
+#busDashboardView .dash-filter-select{
+  width:100%; padding:11px 30px 11px 13px;
+  border:1.5px solid #E1EAF6; border-radius:11px;
+  background:#F7FAFD; font-size:13px; font-weight:600; color:#12233B;
+  appearance:none; cursor:pointer; outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+#busDashboardView .dash-filter-select:hover{ border-color:#B9CEF0; }
+#busDashboardView .dash-filter-select:focus{
+  border-color:#2F6FED; background:#fff;
+  box-shadow:0 0 0 3px rgba(47,111,237,.14);
+}
+
+/* KPI stat kartları */
+#busDashboardView .dash-stat-card{
+  border-radius:18px;
+  border:1px solid #E3ECF8;
+  background:#FFFFFF;
+  padding:20px 20px 0;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 12px 28px rgba(16,32,64,.07);
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+#busDashboardView .dash-stat-card:hover{
+  transform:translateY(-4px);
+  border-color:#C4D6F2;
+  box-shadow:0 6px 14px rgba(16,32,64,.07), 0 26px 52px rgba(16,32,64,.13);
+}
+#busDashboardView .dash-stat-card::before{
+  height:4px;
+}
+#busDashboardView .dash-stat-icon{
+  width:44px; height:44px; border-radius:13px;
+  margin-bottom:14px;
+  box-shadow:0 7px 16px rgba(30,68,130,.18);
+  transition:transform .2s ease;
+}
+#busDashboardView .dash-stat-card:hover .dash-stat-icon{ transform:scale(1.1) rotate(-4deg); }
+#busDashboardView .dash-stat-icon-blue{ background:linear-gradient(135deg,#4E93FA,#2F6FED); color:#fff; }
+#busDashboardView .dash-stat-icon-green{ background:linear-gradient(135deg,#34D399,#059669); color:#fff; }
+#busDashboardView .dash-stat-icon-purple{ background:linear-gradient(135deg,#A78BFA,#7C3AED); color:#fff; }
+#busDashboardView .dash-stat-lbl{
+  font-size:11.5px; color:#8CA0BC; font-weight:700;
+  letter-spacing:.4px; text-transform:uppercase;
+}
+#busDashboardView .dash-stat-val{
+  font-size:42px; font-weight:700; line-height:1.05;
+  color:#12233B;
+}
+#busDashboardView .dash-top-row .dash-stat-card:nth-child(3) .dash-stat-val{ color:#2F6FED; }
+#busDashboardView .dash-top-row .dash-stat-card:nth-child(4) .dash-stat-val{ color:#059669; }
+#busDashboardView .dash-top-row .dash-stat-card:nth-child(5) .dash-stat-val{ color:#7C3AED; }
+
+/* Trend pill-ləri */
+#busDashboardView .dash-stat-pct{ margin-top:3px; min-height:22px; }
+#busDashboardView .dash-pct-up, #busDashboardView .dash-pct-down, #busDashboardView .dash-pct-flat{
+  display:inline-flex; align-items:center; gap:3px;
+  padding:2px 10px; border-radius:20px;
+  font-size:11px; font-weight:700;
+}
+#busDashboardView .dash-pct-up{ background:#E5F6ED; color:#188A4B; }
+#busDashboardView .dash-pct-down{ background:#FDF1E3; color:#D97706; }
+#busDashboardView .dash-pct-flat{ background:#EFF3F9; color:#5C7089; }
+#busDashboardView .dash-stat-sub{ font-size:11.5px; color:#8CA0BC; font-weight:600; }
+
+/* Sparkline */
+#busDashboardView .dash-stat-canvas{
+  height:50px; margin-top:auto;
+  border-radius:12px 12px 0 0;
+  background:linear-gradient(180deg,rgba(47,111,237,.10),rgba(47,111,237,0));
+}
+
+/* Tarix + axtarış düyməsi */
+#busDashboardView .dash-range-btn{
+  border-radius:18px;
+  border:1.5px dashed #C6D8F2;
+  background:#F7FAFD;
+  gap:9px;
+  min-height:100%;
+  transition:all .18s ease;
+}
+#busDashboardView .dash-range-btn:hover{
+  border-color:#2F6FED; background:#fff;
+  box-shadow:0 12px 28px rgba(47,111,237,.15);
+  transform:translateY(-2px);
+}
+#busDashboardView .dash-range-ic{
+  width:40px; height:40px; border-radius:12px;
+  background:#fff; color:#2F6FED;
+  border:1px solid #E1EAF6;
+  box-shadow:0 5px 12px rgba(30,68,130,.09);
+}
+
+/* ── Servis növü filteri ── */
+#busDashboardView .dash-svctype-row{ padding:18px 34px 0; }
+#busDashboardView .dash-svctype-tabs{
+  border-radius:14px; padding:5px; gap:6px;
+  background:#EEF3FB;
+  box-shadow:inset 0 1px 2px rgba(16,32,64,.06);
+}
+#busDashboardView .dash-svctype-btn{
+  padding:9px 26px; border-radius:10px;
+  font-size:13px; font-weight:700; color:#5C7089;
+}
+#busDashboardView .dash-svctype-btn.dash-svctype-active{
+  background:linear-gradient(135deg,#4E93FA,#2F6FED);
+  color:#fff; box-shadow:0 4px 12px rgba(47,111,237,.32);
+}
+#busDashboardView .dash-svctype-btn:hover:not(.dash-svctype-active){ background:#DDE9FB; color:#12233B; }
+
+/* ── Header ── */
+#busDashboardView .dash-header{
+  padding:14px 30px;
+  background:rgba(255,255,255,.96) !important;
+  box-shadow:0 1px 0 rgba(30,68,130,.05), 0 12px 28px rgba(30,68,130,.08);
+}
+#busDashboardView .dash-title{ font-size:21px; letter-spacing:2px; gap:12px; }
+#busDashboardView .dash-title::before{
+  content:""; width:36px; height:36px; border-radius:11px; flex-shrink:0;
+  background:linear-gradient(135deg,#4E93FA,#2F6FED);
+  box-shadow:0 6px 14px rgba(47,111,237,.3);
+}
+
+/* Segment tab-lar */
+#busDashboardView .dash-tabs{
+  background:#EEF3FB; border-radius:12px; padding:4px; gap:2px;
+  box-shadow:inset 0 1px 2px rgba(16,32,64,.06);
+}
+#busDashboardView .dash-tab{
+  padding:8px 16px; border-radius:9px;
+  font-size:12.5px; font-weight:700; color:#5C7089;
+}
+#busDashboardView .dash-tab.active{
+  background:linear-gradient(135deg,#4E93FA,#2F6FED);
+  color:#fff; box-shadow:0 4px 12px rgba(47,111,237,.32);
+}
+#busDashboardView .dash-tab:hover:not(.active){ color:#12233B; }
+
+/* Excel düyməsi */
+#busDashboardView .dash-excel-btn{
+  padding:10px 18px; border-radius:11px;
+  background:linear-gradient(135deg,#4E93FA,#2F6FED);
+  box-shadow:0 6px 16px rgba(47,111,237,.28);
+}
+
+/* ── Problem kartları (radial arcs) ── */
+#busDashboardView .dash-prob-grid{ gap:18px; }
+#busDashboardView .dash-prob-card{
+  border-radius:16px;
+  border:1px solid #E3ECF8;
+  padding:20px;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 10px 26px rgba(16,32,64,.06);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+#busDashboardView .dash-prob-card:hover{
+  transform:translateY(-3px);
+  border-color:#C4D6F2;
+  box-shadow:0 6px 14px rgba(16,32,64,.07), 0 20px 44px rgba(16,32,64,.12);
+}
+#busDashboardView .dash-prob-top{ gap:18px; }
+#busDashboardView .dash-prob-name{ font-size:15px; font-weight:700; color:#12233B; }
+#busDashboardView .dash-prob-count{ font-size:12.5px; color:#5C7089; font-weight:600; margin-top:4px; }
+#busDashboardView .dash-prob-pct{ font-size:11.5px; font-weight:600; color:#8CA0BC; margin-top:6px; }
+
+/* ── Həll siyahısı ── */
+#busDashboardView .dash-sol-list{
+  border:1px solid #E3ECF8; border-radius:16px;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 8px 22px rgba(16,32,64,.05);
+  overflow:hidden;
+}
+#busDashboardView .dash-sol-row{
+  padding:15px 18px; gap:16px;
+  border-bottom:1px solid #F0F5FC;
+}
+#busDashboardView .dash-sol-row:last-child{ border-bottom:none; }
+#busDashboardView .dash-sol-row:hover{ background:#F6FAFE; }
+#busDashboardView .dash-sol-num{
+  width:26px; height:26px; font-size:12px;
+  box-shadow:0 3px 8px rgba(16,32,64,.12);
+}
+#busDashboardView .dash-sol-name{ font-size:14px; font-weight:600; }
+#busDashboardView .dash-sol-count{ font-size:20px; }
+#busDashboardView .dash-sol-pct{ font-size:11.5px; }
+#busDashboardView .dash-sol-bar-track{ height:7px; }
+
+/* ── Digər Tələb/Problemlər ── */
+#busDashboardView .dash-other-wrap{ gap:22px; }
+#busDashboardView .dash-other-list{ gap:10px; }
+#busDashboardView .dash-other-row{
+  padding:12px 14px; border-radius:12px;
+  border:1px solid #E8F0F9;
+  box-shadow:0 4px 12px rgba(30,68,130,.05);
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+#busDashboardView .dash-other-row:hover{
+  transform:translateX(3px); border-color:#C4D6F2;
+  box-shadow:0 8px 18px rgba(30,68,130,.09);
+}
+#busDashboardView .dash-op-num{
+  width:26px; height:26px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:800;
+  box-shadow:0 3px 8px rgba(16,32,64,.12);
+}
+#busDashboardView .dash-op-name{ font-size:13.5px; font-weight:600; flex:1; }
+#busDashboardView .dash-op-badge{
+  padding:3px 10px; border-radius:20px;
+  font-size:12px; font-weight:700; white-space:nowrap;
+}
+#busDashboardView .dash-op-donut-col{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+#busDashboardView .dash-op-donut-lbl{ font-size:12.5px; font-weight:600; color:#8CA0BC; }
+#busDashboardView .dash-op-donut-lbl b{ font-family:'Rajdhani',sans-serif; font-size:18px; color:#12233B; }
+#busDashboardView .dash-op-legend{ display:flex; flex-direction:column; gap:7px; align-items:flex-start; }
+#busDashboardView .dash-op-legend-row{
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; font-weight:600; color:#5C7089;
+}
+#busDashboardView .dash-op-legend-dot{
+  width:10px; height:10px; border-radius:50%; flex-shrink:0;
+}
+#busDashboardView .dash-op-legend-name{ white-space:nowrap; }
+
+/* ── Servis kateqoriyaları ── */
+#busDashboardView .dash-cat-list{ display:flex; flex-direction:column; gap:14px; }
+#busDashboardView .dash-cat-row{
+  display:grid; grid-template-columns:auto 1fr 110px;
+  gap:14px; align-items:center;
+  padding:14px 16px; border-radius:14px;
+  background:#F8FBFE; border:1px solid #E8F0F9;
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+#busDashboardView .dash-cat-row:hover{
+  transform:translateX(3px); border-color:#C4D6F2;
+  box-shadow:0 8px 18px rgba(30,68,130,.09);
+}
+#busDashboardView .dash-cat-left{ display:flex; align-items:center; gap:12px; min-width:0; }
+#busDashboardView .dash-cat-icon{
+  width:38px; height:38px; border-radius:11px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 10px rgba(30,68,130,.08);
+}
+#busDashboardView .dash-cat-info{ min-width:0; }
+#busDashboardView .dash-cat-name{
+  font-size:13.5px; font-weight:700; color:#12233B;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#busDashboardView .dash-cat-pct-lbl{ font-size:11.5px; font-weight:600; color:#8CA0BC; margin-top:3px; }
+#busDashboardView .dash-cat-bar-wrap{ height:8px; background:#E9F0FA; border-radius:5px; overflow:hidden; }
+#busDashboardView .dash-cat-bar{ height:100%; border-radius:5px; }
+#busDashboardView .dash-cat-right{ text-align:right; }
+#busDashboardView .dash-cat-count{
+  font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; color:#12233B;
+}
+#busDashboardView .dash-cat-pct{ font-size:11.5px; font-weight:700; color:#8CA0BC; }
+
+/* ── Servis verilən ünvan ── */
+#busDashboardView .dash-loc-wrap2{ gap:22px; }
+#busDashboardView .dash-loc-list{ display:flex; flex-direction:column; gap:10px; }
+#busDashboardView .dash-loc-row{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 14px; border-radius:12px;
+  background:#F8FBFE; border:1px solid #E8F0F9;
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+#busDashboardView .dash-loc-row:hover{
+  transform:translateX(3px); border-color:#C4D6F2;
+  box-shadow:0 8px 18px rgba(30,68,130,.09);
+}
+#busDashboardView .dash-loc-icon{
+  width:38px; height:38px; border-radius:11px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 10px rgba(30,68,130,.08);
+}
+#busDashboardView .dash-loc-info{ flex:1; min-width:0; }
+#busDashboardView .dash-loc-name{
+  font-size:13.5px; font-weight:700; color:#12233B;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#busDashboardView .dash-loc-bar-track{ height:7px; background:#E9F0FA; border-radius:4px; overflow:hidden; margin-top:8px; }
+#busDashboardView .dash-loc-bar{ height:100%; border-radius:4px; }
+#busDashboardView .dash-loc-right{ text-align:right; }
+#busDashboardView .dash-loc-count{
+  font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; color:#12233B;
+}
+#busDashboardView .dash-loc-pct{ font-size:11.5px; font-weight:700; color:#8CA0BC; }
+
+/* ── Sıralama cədvəlləri (Daşıyıcı / Texnik / Qrup rəhbəri / Təkrarlanan) ── */
+#busDashboardView .dash-ranklist-wrap{
+  border:1px solid #E3ECF8; border-radius:16px; overflow:hidden;
+  box-shadow:0 1px 2px rgba(16,32,64,.04), 0 8px 22px rgba(16,32,64,.05);
+}
+#busDashboardView .dash-ranklist{ width:100%; border-collapse:collapse; }
+#busDashboardView .dash-ranklist thead th{
+  font-size:10.5px; font-weight:700; letter-spacing:.7px; text-transform:uppercase;
+  color:#8CA0BC; background:#F6F9FE;
+  padding:13px 18px; text-align:left;
+  border-bottom:1px solid #E7EFFA;
+}
+#busDashboardView .dash-ranklist tbody td{
+  padding:14px 18px; font-size:13.5px; color:#33445E;
+  border-bottom:1px solid #F0F5FC;
+  transition:background .12s ease;
+}
+#busDashboardView .dash-ranklist tbody tr:hover td{ background:#F6FAFE; }
+#busDashboardView .dash-ranklist tbody tr:last-child td{ border-bottom:none; }
+#busDashboardView .dash-ranklist tbody tr td:first-child span{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:26px; height:26px; border-radius:50%;
+  background:#2F6FED; color:#fff;
+  font-size:12px; font-weight:800;
+  box-shadow:0 3px 8px rgba(47,111,237,.22);
+}
+#busDashboardView .dash-ranklist th.dr-count-col,
+#busDashboardView .dash-ranklist tbody td:last-child{ text-align:right; }
+#busDashboardView .dash-rank-count-val{
+  font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:700; color:#12233B;
+}
+#busDashboardView .dash-ranklist .dr-num-col{ width:56px; }
+#busDashboardView .dash-ranklist .dr-count-col{ width:96px; }
+
+/* Hamısını göstər */
+#busDashboardView .dash-show-more-row{
+  padding:14px 18px; border-top:1px dashed #E1EAF6;
+}
+#busDashboardView .dash-show-more-btn{
+  border:none; background:#EAF2FD; color:#2F6FED;
+  font-size:12.5px; font-weight:700;
+  padding:9px 18px; border-radius:10px; cursor:pointer;
+  transition:all .15s ease;
+}
+#busDashboardView .dash-show-more-btn:hover{ background:#DDE9FB; }
+
+/* ── Təkrarlanan problemli avtobuslar (alert panel) ── */
+#busDashboardView .dash-panel-alert{
+  background:linear-gradient(180deg,#FFFBFB,#FFF6F6);
+  border-color:#F5CFCF;
+}
+#busDashboardView .dash-panel-alert .dash-section-title{ color:#A32D2D; }
+#busDashboardView .dash-panel-alert .dash-section-title::before{
+  background:linear-gradient(135deg,#F87171,#DC2626);
+  box-shadow:0 5px 12px rgba(220,38,38,.26);
+}
+#busDashboardView .dash-alert-panel{
+  border:none; background:transparent; padding:0;
+  box-shadow:none;
+}
+
+/* ── Boş state ── */
+#busDashboardView .dash-empty-txt{
+  background:#F8FBFE;
+  border:1.5px dashed #D5E4F5;
+  border-radius:12px;
+  padding:26px 18px;
+  font-size:13.5px; color:#8CA0BC;
+}
+
+/* ── Mobil xülasə ── */
+#busDashboardView .dash-m-metrics{
+  grid-template-columns:repeat(3,1fr); gap:12px;
+  padding:0 16px; margin-bottom:18px;
+}
+#busDashboardView .dash-m-metrics > div{
+  background:#fff; border:1px solid #E3ECF8; border-radius:14px;
+  padding:14px 16px; font-size:13px; font-weight:600; color:#5C7089;
+  box-shadow:0 8px 20px rgba(30,68,130,.06);
+}
+#busDashboardView .dash-m-metrics b{
+  font-family:'Rajdhani',sans-serif; font-size:22px; color:#12233B;
+  display:block; margin-top:2px;
+}
+#busDashboardView .dash-m-section{
+  background:#fff; border:1px solid #E3ECF8; border-radius:16px;
+  padding:18px; margin:0 16px 16px;
+  box-shadow:0 8px 22px rgba(30,68,130,.06);
+}
+#busDashboardView .dash-m-title{
+  font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.5px; color:#12233B;
+  margin-bottom:12px;
+}
+#busDashboardView .dash-m-card-empty{
+  border:1.5px dashed #D5E4F5; border-radius:12px;
+  padding:16px; font-size:13px; color:#8CA0BC; text-align:center;
+}
+
+/* ── Responsive ── */
+@media(max-width:1240px){
+  #busDashboardView .dash-top-row{ grid-template-columns:1fr 1fr; }
+  #busDashboardView .dash-stat-card{ min-height:168px; }
+  #busDashboardView .dash-range-btn{ min-height:120px; }
+}
+@media(max-width:900px){
+  #busDashboardView .dash-container{ padding:20px 18px 60px; }
+  #busDashboardView .dash-svctype-row{ padding:14px 18px 0; }
+  #busDashboardView .dash-header{ padding:12px 16px; }
+  #busDashboardView .dash-mid-row{ grid-template-columns:1fr; }
+  #busDashboardView .dash-panel{ padding:18px 16px 20px; }
+}
+@media(max-width:700px){
+  #busDashboardView .dash-m-metrics{ grid-template-columns:1fr 1fr; }
+  #busDashboardView .dash-cat-row{ grid-template-columns:auto 1fr; }
+  #busDashboardView .dash-cat-bar-wrap{ grid-column:2; }
+}
+
+/* ── Dark mode ── */
+body.dark-mode #busDashboardView .dash-panel{
+  background:#131E2E;
+  border-color:#27374F;
+  box-shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.3);
+}
+body.dark-mode #busDashboardView .dash-panel:hover{ border-color:#3A4F72; }
+body.dark-mode #busDashboardView .dash-panel .dash-section-title{ color:#E8EEF5; }
+body.dark-mode #busDashboardView .dash-filter-card,
+body.dark-mode #busDashboardView .dash-stat-card,
+body.dark-mode #busDashboardView .dash-range-btn,
+body.dark-mode #busDashboardView .dash-prob-card,
+body.dark-mode #busDashboardView .dash-sol-list,
+body.dark-mode #busDashboardView .dash-ranklist-wrap{
+  background:#131E2E; border-color:#27374F;
+}
+body.dark-mode #busDashboardView .dash-stat-lbl{ color:#8FA0B8; }
+body.dark-mode #busDashboardView .dash-stat-val{ color:#E8EEF5; }
+body.dark-mode #busDashboardView .dash-stat-sub{ color:#8FA0B8; }
+body.dark-mode #busDashboardView .dash-filter-select{
+  background:#0F1A28; border-color:#2A3B52; color:#E8EEF5;
+}
+body.dark-mode #busDashboardView .dash-filter-select:focus{ background:#0F1A28; border-color:#4E93FA; }
+body.dark-mode #busDashboardView .dash-range-btn{ background:#0F1A28; }
+body.dark-mode #busDashboardView .dash-range-ic{
+  background:#1C2A3D; border-color:#2A3B52; color:#4E93FA;
+}
+body.dark-mode #busDashboardView .dash-prob-name{ color:#E8EEF5; }
+body.dark-mode #busDashboardView .dash-prob-count{ color:#8FA0B8; }
+body.dark-mode #busDashboardView .dash-sol-row{ border-color:#1E2C40; }
+body.dark-mode #busDashboardView .dash-sol-row:hover{ background:#0F1A28; }
+body.dark-mode #busDashboardView .dash-sol-name{ color:#E8EEF5; }
+body.dark-mode #busDashboardView .dash-other-row,
+body.dark-mode #busDashboardView .dash-cat-row,
+body.dark-mode #busDashboardView .dash-loc-row{
+  background:#0F1A28; border-color:#22324A;
+}
+body.dark-mode #busDashboardView .dash-other-row:hover,
+body.dark-mode #busDashboardView .dash-cat-row:hover,
+body.dark-mode #busDashboardView .dash-loc-row:hover{ border-color:#3A4F72; }
+body.dark-mode #busDashboardView .dash-op-name,
+body.dark-mode #busDashboardView .dash-cat-name,
+body.dark-mode #busDashboardView .dash-loc-name{ color:#E8EEF5; }
+body.dark-mode #busDashboardView .dash-cat-pct-lbl,
+body.dark-mode #busDashboardView .dash-op-donut-lbl{ color:#8FA0B8; }
+body.dark-mode #busDashboardView .dash-ranklist thead th{
+  background:#0F1A28; color:#8FA0B8; border-color:#22324A;
+}
+body.dark-mode #busDashboardView .dash-ranklist tbody td{
+  color:#C7D5E8; border-color:#1E2C40;
+}
+body.dark-mode #busDashboardView .dash-ranklist tbody tr:hover td{ background:#0F1A28; }
+body.dark-mode #busDashboardView .dash-rank-count-val{ color:#E8EEF5; }
+body.dark-mode #busDashboardView .dash-show-more-row{ border-color:#2A3B52; }
+body.dark-mode #busDashboardView .dash-show-more-btn{ background:#1C2A3D; color:#4E93FA; }
+body.dark-mode #busDashboardView .dash-show-more-btn:hover{ background:#22334B; }
+body.dark-mode #busDashboardView .dash-panel-alert{
+  background:linear-gradient(180deg,#221516,#1D1111);
+  border-color:#5C2A2A;
+}
+body.dark-mode #busDashboardView .dash-panel-alert .dash-section-title{ color:#F2A0A0; }
+body.dark-mode #busDashboardView .dash-panel-alert:hover{ border-color:#7A3434; }
+body.dark-mode #busDashboardView .dash-empty-txt{
+  background:#0F1A28; border-color:#2A3B52; color:#8FA0B8;
+}
+body.dark-mode #busDashboardView .dash-m-metrics > div,
+body.dark-mode #busDashboardView .dash-m-section{
+  background:#131E2E; border-color:#27374F;
+}
+body.dark-mode #busDashboardView .dash-m-metrics b,
+body.dark-mode #busDashboardView .dash-m-title{ color:#E8EEF5; }
+body.dark-mode #busDashboardView .dash-m-card-empty{
+  background:#0F1A28; border-color:#2A3B52; color:#8FA0B8;
+}
+
