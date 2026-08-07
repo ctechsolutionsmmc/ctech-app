@@ -555,7 +555,7 @@ function renderTvmTable(){
   var body=document.getElementById('tvmRptTableBody');
   document.getElementById('tvmRptCount').textContent=tvmRptFiltered.length+' nəticə';
   if(tvmRptFiltered.length===0){
-    body.innerHTML='<tr><td colspan="5"><div class="rpt-empty">Məlumat tapılmadı</div></td></tr>';
+    body.innerHTML='<tr><td colspan="6"><div class="rpt-empty">Məlumat tapılmadı</div></td></tr>';
     document.getElementById('tvmRptLoadMoreWrap').style.display='none';
     return;
   }
@@ -565,11 +565,16 @@ function renderTvmTable(){
     var ticketId=escapeHtml(row['Ticket ID']||'');
     var safeId=(row['Ticket ID']||'').replace(/'/g,'');
     var editable=canEditTvmTicket(row);
+    var st=String(row['Status']||'').trim();
+    var stStyle = st==='Qiymətləndirilir' ? 'color:#1B4A8A;background:#E6F1FB;border:1px solid #CFE0F7;'
+      : st==='Bağlandı' ? 'color:#188A4B;background:#E5F6ED;border:1px solid #BFE8D2;'
+      : 'color:#5C7089;background:#F0F5FC;border:1px solid #DCE6F5;';
     html+='<tr>'
       +'<td class="rpt-td-id">'+ticketId+'</td>'
       +'<td>'+escapeHtml(row['Tarix']||'')+'</td>'
       +'<td class="rpt-td-plate">'+escapeHtml(row['TVM SN']||'')+'</td>'
       +'<td class="col-carrier" title="'+escapeHtml(row['TVM Lokasiya']||'')+'">'+escapeHtml(row['TVM Lokasiya']||'')+'</td>'
+      +'<td class="col-status"><span class="dv-status-chip" style="'+stStyle+'">'+escapeHtml(st||'—')+'</span></td>'
       +'<td class="col-act"><div class="rpt-row-actions">'
       +'<button class="rpt-icon-btn" onclick="openTvmDetail(\''+safeId+'\')" aria-label="Baxış" title="Baxış"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>'
       +(editable?'<button class="rpt-icon-btn rpt-edit-btn" onclick="openTvmServiceForEdit(\''+safeId+'\')" aria-label="Redaktə et" title="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>':'')
@@ -587,7 +592,7 @@ function renderTvmTable(){
 function tvmRptShowMore(){ tvmRptShownCount+=tvmRptPageSize; renderTvmTable(); }
 
 var TVM_DV_FIELD_MAP=[
-  {section:'Servis məlumatları',rows:[['Tarix','Tarix'],['Bildirilmə Saatı','Bildirilmə Saatı']]},
+  {section:'Servis məlumatları',rows:[['Status','Status'],['Tarix','Tarix'],['Bildirilmə Saatı','Bildirilmə Saatı']]},
   {section:'Validator məlumatları',rows:[['TVM SN','TVM SN'],['TVM Lokasiya','TVM Lokasiya'],['Servis Lokasiyası','Servis Lokasiyası']]},
   {section:'Problem və həll',rows:[['Problem','Problem'],['Həll','Həll'],['Qeyd','Qeyd'],['Köhnə SN','Köhnə SN'],['Yeni SN','Yeni SN']]},
   {section:'Vaxt məlumatları',rows:[['Başlanğıc','Başlanğıc'],['Bitiş','Bitiş']]},

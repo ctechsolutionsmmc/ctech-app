@@ -2,9 +2,12 @@
    CTECH SERVICE PLATFORM — CTD.CSS
    Desktop əsas menyu dizaynı (ctd-*) — yalnız masaüstü (≥901px)
    Hero banner, topbar, profil çipi, modul kartları, widget-lər
-   Dark mode: yalnız bu faylın elementlərinə aid hissələr
+   Light dizayn: açıq göy-boz fon (#EBF1FA), ağ kartlar, mavi aksentlər
+   Qeyd: Yalnız vizual dəyişikliklər — HTML/JS dəyişmir, bütün
+   .ctd-* ID/klasslar qorunur. Guest hero (.ctd-hero.guest-hero)
+   toxunulmur — o, köhnə tünd görünüşündə qalır.
    ================================================================ */
- 
+
 /* ═══════════════════════════════════════════════════════════════
    YENİ ƏSAS MENYU DİZAYNI (CTD = CTech Dashboard) — YALNIZ VEB/MASAÜSTÜ
    Mobil versiya bu bloka görə HEÇ dəyişmir (bütün .ctd-* elementləri
@@ -179,98 +182,143 @@
   .ctd-stat-card{
     position:relative; overflow:hidden;
     display:flex; align-items:flex-start; gap:14px;
-    background:rgba(255,255,255,0.96); border:1px solid rgba(255,255,255,0.6);
-    backdrop-filter:blur(8px); border-radius:18px; padding:18px 20px 22px;
-    box-shadow:0 18px 40px -24px rgba(5,14,28,0.55);
+    background:#FFFFFF; border:1px solid #DDE8F5;
+    border-radius:18px; padding:18px 20px 22px;
+    box-shadow:0 14px 30px -18px rgba(12,26,48,0.18);
     transition:transform .16s ease, box-shadow .16s ease;
   }
-  .ctd-stat-card:hover{ transform:translateY(-3px); box-shadow:0 24px 46px -22px rgba(5,14,28,0.62); }
+  .ctd-stat-card:hover{ transform:translateY(-3px); box-shadow:0 20px 38px -20px rgba(12,26,48,0.24); }
   .ctd-stat-icon{ width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:inset 0 0 0 1px rgba(18,35,59,0.06); }
   .ctd-stat-body{ display:flex; flex-direction:column; gap:3px; min-width:0; }
-  .ctd-stat-label{ font-size:12px; font-weight:600; color:#33445E; white-space:nowrap; }
+  .ctd-stat-label{ font-size:12px; font-weight:600; color:#5C7089; white-space:nowrap; }
   .ctd-stat-value{ font-family:'Space Grotesk','Inter',sans-serif; font-size:28px; font-weight:700; color:#12233B; line-height:1.05; }
-  .ctd-stat-sub{ font-size:11px; color:#8A97A6; }
+  .ctd-stat-sub{ font-size:11px; color:#94A3B8; }
   .ctd-stat-card::after{ content:''; position:absolute; left:0; bottom:0; height:4px; width:52px; border-radius:0 6px 6px 0; }
   .ctd-stat-card:nth-child(1)::after{ background:#2F6FED; }
-  .ctd-stat-card:nth-child(2)::after{ background:#0E8C7A; }
-  .ctd-stat-card:nth-child(3)::after{ background:#C9821B; }
-  .ctd-stat-card:nth-child(4)::after{ background:#7C5CD6; }
+  .ctd-stat-card:nth-child(2)::after{ background:#10B981; }
+  .ctd-stat-card:nth-child(3)::after{ background:#F59E0B; }
+  .ctd-stat-card:nth-child(4)::after{ background:#94A3B8; }
 
   /* ── Bus əməliyyatları bölməsi ── */
-  .ctd-content-top-wrap{ position:relative; z-index:3; background:linear-gradient(180deg, #DDE4ED 0%, #C7D1DD 100%); padding-top:56px; margin-top:-160px; padding-bottom:50px; }
+  .ctd-content-top-wrap{ position:relative; z-index:3; background:#EBF1FA; padding-top:56px; margin-top:-160px; padding-bottom:50px; }
   .ctd-content-top{ padding:0 40px; }
   .ctd-content-grid{ display:grid; grid-template-columns:1.6fr 1fr; gap:18px; align-items:stretch; }
   .ctd-widget-stack{ display:flex; flex-direction:column; gap:18px; }
   .ctd-section-label{ display:flex; align-items:center; gap:10px; margin:0 0 16px 4px; }
-  .ctd-section-label span{ font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#5B6B7F; }
-  .ctd-section-label.on-dark span{ color:#DCE7F7; }
-  .ctd-section-label.on-dark .rule{ background:#9FC2FF; }
+  .ctd-section-label span{ font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#2F6FED; }
+  .ctd-section-label .rule{ width:26px; height:2px; border-radius:2px; background:#2F6FED; }
+  .ctd-section-label.on-dark span{ color:#2F6FED; }
+  .ctd-section-label.on-dark .rule{ background:#2F6FED; }
 
   .ctd-module-card{
-    background:rgba(12,25,42,0.92); border:1px solid rgba(255,255,255,0.16); backdrop-filter:blur(10px);
+    background:#FFFFFF; border:1px solid #DDE8F5;
     border-radius:18px; padding:20px;
-    box-shadow:0 14px 34px -16px rgba(8,16,30,0.5);
+    box-shadow:0 14px 30px -18px rgba(12,26,48,0.16);
     display:flex; flex-direction:column;
   }
   .ctd-module-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
   .ctd-module-icon{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .ctd-module-icon.blue{ background:rgba(47,111,237,0.28); color:#9FC2FF; }
-  .ctd-module-icon.teal{ background:rgba(14,140,122,0.28); color:#7BDCC9; }
-  .ctd-module-title{ font-size:15px; font-weight:600; color:#fff; }
-  .ctd-module-desc{ font-size:12px; color:#AEBED3; margin-top:1px; }
+  .ctd-module-icon.blue{ background:#EAF1FE; color:#2F6FED; }
+  .ctd-module-icon.teal{ background:#E4F5F2; color:#0E8C7A; }
+  .ctd-module-title{ font-size:15px; font-weight:600; color:#12233B; }
+  .ctd-module-desc{ font-size:12px; color:#5C7089; margin-top:1px; }
   .ctd-module-actions{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-top:16px; }
   .ctd-action-btn{
     display:flex; flex-direction:column; align-items:flex-start; gap:7px;
-    padding:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); border-radius:10px;
+    padding:12px; background:#EAF1FE; border:1px solid #CFE0F7; border-radius:10px;
     cursor:pointer; transition:border-color .15s ease, background .15s ease, transform .15s ease;
   }
-  .ctd-action-btn:hover{ border-color:#9FC2FF; background:rgba(255,255,255,0.1); transform:translateY(-1px); }
-  .ctd-action-btn .a-icon{ color:#9FC2FF; }
-  .ctd-action-btn .a-label{ font-size:11.5px; font-weight:500; color:#EAF0F9; }
+  .ctd-action-btn:hover{ border-color:#2F6FED; background:#EBF1FA; transform:translateY(-1px); }
+  .ctd-action-btn .a-icon{ color:#2F6FED; }
+  .ctd-action-btn .a-label{ font-size:11.5px; font-weight:500; color:#12233B; }
 
   .ctd-mini-widget{
-    background:rgba(12,25,42,0.85); border:1px solid rgba(255,255,255,0.16); backdrop-filter:blur(10px);
+    background:#FFFFFF; border:1px solid #DDE8F5;
     border-radius:14px; padding:14px 16px;
     display:flex; align-items:center; gap:12px; flex:1;
-    box-shadow:0 1px 2px rgba(20,35,55,0.04), 0 12px 28px -18px rgba(20,35,55,0.18);
+    box-shadow:0 1px 2px rgba(20,35,55,0.04), 0 12px 26px -20px rgba(20,35,55,0.16);
     cursor:pointer; transition:transform .15s ease, border-color .15s ease;
   }
-  .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:rgba(255,255,255,0.3); }
-  .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:#c9d2dd; }
+  .ctd-mini-widget:hover{ transform:translateY(-2px); border-color:#2F6FED; }
   #guestDashboardCards .ctd-mini-widget{
     max-width:340px !important; background:rgba(13,27,45,0.32); border-color:rgba(255,255,255,0.22);
   }
+  /* Guest kartlarının mətnləri köhnə tünd görünüşdə qalır (guest hero toxunulmur) */
+  #guestDashboardCards .ctd-mini-title{ color:#FFFFFF; }
+  #guestDashboardCards .ctd-mini-desc{ color:#AEBED3; }
   .ctd-mini-icon{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .ctd-mini-icon.teal{ background:#E4F5F2; color:#0E8C7A; }
   .ctd-mini-icon.blue{ background:#EAF1FE; color:#2F6FED; }
-  .ctd-mini-title{ font-size:13px; font-weight:600; color:#fff; margin-bottom:1px; }
-  .ctd-mini-desc{ font-size:11px; color:#AEBED3; }
+  .ctd-mini-title{ font-size:13px; font-weight:600; color:#12233B; margin-bottom:1px; }
+  .ctd-mini-desc{ font-size:11px; color:#5C7089; }
 
   /* ── 2-ci banner bölməsi (TVM) ── */
   .ctd-banner2-section{ position:relative; margin-top:0; padding:56px 40px 210px; overflow:hidden; }
-  .ctd-banner2-bg{ position:absolute; inset:0; background-image:url('../dash-tvm-banner.webp'); background-size:cover; background-position:center 62%; background-repeat:no-repeat; }
-  .ctd-banner2-top-fade{ position:absolute; left:0; right:0; top:0; height:150px; background:linear-gradient(to bottom, #C7D1DD 0%, rgba(199,209,221,0) 100%); }
-  .ctd-banner2-scrim{ position:absolute; inset:0; background:linear-gradient(200deg, rgba(15,42,71,0.32) 0%, rgba(15,42,71,0.16) 30%, rgba(15,42,71,0.10) 55%, rgba(15,42,71,0.30) 100%); }
-  .ctd-banner2-fade-bottom{ position:absolute; left:0; right:0; bottom:0; height:190px; background:linear-gradient(to bottom, rgba(245,247,250,0) 0%, #F5F7FA 92%); }
+  .ctd-banner2-bg{ position:absolute; inset:0; background-image:url('../dash-tvm-banner.webp'); background-size:cover; background-position:center 55%; background-repeat:no-repeat; }
+  .ctd-banner2-top-fade{ position:absolute; left:0; right:0; top:0; height:150px; background:linear-gradient(to bottom, #EBF1FA 0%, rgba(235,241,250,0) 100%); }
+  .ctd-banner2-scrim{ position:absolute; inset:0; background:linear-gradient(200deg, rgba(15,42,71,0.20) 0%, rgba(15,42,71,0.08) 35%, rgba(15,42,71,0.14) 100%); }
+  .ctd-banner2-fade-bottom{ position:absolute; left:0; right:0; bottom:0; height:190px; background:linear-gradient(to bottom, rgba(235,241,250,0) 0%, #EBF1FA 92%); }
   .ctd-banner2-inner{ position:relative; z-index:2; display:flex; }
   .ctd-banner2-panel{ margin-left:auto; max-width:400px; width:100%; }
 
   .ctd-widget-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
   .ctd-widget-tile{
-    background:rgba(9,20,35,0.78); border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(14px);
-    border-radius:16px; padding:16px; box-shadow:0 10px 26px -14px rgba(6,14,26,0.5);
+    background:#FFFFFF; border:1px solid #DDE8F5;
+    border-radius:16px; padding:16px; box-shadow:0 14px 30px -20px rgba(6,14,26,0.28);
     transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; cursor:pointer;
   }
-  .ctd-widget-tile:hover{ transform:translateY(-2px); border-color:rgba(255,255,255,0.34); box-shadow:0 14px 30px -14px rgba(6,14,26,0.55); }
+  .ctd-widget-tile:hover{ transform:translateY(-2px); border-color:#2F6FED; box-shadow:0 18px 34px -20px rgba(6,14,26,0.32); }
   .ctd-widget-icon{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
-  .ctd-widget-icon.amber{ background:rgba(201,130,27,0.3); color:#F5C579; }
-  .ctd-widget-icon.teal{ background:rgba(14,140,122,0.3); color:#7BDCC9; }
-  .ctd-widget-icon.blue{ background:rgba(47,111,237,0.3); color:#9FC2FF; }
-  .ctd-widget-title{ font-size:13.5px; font-weight:600; color:#fff; margin-bottom:3px; }
-  .ctd-widget-desc{ font-size:11px; color:#B9C7DC; line-height:1.4; }
+  .ctd-widget-icon.amber{ background:#FDF3E3; color:#C9821B; }
+  .ctd-widget-icon.teal{ background:#E4F5F2; color:#0E8C7A; }
+  .ctd-widget-icon.blue{ background:#EAF1FE; color:#2F6FED; }
+  .ctd-widget-title{ font-size:13.5px; font-weight:600; color:#12233B; margin-bottom:3px; }
+  .ctd-widget-desc{ font-size:11px; color:#5C7089; line-height:1.4; }
   .ctd-icon-btn { display:none !important; }
   #themeToggleBtn { display:none !important; }
-  .ctd-footer{ text-align:center; font-size:12px; color:#8A97A6; padding:24px 0 40px; position:relative; z-index:3; background:#F5F7FA; }
+  .ctd-footer{ text-align:center; font-size:12px; color:#5C7089; padding:24px 0 40px; position:relative; z-index:3; background:#EBF1FA; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     LIGHT THEME OVERRIDES — yalnız daxil olmuş (non-guest) istifadəçi
+     Guest hero (.ctd-hero.guest-hero) tünd görünüşündə qalır.
+     Yalnız vizual xüsusiyyətlər: rəng, fon, haşiyə, kölgə, mətn rəngi.
+     ═══════════════════════════════════════════════════════════════ */
+  .ctd-hero:not(.guest-hero){ background:#EBF1FA; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-bg{ display:none; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-blur{ display:none; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-scrim{ background:transparent; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-fade{ background:#EBF1FA; }
+
+  .ctd-hero:not(.guest-hero) .ctd-topbar{
+    background:rgba(255,255,255,0.95);
+    border-bottom:1px solid #E3EAF3;
+    backdrop-filter:blur(8px);
+  }
+  .ctd-hero:not(.guest-hero) .ctd-brand{ color:#12233B; }
+  .ctd-hero:not(.guest-hero) .ctd-brand .accent{ color:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-platform-title{ color:#12233B; }
+  .ctd-hero:not(.guest-hero) .ctd-platform-title .accent{ color:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-nav-btn{ background:#EAF1FE; border-color:#CFE0F7; color:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-nav-btn svg{ stroke:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-nav-btn:hover{ background:#EBF1FA; border-color:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-nav-btn.ctd-signout{ background:#FEEBEB; border-color:#F5C6C6; }
+  .ctd-hero:not(.guest-hero) .ctd-nav-btn.ctd-signout:hover{ background:#FBDCDC; }
+  .ctd-hero:not(.guest-hero) .ctd-clock-pill{
+    background:#FFFFFF; border-color:#DDE8F5; color:#12233B;
+    box-shadow:0 2px 10px rgba(12,26,48,0.08);
+  }
+  .ctd-hero:not(.guest-hero) .ctd-user-chip{
+    background:#FFFFFF; border-color:#DDE8F5;
+    box-shadow:0 2px 10px rgba(12,26,48,0.08);
+  }
+  .ctd-hero:not(.guest-hero) .ctd-user-chip:hover{ background:#F5F9FF; }
+  .ctd-hero:not(.guest-hero) .ctd-avatar{ background:#EAF1FE; color:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-uname{ color:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-urole{ color:#5C7089; }
+  .ctd-hero:not(.guest-hero) .ctd-chip-caret{ color:#12233B; }
+  .ctd-hero:not(.guest-hero) .ctd-welcome{ color:#12233B; }
+  .ctd-hero:not(.guest-hero) .ctd-welcome span{ color:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-subwelcome{ color:#5C7089; }
 
   @media (max-width:1240px){
     .ctd-content-grid{ grid-template-columns:1fr; }
@@ -281,4 +329,3 @@
     .ctd-stat-row{ grid-template-columns:repeat(2,1fr); }
   }
 }
-
