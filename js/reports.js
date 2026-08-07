@@ -2981,14 +2981,20 @@ function loadTvmFormData(){
 }
 
 function openTvmServiceForEdit(ticketId){
-  var ov = document.getElementById('busOpenOverlay'); if(ov) ov.style.display = 'flex';
+  var ov = document.getElementById('tvmOpenOverlay') || document.getElementById('busOpenOverlay');
+  if(ov) ov.style.display = 'flex';
   var ensureFormData = (tvmFormData && tvmFormData.tvmLeaders) ? Promise.resolve(tvmFormData) :
-    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK') tvmFormData=d; return tvmFormData; });
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmFormData'})}).then(function(r){return r.json();}).then(function(d){ if(d.status==='OK') tvmFormData=d; return tvmFormData; })
+    .catch(function(){ return tvmFormData; }); // şəbəkə xətası olarsa, keşlə davam et (bus-da olduğu kimi)
   ensureFormData.then(function(){
-    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmServiceById',ticketId:ticketId})}).then(function(r){return r.json();});
+    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmServiceById',ticketId:ticketId})}).then(function(r){return r.json();}).catch(function(){ return { status:'ERROR', message:'Server cavabı oxuna bilmədi (şəbəkə/JSON xətası)' }; });
   }).then(function(d){
     if(ov) ov.style.display = 'none';
-    if(d.status !== 'OK'){ alert(d.message||'Ticket yüklənə bilmədi'); return; }
+    if(!d || d.status !== 'OK'){
+      var errMsg = (d && d.message) || (d && d.error && d.error.message) || 'Ticket yüklənə bilmədi';
+      alert(errMsg);
+      return;
+    }
 
     tvmEditMode = true; tvmEditTicketId = ticketId; tvmReturnTarget = 'report';
     resetTvmFormFields();
@@ -3024,7 +3030,7 @@ function openTvmServiceForEdit(ticketId){
     if(d.team_leader) setDDValue('tvm_leader', d.team_leader);
 
     tvmFormDirty = false;
-  }).catch(function(){ if(ov) ov.style.display = 'none'; alert('Şəbəkə xətası: ticket yüklənə bilmədi'); });
+  }).catch(function(e){ if(ov) ov.style.display = 'none'; alert('Xəta: ' + ((e && e.message) ? e.message : 'ticket yüklənə bilmədi')); });
 }
 
 function resetTvmFormFields(){
