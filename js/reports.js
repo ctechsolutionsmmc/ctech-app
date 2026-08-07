@@ -3461,38 +3461,95 @@ function submitAdminNotification(){
   });
 }
 
-// ── ADMIN PANEL: HOME DASHBOARDS (stat kartların konfiqurasiyası) ──
-var HOME_DASH_METRICS = [
-  { value:'bus_open', label:'Açıq Servislər (Bus)' },
-  { value:'bus_today', label:'Bugünkü Servislər (Bus)' },
-  { value:'bus_active_tech', label:'Aktiv Texniklər (Bus)' },
-  { value:'bus_latest', label:'Son Servis (Bus)' },
-  { value:'none', label:'Heç biri (boş)' }
+// ── ADMIN PANEL: HOME DASHBOARDS (4 stat kartın konfiqurasiyası) ──
+// Hər qutucuq üçün BUS və TVM-dən seçimlər: ümumi ölçülər + problemlər, həllər,
+// lokasiyalar, daşıyıcılar, texniklər, qrup rəhbərləri. Siyahılar getFormData /
+// getTvmFormData-dan gəlir — sheet-də nə varsa burada seçim kimi görünür.
+var DEFAULT_HOME_DASH_CONFIG = [
+  { metric:'bus_open',        title:'Açıq servislər' },
+  { metric:'bus_today',       title:'Bugünkü servislər' },
+  { metric:'bus_active_tech', title:'Aktiv texnik' },
+  { metric:'bus_latest',      title:'Son daxil olan' }
 ];
 var admHomeDashConfig = [];
+
+function buildHomeDashOptionGroups(){
+  var groups=[];
+  function add(label, items){ if(items && items.length) groups.push({label:label, items:items}); }
+  function item(prefix, name){ return { value: prefix + ':' + name, label: name }; }
+  var bf=bsFormData||{}, tf=tvmFormData||{};
+  add('Bus · Ümumi ölçülər', [
+    { value:'bus_open', label:'Açıq servislər' },
+    { value:'bus_today', label:'Bugünkü servislər' },
+    { value:'bus_active_tech', label:'Aktiv texnik (bugün)' },
+    { value:'bus_latest', label:'Son daxil olan servis' },
+    { value:'bus_total', label:'Ümumi servis (son 1 gün)' }
+  ]);
+  add('Bus · Daşıyıcılar', (bf.carriers||[]).map(function(n){ return item('bus_carrier', n); }));
+  add('Bus · Problemlər', (bf.busProblems||[]).map(function(n){ return item('bus_problem', n); }));
+  add('Bus · Həllər', (bf.solutions||[]).map(function(n){ return item('bus_solution', n); }));
+  add('Bus · Lokasiyalar', (bf.locations||[]).map(function(n){ return item('bus_location', n); }));
+  add('Bus · Texniklər', (bf.technicians||[]).map(function(n){ return item('bus_tech', n); }));
+  add('Bus · Qrup rəhbərləri', (bf.leaders||[]).map(function(n){ return item('bus_leader', n); }));
+  add('TVM · Ümumi ölçülər', [
+    { value:'tvm_open', label:'Açıq (Qiymətləndirilir)' },
+    { value:'tvm_today', label:'Bugünkü servislər' },
+    { value:'tvm_active_tech', label:'Aktiv texnik (bugün)' },
+    { value:'tvm_total', label:'Ümumi servis (son 1 gün)' }
+  ]);
+  add('TVM · Problemlər', (tf.tvmFaults||[]).map(function(n){ return item('tvm_problem', n); }));
+  add('TVM · Həllər', (tf.tvmSolutions||[]).map(function(n){ return item('tvm_solution', n); }));
+  var tvmLocs=[];
+  (tf.tvmRegistry||[]).forEach(function(r){ if(r && r.location && tvmLocs.indexOf(r.location)===-1) tvmLocs.push(r.location); });
+  add('TVM · Lokasiyalar', tvmLocs.map(function(n){ return item('tvm_location', n); }));
+  add('TVM · Texniklər', (tf.technicians||[]).map(function(n){ return item('tvm_tech', n); }));
+  add('TVM · Qrup rəhbərləri', (tf.tvmLeaders||[]).map(function(n){ return item('tvm_leader', n); }));
+  return groups;
+}
+function homeDashOptionsHtml(selectedMetric){
+  var html='<option value="none">Heç biri (boş)</option>';
+  buildHomeDashOptionGroups().forEach(function(g){
+    html+='<optgroup label="'+escapeHtml(g.label)+'">';
+    g.items.forEach(function(m){
+      html+='<option value="'+escapeHtml(m.value)+'"'+(m.value===selectedMetric?' selected':'')+'>'+escapeHtml(m.label)+'</option>';
+    });
+    html+='</optgroup>';
+  });
+  return html;
+}
 
 function loadAdminHomeDashboard(){
   var box=document.getElementById('admHomeDashSlots');
   box.innerHTML='<div class="adm-empty">Yüklənir...</div>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if(d.status!=='OK'){ box.innerHTML='<div class="adm-empty">Xəta baş verdi</div>'; return; }
-    admHomeDashConfig = d.config || [];
+  // Paralel: hazırki konfiqurasiya + BUS siyahıları + TVM siyahıları
+  var cfgP=fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
+    .then(function(r){return r.json();}).catch(function(){ return {status:'ERR'}; });
+  var busP=(bsFormData && bsFormData.busProblems)
+    ? Promise.resolve({status:'OK'})
+    : fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})})
+        .then(function(r){return r.json();}).catch(function(){ return {status:'ERR'}; });
+  var tvmP=(tvmFormData && tvmFormData.tvmFaults)
+    ? Promise.resolve({status:'OK'})
+    : fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmFormData'})})
+        .then(function(r){return r.json();}).catch(function(){ return {status:'ERR'}; });
+  Promise.all([cfgP, busP, tvmP]).then(function(res){
+    var d=res[0], bf=res[1], tf=res[2];
+    if(bf && bf.status==='OK') bsFormData=bf;
+    if(tf && tf.status==='OK') tvmFormData=tf;
+    var config=(d && d.status==='OK') ? (d.config||[]) : [];
+    // Boşdursa default 4 qutucuğu göstər ki, admin hər şeyi görsün
+    if(!config || config.length===0) config=DEFAULT_HOME_DASH_CONFIG.slice();
+    admHomeDashConfig=config;
     renderHomeDashSlots();
-  })
-  .catch(function(){ box.innerHTML='<div class="adm-empty">Şəbəkə xətası</div>'; });
+  }).catch(function(){ box.innerHTML='<div class="adm-empty">Şəbəkə xətası</div>'; });
 }
 function renderHomeDashSlots(){
   var box=document.getElementById('admHomeDashSlots');
   box.innerHTML = admHomeDashConfig.map(function(c, idx){
-    var options = HOME_DASH_METRICS.map(function(m){
-      return '<option value="'+m.value+'"'+(m.value===c.metric?' selected':'')+'>'+m.label+'</option>';
-    }).join('');
     return '<div class="adm-msg-compose" style="margin-bottom:0;">'
       + '<div class="adm-msg-compose-title">Qutucuq '+(idx+1)+'</div>'
-      + '<div class="adm-form-field"><label>Başlıq</label><input type="text" data-slot-title="'+idx+'" value="'+escapeHtml(c.title)+'"></div>'
-      + '<div class="adm-form-field" style="margin-bottom:0;"><label>Göstərilən Məlumat</label><select data-slot-metric="'+idx+'">'+options+'</select></div>'
+      + '<div class="adm-form-field"><label>Başlıq</label><input type="text" data-slot-title="'+idx+'" value="'+escapeHtml(c.title||'')+'"></div>'
+      + '<div class="adm-form-field" style="margin-bottom:0;"><label>Göstərilən Məlumat</label><select data-slot-metric="'+idx+'">'+homeDashOptionsHtml(c.metric)+'</select></div>'
       + '</div>';
   }).join('');
 }
@@ -3514,7 +3571,7 @@ function submitDashboardConfig(){
   .catch(function(e){ errEl.textContent='Şəbəkə xətası: '+e.message; errEl.style.display='block'; });
 }
 
-// ── DASHBOARD: stat kartlarının real datası ──
+// ── DASHBOARD: 4 stat kartının real datası (BUS + TVM, admin konfiqurasiyasına görə) ──
 function loadHomeDashStats(){
   if(window.innerWidth < 901) return; // yalnız desktop görünüşdə lazımdır
   var dashVisible = document.getElementById('dashboardView') && document.getElementById('dashboardView').style.display !== 'none';
@@ -3523,57 +3580,108 @@ function loadHomeDashStats(){
     badge.style.display = 'flex';
     setTimeout(function(){ badge.style.display = 'none'; }, 2500);
   }
-  // ── Paralel: konfiqurasiya və statistik məlumat EYNİ ANDA çəkilir.
-  // Əvvəlki versiya ardıcıl idi (config → sonra data) — indi bir raund
-  // şəbəkə gediş-gəlişi qənaət olunur və kartlar daha tez dolur.
+  // Konfiqurasiya + BUS data + TVM data — paralel çəkilir.
+  // Konfiqurasiya gəlməsə/boş olsa belə DEFAULT_HOME_DASH_CONFIG işlədilir —
+  // kartlar həmişə data göstərir (əvvəl boş konfiqda "—" qalırdı).
   var cfgP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
     .then(function(r){ return r.json(); })
     .catch(function(){ return {status:'ERR'}; });
-  var dataP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:1})})
+  var busP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:1})})
     .then(function(r){ return r.json(); })
     .catch(function(){ return {status:'ERR'}; });
-  Promise.all([cfgP, dataP]).then(function(res){
-    var d=res[0], rd=res[1];
-    if(!d || d.status!=='OK') return;
-    var config=d.config||[];
-    var titleEls=Array.from(document.querySelectorAll('.ctd-stat-card .ctd-stat-label'));
-    config.forEach(function(c, idx){ if(titleEls[idx]) titleEls[idx].textContent=c.title; });
-    if(!rd || rd.status!=='OK') return;
-    var rows=rd.rows||[];
+  var tvmP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData', daysBack:1})})
+    .then(function(r){ return r.json(); })
+    .catch(function(){ return {status:'ERR'}; });
+  Promise.all([cfgP, busP, tvmP]).then(function(res){
+    var d=res[0], bd=res[1], td=res[2];
+    var config=(d && d.status==='OK' && d.config && d.config.length) ? d.config : DEFAULT_HOME_DASH_CONFIG;
+    var busRows=(bd && bd.status==='OK') ? (bd.rows||[]) : [];
+    var tvmRows=(td && td.status==='OK') ? (td.rows||[]) : [];
     var todayStr=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baku',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date()).split('/').join('.');
-    config.forEach(function(c, idx){
-      if(c.metric==='bus_open'){
-        var v=rows.filter(function(r){
-          var st=(r['Status']||'').trim();
-          return st==='Təhkim Edildi' || st==='Texnik Tamamladı';
-        }).length;
-        setHomeDashSlotValue(idx, v);
-      } else if(c.metric==='bus_today'){
-        var v2=rows.filter(function(r){return (r['Tarix']||'').trim()===todayStr;}).length;
-        setHomeDashSlotValue(idx, v2);
-      } else if(c.metric==='bus_active_tech'){
-        var names={};
-        rows.forEach(function(r){
-          if((r['Tarix']||'').trim()!==todayStr) return;
-          if(r['1. Texnik']) names[r['1. Texnik'].trim()]=true;
-          if(r['2. Texnik']) names[r['2. Texnik'].trim()]=true;
-        });
-        setHomeDashSlotValue(idx, Object.keys(names).length);
-      } else if(c.metric==='bus_latest'){
-        if(rows.length>0){
-          var latest=rows[0];
-          var timeEl=document.getElementById('dashStatLatestTime');
-          var infoEl=document.getElementById('dashStatLatestInfo');
-          if(timeEl) timeEl.textContent=latest['Tarix']||'—';
-          if(infoEl) infoEl.textContent=(latest['Daşıyıcı']||'')+' · '+(latest['D.Q.N.']||'');
-        }
-      }
-    });
+    var cards=document.querySelectorAll('.ctd-stat-card');
+    for(var i=0;i<4;i++){
+      var c=config[i] || DEFAULT_HOME_DASH_CONFIG[i];
+      var card=cards[i]; if(!card) continue;
+      var titleEl=card.querySelector('.ctd-stat-label');
+      var valEl=card.querySelector('.ctd-stat-value');
+      var subEl=card.querySelector('.ctd-stat-sub');
+      if(titleEl && c.title) titleEl.textContent=c.title;
+      var r=computeHomeDashMetric(c.metric, busRows, tvmRows, todayStr);
+      if(valEl) valEl.textContent=(r && r.value!=null) ? r.value : '—';
+      if(subEl) subEl.textContent=(r && r.sub) ? r.sub : '';
+    }
   });
 }
-function setHomeDashSlotValue(idx, val){
-  var ids=['dashStatOpen','dashStatToday','dashStatTech'];
-  if(idx<3 && document.getElementById(ids[idx])) document.getElementById(ids[idx]).textContent=val;
+function computeHomeDashMetric(metric, busRows, tvmRows, todayStr){
+  function isToday(r){ return String(r['Tarix']||'').trim()===todayStr; }
+  function todayRows(rows){ return rows.filter(isToday); }
+  function cntField(rows, field, name){
+    var n=String(name).toLowerCase();
+    var c=0;
+    rows.forEach(function(r){
+      if(String(r[field]||'').toLowerCase().indexOf(n)!==-1) c++;
+    });
+    return c;
+  }
+  if(metric==='bus_open'){
+    var open=busRows.filter(function(r){
+      var st=(r['Status']||'').trim();
+      return st==='Təhkim Edildi' || st==='Texnik Tamamladı';
+    }).length;
+    return {value:open, sub:'Bus Service'};
+  }
+  if(metric==='bus_today'){ return {value:todayRows(busRows).length, sub:'Bugün · Bus'}; }
+  if(metric==='bus_total'){ return {value:busRows.length, sub:'Son 1 gün · Bus'}; }
+  if(metric==='bus_active_tech'){
+    var names={};
+    todayRows(busRows).forEach(function(r){
+      if(r['1. Texnik']) names[String(r['1. Texnik']).trim()]=true;
+      if(r['2. Texnik']) names[String(r['2. Texnik']).trim()]=true;
+    });
+    return {value:Object.keys(names).length, sub:'Bugün · Bus'};
+  }
+  if(metric==='bus_latest'){
+    if(busRows.length>0){
+      var latest=busRows[0];
+      return {value:latest['Tarix']||'—', sub:(latest['Daşıyıcı']||'')+' · '+(latest['D.Q.N.']||'')};
+    }
+    return {value:'—', sub:'Bus'};
+  }
+  if(metric==='tvm_open'){
+    var tOpen=tvmRows.filter(function(r){ return String(r['Status']||'').trim()==='Qiymətləndirilir'; }).length;
+    return {value:tOpen, sub:'TVM Service'};
+  }
+  if(metric==='tvm_today'){ return {value:todayRows(tvmRows).length, sub:'Bugün · TVM'}; }
+  if(metric==='tvm_total'){ return {value:tvmRows.length, sub:'Son 1 gün · TVM'}; }
+  if(metric==='tvm_active_tech'){
+    var tNames={};
+    todayRows(tvmRows).forEach(function(r){ if(r['Texnik']) tNames[String(r['Texnik']).trim()]=true; });
+    return {value:Object.keys(tNames).length, sub:'Bugün · TVM'};
+  }
+  // Element seçimləri: "bus_problem:Sinif problemi" kimi → bugünkü sətirlərdə say
+  var m=/^(bus|tvm)_(problem|solution|location|carrier|tech|leader):(.*)$/.exec(metric||'');
+  if(m){
+    var src=m[1], kind=m[2], name=m[3].trim();
+    var rows=(src==='bus')?todayRows(busRows):todayRows(tvmRows);
+    var cnt=0;
+    if(src==='bus' && kind==='tech'){
+      // Bus texnik iki sütunda ola bilər (1. Texnik / 2. Texnik)
+      rows.forEach(function(r){
+        if(String(r['1. Texnik']||'').trim()===name || String(r['2. Texnik']||'').trim()===name) cnt++;
+      });
+    } else {
+      var fieldMap={
+        bus_problem:'Problem', bus_solution:'Həll', bus_location:'Servis yeri',
+        bus_carrier:'Daşıyıcı', bus_leader:'Qrup rəhbəri',
+        tvm_problem:'Problem', tvm_solution:'Həll', tvm_location:'TVM Lokasiya',
+        tvm_tech:'Texnik', tvm_leader:'Qrup rəhbəri'
+      };
+      var field=fieldMap[src+'_'+kind];
+      cnt=cntField(rows, field, name);
+    }
+    return {value:cnt, sub:(src==='bus'?'Bus':'TVM')+' · '+name};
+  }
+  return null;
 }
 
 
