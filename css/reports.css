@@ -1668,22 +1668,24 @@ body.dark-mode .tvmd-header{
   box-shadow:0 1px 0 rgba(0,0,0,.2), 0 10px 26px rgba(0,0,0,.35);
 }
 
-/* ── Başlıqlar: akcent zolağı ── */
+/* ── Başlıqlar: akcent zolağı + böyük, tünd ── */
 .dash-section-title{
-  display:flex; align-items:center; gap:8px;
+  display:flex; align-items:center; gap:9px;
+  font-size:15px; letter-spacing:.3px; text-transform:uppercase;
 }
 .dash-section-title::before{
-  content:""; width:4px; height:16px; border-radius:3px; flex-shrink:0;
+  content:""; width:4px; height:18px; border-radius:3px; flex-shrink:0;
   background:linear-gradient(180deg,#4E93FA,#2F6FED);
 }
 body.dark-mode .dash-section-title::before{
   background:linear-gradient(180deg,#5B9BF5,#2F6FED);
 }
 .tvmd-section-label{
-  display:flex; align-items:center; gap:8px;
+  display:flex; align-items:center; gap:9px;
+  font-size:14.5px; letter-spacing:.3px; text-transform:uppercase;
 }
 .tvmd-section-label::before{
-  content:""; width:4px; height:15px; border-radius:3px; flex-shrink:0;
+  content:""; width:4px; height:17px; border-radius:3px; flex-shrink:0;
   background:linear-gradient(180deg,#4E93FA,#2F6FED);
 }
 body.dark-mode .tvmd-section-label::before{
@@ -1721,12 +1723,49 @@ body.dark-mode .dash-stat-card:hover{
   box-shadow:0 20px 44px rgba(0,0,0,.4);
 }
 
-/* Üst akcent zolağı — dəyişiklik dərhal görünsün */
+/* ── Üst akcent zolağı — hər kartın öz rəngi (BUS) ── */
 .dash-stat-card::before, .tvmd-metric-card::before{
-  content:""; position:absolute; top:0; left:0; right:0; height:3px;
+  content:""; position:absolute; top:0; left:0; right:0; height:4px;
   background:linear-gradient(90deg,#4E93FA,#2F6FED);
 }
 .tvmd-metric-card{ position:relative; }
+.dash-stat-card{ position:relative; }
+.dash-top-row .dash-stat-card:nth-child(3)::before,
+.dash-stat-card:has(.dash-stat-icon-blue)::before{ background:linear-gradient(90deg,#5B9BF5,#2F6FED); }
+.dash-top-row .dash-stat-card:nth-child(4)::before,
+.dash-stat-card:has(.dash-stat-icon-green)::before{ background:linear-gradient(90deg,#34D399,#059669); }
+.dash-top-row .dash-stat-card:nth-child(5)::before,
+.dash-stat-card:has(.dash-stat-icon-purple)::before{ background:linear-gradient(90deg,#A78BFA,#7C3AED); }
+
+/* TVM metrik kartlar — öz rəngləri */
+.tvmd-metrics-row .tvmd-metric-card:nth-child(1)::before,
+.tvmd-metric-card:has(.tvmd-ic-blue)::before{ background:linear-gradient(90deg,#5B9BF5,#2F6FED); }
+.tvmd-metrics-row .tvmd-metric-card:nth-child(2)::before,
+.tvmd-metric-card:has(.tvmd-ic-teal)::before{ background:linear-gradient(90deg,#2DD4BF,#0E8C7A); }
+.tvmd-metrics-row .tvmd-metric-card:nth-child(3)::before,
+.tvmd-metric-card:has(.tvmd-ic-orange)::before{ background:linear-gradient(90deg,#FBBF24,#D97706); }
+.tvmd-metric-card:has(.tvmd-ic-green)::before{ background:linear-gradient(90deg,#34D399,#188A4B); }
+
+/* Dəyərlər — kart rənginə uyğun, daha böyük */
+.dash-top-row .dash-stat-card:nth-child(3) .dash-stat-val,
+.dash-stat-card:has(.dash-stat-icon-blue) .dash-stat-val{ color:#2F6FED; }
+.dash-top-row .dash-stat-card:nth-child(4) .dash-stat-val,
+.dash-stat-card:has(.dash-stat-icon-green) .dash-stat-val{ color:#059669; }
+.dash-top-row .dash-stat-card:nth-child(5) .dash-stat-val,
+.dash-stat-card:has(.dash-stat-icon-purple) .dash-stat-val{ color:#7C3AED; }
+.tvmd-metric-card:has(.tvmd-ic-blue) .tvmd-metric-value{ color:#2F6FED; }
+.tvmd-metric-card:has(.tvmd-ic-teal) .tvmd-metric-value{ color:#0E8C7A; }
+.tvmd-metric-card:has(.tvmd-ic-orange) .tvmd-metric-value{ color:#D97706; }
+.tvmd-metric-card:has(.tvmd-ic-green) .tvmd-metric-value{ color:#188A4B; }
+.dash-stat-val{ font-size:38px; }
+.tvmd-metric-value{ font-size:34px; }
+
+/* İkonlar hover-də böyüyür */
+.dash-stat-icon{ transition:transform .18s ease, box-shadow .18s ease; }
+.dash-stat-card:hover .dash-stat-icon{
+  transform:scale(1.1);
+  box-shadow:0 6px 14px rgba(30,68,130,.14);
+}
 
 /* Dəyər pop effekti */
 @keyframes dashValPop{
