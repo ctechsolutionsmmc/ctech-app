@@ -1755,9 +1755,10 @@ function loadTelegramTemplates(){
     if(d.status!=='OK'){ wrap.innerHTML='<div class="adm-empty">Xəta: '+escapeHtml(d.message||'')+'</div>'; return; }
     wrap.innerHTML=(d.templates||[]).map(function(t){
       var safeKey=t.key.replace(/'/g,'');
+      var isDaily=(t.key==='bus_daily_report'||t.key==='tvm_daily_report');
       return '<div class="adm-tg-card">'
         +'<div class="adm-tg-card-head">'
-        +'<div class="adm-tg-card-title">'+escapeHtml(t.label)+'</div>'
+        +'<div class="adm-tg-card-title">'+escapeHtml(t.label)+(isDaily?' <span class="adm-tg-daily-badge">📊 Gündəlik 24 saat</span>':'')+'</div>'
         +'<label class="adm-guest-check"><input type="checkbox" id="admTg_active_'+safeKey+'" '+(t.active?'checked':'')+'><span>Aktiv</span></label>'
         +'</div>'
         +'<textarea class="adm-tg-textarea" id="admTg_text_'+safeKey+'" rows="6">'+escapeHtml(t.template)+'</textarea>'

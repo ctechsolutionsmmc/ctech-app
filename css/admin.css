@@ -339,6 +339,8 @@ body.dark-mode .adm-msg-history-title{ color:#E8EEF5; }
 }
 .adm-tg-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
 .adm-tg-card-title{ font-size:14.5px; font-weight:700; color:#12233B; }
+.adm-tg-daily-badge{ display:inline-block; margin-left:8px; padding:3px 9px; border-radius:999px; font-size:10.5px; font-weight:800; letter-spacing:.02em; color:#0E8C7A; background:#E4F5F2; border:1px solid #BEE5DE; vertical-align:middle; }
+body.dark-mode .adm-tg-daily-badge{ color:#7FDBC9; background:#14352E; border-color:#2A5C50; }
 .adm-tg-textarea{
   width:100%; border:1.5px solid #DCE6F5; border-radius:10px; padding:12px;
   font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#12233B; resize:vertical;
