@@ -1,0 +1,197 @@
+/* ═══════════════════════════════════════════════════════════
+   APP UPDATE OVERLAY — məcburi yenilənmə ekranı
+   (APK/WebView üçün; bütün UI-dan yuxarıda, bağlana bilməz)
+   ═══════════════════════════════════════════════════════════ */
+
+html.upd-open,
+html.upd-open body{
+  overflow: hidden !important;
+  height: 100%;
+}
+
+.upd-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 999999;               /* hər şeyin üstündə */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #16345E 0%, #0D2035 58%, #0A1A2C 100%);
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.upd-overlay::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+.upd-card{
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: #FFFFFF;
+  border-radius: 22px;
+  padding: 30px 24px 26px;
+  box-shadow: 0 30px 70px rgba(2,12,26,.55), 0 0 0 1px rgba(255,255,255,.08);
+  text-align: center;
+  box-sizing: border-box;
+  animation: updIn .45s cubic-bezier(.2,.85,.3,1.05) both;
+}
+
+@keyframes updIn{
+  from{ opacity: 0; transform: translateY(18px) scale(.96); }
+  to{ opacity: 1; transform: none; }
+}
+
+.upd-brand{
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: #8CA0BC;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.upd-brand span{ color: #2F6FED; }
+
+.upd-icon{
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2F6FED;
+  background: linear-gradient(145deg, #EAF1FE, #DCE8FB);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+}
+
+.upd-title{
+  font-size: 19px;
+  font-weight: 800;
+  color: #12233B;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 8px;
+}
+
+.upd-sub{
+  font-size: 13px;
+  line-height: 1.6;
+  color: #5C7089;
+  font-weight: 500;
+  white-space: pre-line;
+  margin-bottom: 18px;
+  min-height: 20px;
+}
+
+/* ── Spinner ── */
+.upd-spin-wrap{
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 6px;
+}
+.upd-spin{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 4px solid #E3EBF7;
+  border-top-color: #2F6FED;
+  animation: updSpin .8s linear infinite;
+}
+@keyframes updSpin{ to{ transform: rotate(360deg); } }
+
+/* ── Progress ── */
+.upd-progress-wrap{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 0 2px;
+}
+.upd-bar{
+  height: 12px;
+  border-radius: 999px;
+  background: #E9F0FA;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(15,40,80,.08);
+}
+.upd-bar-fill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2F6FED, #4E93FA);
+  box-shadow: 0 0 12px rgba(47,111,237,.45);
+  transition: width .18s ease-out;
+}
+.upd-meta{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.upd-pct{
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #12233B;
+}
+.upd-file{
+  font-size: 11px;
+  font-weight: 600;
+  color: #8CA0BC;
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Düymə ── */
+.upd-btn{
+  width: 100%;
+  margin-top: 14px;
+  padding: 15px 18px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2F6FED, #2459C4);
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(47,111,237,.35);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.upd-btn:active{ transform: translateY(2px) scale(.99); box-shadow: 0 5px 12px rgba(47,111,237,.28); filter: brightness(.97); }
+
+/* ── Dark mode ── */
+body.dark-mode .upd-card{
+  background: #16212E;
+  box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06);
+}
+body.dark-mode .upd-brand{ color: #8FB4EA; }
+body.dark-mode .upd-icon{
+  background: linear-gradient(145deg, #1C2A3D, #16212E);
+  color: #6FA5F5;
+}
+body.dark-mode .upd-title{ color: #E8EEF5; }
+body.dark-mode .upd-sub{ color: #9DB1C9; }
+body.dark-mode .upd-bar{ background: #25374F; }
+body.dark-mode .upd-pct{ color: #E8EEF5; }
+body.dark-mode .upd-file{ color: #8FB4EA; }
+body.dark-mode .upd-spin{ border-color: #25374F; border-top-color: #4E93FA; }
+
+/* ── Kiçik ekranlar ── */
+@media (max-width: 380px){
+  .upd-card{ padding: 24px 18px 22px; }
+  .upd-title{ font-size: 17px; }
+}

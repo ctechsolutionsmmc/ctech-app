@@ -43,3 +43,24 @@ Qeydlər:
 - Məhsul sahibi sayı "Problem Owner" sahəsindən: AYNA / BakıKart / hər ikisi.
 - Hər siyahı maks. **20 sətir**; mesaj Telegram-ın 4096 simvol limitini aşsa 10 sətirə yığılır, qalanı "+N daha..." ilə göstərilir.
 - Kateqoriya sayları əsasən "Qısa Həllər" sütunundan; köhnə sətirlərdə boşdursa "Həll" mətnindən.
+
+## Yenilənmə sistemi (APK/WebView üçün)
+
+Tətbiq WebView APK (qabıq) kimi quraşdırılır — kod telefonda saxlanmır, serverdən yüklənir. Buna görə APK-nın özü heç vaxt yenidən qurulmur; dəyişən **tətbiqin məzmunudur**.
+
+### Necə işləyir
+
+1. **`version.json`** — serverdəki cari versiya (məs. `4.1`) və qısa yenilənmə mesajı. Hər yayımlamada buradakı versiya nömrəsi artırılır.
+2. **`js/app-update.js`** — istifadəçi login olduqda (və sessiya bərpa olunanda) `checkForAppUpdate()` çağırır:
+   - Cihazdakı `app_version` dəyəri ilə `version.json`-dakı versiya müqayisə edilir.
+   - Yeni versiya **varsa** → məcburi ekran çıxır (keçmək/ertələmək olmur): "Yenilənmə mövcuddur".
+   - "Yenilənmələri təsdiqlə" düyməsi basılanda **real yüklənmə** başlayır: yeni `index.html` çəkilir, oradakı bütün css/js faylları **0–100% bayt progressi** və fırlanan simvolla cihaz keşinə yüklənir.
+   - Bitdikdə "Yenilənmə tamamlandı" → **Başla** düyməsi tətbiqi yeni kodla yenidən işə salır (sessiya qorunur).
+
+### Yeni versiya yayımlayanda (3 addım)
+
+1. `index.html`-də bütün `?v=` versiya nömrələrini artırın (keş-busting).
+2. `version.json`-da `version` nömrəsini artırın + mesajı yazın.
+3. (Backend dəyişibsə) Apps Script-də **Dağıtımı yönet → Yeni sürüm** yaradın.
+
+İlk açılışda sistem versiyanı səssizcə qeyd edir (ekran çıxmır); bundan sonra hər yeni versiya üçün ekran göstərilir.

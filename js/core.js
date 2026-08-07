@@ -193,6 +193,8 @@ function login(){
         showDashboard();
         attachIdleListeners();
         startSessionTimer(expiresAt);
+        // Yenilənmə yoxlaması — login olduqdan sonra (yenisi varsa məcburi ekran çıxır)
+        if(typeof checkForAppUpdate==='function') checkForAppUpdate();
       });
     }
     else if(result.status==='LOCKED'){ showLoadingFail(result.message||'Hesabınız müvəqqəti bloklanmışdır.'); }
@@ -509,6 +511,8 @@ if(_savedSession && _savedSession.user && _savedSession.user.email){
     showDashboard();
     attachIdleListeners();
     startSessionTimer(_savedSession.expires);
+    // Yenilənmə yoxlaması — sessiya bərpa olunanda da (login olmadan)
+    if(typeof checkForAppUpdate==='function') checkForAppUpdate();
   }, 0);
 } else if(_savedSession){
   clearSession();
