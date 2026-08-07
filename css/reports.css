@@ -1721,6 +1721,13 @@ body.dark-mode .dash-stat-card:hover{
   box-shadow:0 20px 44px rgba(0,0,0,.4);
 }
 
+/* Üst akcent zolağı — dəyişiklik dərhal görünsün */
+.dash-stat-card::before, .tvmd-metric-card::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,#4E93FA,#2F6FED);
+}
+.tvmd-metric-card{ position:relative; }
+
 /* Dəyər pop effekti */
 @keyframes dashValPop{
   0%{ transform:scale(.92); opacity:0; }
