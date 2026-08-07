@@ -19,7 +19,11 @@ function openTvmRequest(){
   }
 
   document.getElementById('dashboardView').style.display='none';
-  document.getElementById('tvmRequestView').style.display='block';
+  var tvmReqV=document.getElementById('tvmRequestView');
+  tvmReqV.style.display='block';
+  // Müraciət ekranı həmişə YUXARIDAN açılır — dashboard scroll-u aşağıda qalsa belə
+  tvmReqV.scrollTop=0;
+  window.scrollTo(0,0);
   trResetForm();
   trLoadAssignableTechnicians();
 

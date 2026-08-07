@@ -29,7 +29,7 @@ function routerGetMap(){
     'bus-dashboard': { open: function(){ _callRaw('openBusDashboard'); },             needsAuth: true, desktopOnly: true, denyCallCenter: true },
     'tvm-dashboard': { open: function(){ _callRaw('openTvmDashboard'); },             needsAuth: true, desktopOnly: true, denyCallCenter: true },
     'bus-ongoing':   { open: function(){ _callRaw('openBusOngoing'); },               needsAuth: true },
-    'tvm-ongoing':   { open: function(){ _callRaw('openTvmOngoing'); },               needsAuth: true },
+    'tvm-ongoing':   { open: function(){ _callRaw('openTvmOngoing'); },               needsAuth: true, desktopOnly: true },
     'bus-request':   { open: function(){ _callRaw('openBusRequest'); },               needsAuth: true, desktopOnly: true },
     'bus-bulk':      { open: function(){ _callRaw('openBusBulk'); },                  needsAuth: true, desktopOnly: true },
     'admin':         { open: function(){ _callRaw('openAdminPanel'); },               needsAuth: true, desktopOnly: true, denyCallCenter: true },

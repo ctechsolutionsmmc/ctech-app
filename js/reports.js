@@ -582,17 +582,21 @@ function renderTvmTable(){
     var isDone=(st==='Bağlandı'||st==='Servis Tamamlandı');
     var isOng=(st==='Qiymətləndirilir');
     var lvl=getAccessLevel(currentUser.role);
+    var completeBtnHtml='<button class="rpt-icon-btn" style="color:#188A4B;border-color:#BFE8D2;" onclick="openTvmServiceForEdit(\''+safeId+'\',\'complete\',\'report\')" aria-label="Servisi tamamla" title="Servisi tamamla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>';
+    var editBtnHtml='<button class="rpt-icon-btn rpt-edit-btn" onclick="openTvmServiceForEdit(\''+safeId+'\',\'edit\',\'report\')" aria-label="Redaktə et" title="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>';
     var actBtn='';
     if(lvl==='technician'){
       // Texnik: yalnız özünə təhkim olunan servis — davam edəni TAMAMLAYIR, bitmişi REDAKTƏ edir
       if(tvmIsAssignedToMe(row)){
-        if(isOng) actBtn='<button class="rpt-icon-btn" style="color:#188A4B;border-color:#BFE8D2;" onclick="openTvmServiceForEdit(\''+safeId+'\',\'complete\',\'report\')" aria-label="Servisi tamamla" title="Servisi tamamla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>';
-        else if(isDone) actBtn='<button class="rpt-icon-btn rpt-edit-btn" onclick="openTvmServiceForEdit(\''+safeId+'\',\'edit\',\'report\')" aria-label="Redaktə et" title="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>';
+        if(isOng) actBtn=completeBtnHtml;
+        else if(isDone) actBtn=editBtnHtml;
       }
-    } else if(isDone && (lvl==='leader'||lvl==='admin'||lvl==='callcenter')){
-      // Digər rollar: hesabatda qələm yalnız TAMAMLANMIŞ servisi redaktə edir;
-      // davam edən servislər "Davam edən servis" bölməsində tamamlanır.
-      actBtn='<button class="rpt-icon-btn rpt-edit-btn" onclick="openTvmServiceForEdit(\''+safeId+'\',\'edit\',\'report\')" aria-label="Redaktə et" title="Redaktə et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>';
+    } else if(lvl==='leader'||lvl==='admin'||lvl==='callcenter'){
+      // Desktop: hesabatda qələm yalnız TAMAMLANMIŞ servisi redaktə edir (davam edənlər
+      // "Davam edən servis" bölməsində tamamlanır). Mobil: ayrıca bölmə olmadığı üçün
+      // davam edən servislər də report bölməsindən tamamlana bilir.
+      if(isDone) actBtn=editBtnHtml;
+      else if(isOng && window.innerWidth < 901) actBtn=completeBtnHtml;
     }
     html+='<tr>'
       +'<td class="rpt-td-id">'+ticketId+'</td>'
@@ -3061,7 +3065,11 @@ function openTvmService(){
   tvmEditMode = false; tvmEditTicketId = null; tvmReturnTarget = 'dashboard';
   var btn = document.getElementById('tvmSubmitBtnText'); if(btn) btn.textContent = 'Göndər';
   document.getElementById('dashboardView').style.display = 'none';
-  document.getElementById('tvmServiceView').style.display = 'block';
+  var tvmSvcV = document.getElementById('tvmServiceView');
+  tvmSvcV.style.display = 'block';
+  // Form həmişə YUXARIDAN açılır — əvvəlki istifadədən qalan scroll mövqeyini sıfırla
+  tvmSvcV.scrollTop = 0;
+  window.scrollTo(0,0);
   resetTvmFormFields();
   var bParts = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Baku',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   var dateEl = document.getElementById('tvm_date');

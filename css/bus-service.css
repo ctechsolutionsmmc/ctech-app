@@ -16,6 +16,21 @@
   -webkit-overflow-scrolling:touch;
 }
 
+/* ===== TVM YENİ MÜRACİƏT VIEW ===== */
+/* tvmServiceView kimi tam ekran fixed olmalıdır — əks halda dashboard-un
+   hündür səhifəsindən açılanda pəncərə scroll-u aşağıda qalır və ekran
+   müraciət formunun ALTINDAN başlayır. */
+#tvmRequestView {
+  display:none;
+  position:fixed;
+  top:0; left:0; width:100%; height:100%;
+  background:#EEF4FC;
+  z-index:41;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+body.dark-mode #tvmRequestView { background:#0F1826; }
+
 /* Arxa fon banneri — Bus Service VƏ Bus Request görünüşlərində.
    YALNIZ DESKTOP (≥901px) — mobil ekranda bu bölmə tamamilə toxunulmaz qalır.
    #busRequestView-un öz CSS qaydası yoxdur (JS runtime-da position:fixed
