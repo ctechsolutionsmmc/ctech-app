@@ -6,16 +6,50 @@
 // (0-100% bayt progressi + fırlanan simvol), bitdikdə "Yenilənmə tamamlandı"
 // göstərilir və "Başla" düyməsi tətbiqi yeni kodla yenidən işə salır.
 // Qeyd: APK qabıqdır — dəyişən tətbiqin məzmunudur (serverdəki kod).
+//
+// v4.5 düzəlişləri:
+//  1) Reload sonrası URL-də qalan keş-busting `?u=<rəqəm>` parametri dərhal
+//     təmizlənir (adres çubuğunda rəqəmlər qalmır).
+//  2) Progress REAL-dır: content-length məlum deyilsə bar ilk chunk-a görə
+//     99%-ə SICRAMIR — ölçüsü naməlum fayllar fayl-vahidi ilə addımlanır.
+//  3) "Yenilənmə tamamlandı" yalnız bütün fayllar endirilib yenilənmə
+//     backend-ə QEYDƏ ALINDIQDAN SONRA göstərilir (arxa plan işi bitməmiş
+//     vidget yekunlaşmır).
+//  4) Cihaz növü (Mobil / Kompüter) Telegram bildirişinə əlavə olunur və
+//     backend-ə göndərilir.
 // ═══════════════════════════════════════════════════════════════
 
 (function(){
   'use strict';
+
+  // ── Reload sonrası URL-dən keş-busting `u=` parametrini təmizlə ──
+  // Update bitən kimi səhifə `?u=<timestamp>` ilə yenidən yüklənir (keşi
+  // sıfırlamaq üçün). Parametrin işi o reload-la bitir — adresdə qalmamalıdır.
+  try{
+    if(location.search && /(^|[?&])u=\d+(&|$)/.test(location.search)){
+      var _cleanUrl = location.pathname + location.hash;
+      history.replaceState({ route: (location.hash || '').replace('#', '') || 'dashboard' }, '', _cleanUrl);
+    }
+  }catch(uErr){}
 
   var UPDATE_VERSION_KEY = 'app_version';
   var VERSION_URL = 'version.json';
   var OVERLAY_ID = 'appUpdateOverlay';
 
   var busy = false;
+
+  // ── Cihaz təyini: mobil vs masaüstü (Telegram bildirişi üçün) ──
+  function detectDevice(){
+    var ua = navigator.userAgent || '';
+    var isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua)
+      || (navigator.maxTouchPoints > 1 && window.innerWidth < 901);
+    if(isMobile){
+      if(/Android/i.test(ua)) return 'Mobil (Android) 📱';
+      if(/iPhone|iPad|iPod/i.test(ua)) return 'Mobil (iOS) 📱';
+      return 'Mobil cihaz 📱';
+    }
+    return 'Kompüter/Brauzer 💻';
+  }
 
   // ── Versiya müqayisəsi: "4.1" vs "4.0.3" → 1 / 0 / -1 ──
   function cmpVer(a, b){
@@ -42,7 +76,9 @@
     return urls;
   }
 
-  // ── Faylı stream ilə yüklə, progress callback-i real baytla çağır ──
+  // ── Faylı stream ilə yüklə, progress callback-i REAL baytla çağır ──
+  // ƏSAS DÜZƏLİŞ: content-length məlum deyilsə `total` 0 ötürülür — ilk
+  // chunk ölçüsü ümumi ölçü kimi UYDURULMUR (əvvəl bar dərhal ~99%-ə atılırdı).
   function streamFetch(url, onBytes){
     // cache:'reload' → real şəbəkə yüklənməsi (progress real baytdır) və
     // fayl brauzer keşinə yazılır ki, "Başla" reload-ində dərhal açılsın.
@@ -50,7 +86,9 @@
       if(!res.ok) throw new Error(url + ' → HTTP ' + res.status);
       var total = parseInt(res.headers.get('content-length') || '0', 10) || 0;
       if(!res.body || !res.body.getReader){
-        return res.blob().then(function(blob){ onBytes(blob.size, total || blob.size); });
+        // WebView / köhnə brauzer: stream yoxdur — bütöv blob yüklənir.
+        // Ölçü məlumdursa onu ötür, yoxsa 0 (fayl bitəndə 1 vahid sayılır).
+        return res.blob().then(function(blob){ onBytes(blob.size, total); });
       }
       var reader = res.body.getReader();
       var recv = 0;
@@ -58,7 +96,7 @@
         return reader.read().then(function(r){
           if(r.done) return;
           recv += (r.value && r.value.byteLength) || 0;
-          onBytes(recv, total || recv);
+          onBytes(recv, total);
           return pump();
         });
       }
@@ -125,23 +163,33 @@
     setText('updFile', fileText || '');
   }
 
+  function fileLabel(url){
+    return String(url || '').split('/').pop().split('?')[0];
+  }
+
   // ── Əsas yenilənmə axını ──
-  // Fayllar ardıcıl yüklənir; ümumi % = yüklənmiş bayt / ümumi bayt (real).
+  // Progress modeli (v4.5): məlum content-length → baytla REAL; ölçüsü
+  // naməlum fayl → 1 vahid (fayl bitəndə addımlanır). Heç nə uydurulmur.
   function runUpdate(version){
     var urls = [];
-    var fileInfo = {};     // url → { total, loaded }
-    var totalBytes = 0;    // məlum content-length cəmi (+ naməlumlar bitdikcə)
-    var loadedBytes = 0;
-    var filesDone = 0;
+    var filesDone = 0;            // bitmiş fayl sayı
+    var currentUrl = '';          // hazırda yüklənən fayl
+    var currentTotal = 0;         // hazırkı faylın məlum ölçüsü (0 = naməlum)
+    var currentLoaded = 0;        // hazırkı fayldan yüklənən bayt
     var failStage = false;
 
     showStage('Yenilənmə yüklənir...', 'Fayllar yüklənir, zəhmət olmasa gözləyin.', '', false, true, true);
     setProgress(0, 'Hazırlanır...');
 
+    // Progress per-fayl modeli (v4.5): ümumi % = (bitmiş fayllar + hazırkı
+    // faylın daxilindəki real irəliləyiş) / fayl sayı. MONOTON — geriyə düşmür
+    // (əvvəlki modeldə yeni böyük faylın ölçüsü əlavə olanda bar geriyə atılırdı).
     function overallPct(){
-      if(totalBytes > 0) return Math.min(99, (loadedBytes / totalBytes) * 100);
-      if(urls.length > 0) return Math.min(99, (filesDone / urls.length) * 100);
-      return 0;
+      var n = urls.length;
+      if(n <= 0) return 0;
+      var within = 0;
+      if(currentTotal > 0) within = Math.min(1, currentLoaded / currentTotal);
+      return Math.min(99, ((filesDone + within) / n) * 100);
     }
 
     function fail(err){
@@ -155,55 +203,84 @@
       if(btn) btn.onclick = function(){ failStage = false; runUpdate(version); };
     }
 
-    function finish(){
-      try{ localStorage.setItem(UPDATE_VERSION_KEY, String(version)); }catch(e){}
-      setProgress(100, '');
-      showStage('Yenilənmə tamamlandı', 'Tətbiq yeniləndi. Yeni versiya ilə davam edin.', 'Başla', true, false, false);
-      var btn = document.getElementById('updBtn');
-      if(btn){
-        btn.onclick = function(){
-          // Update-log: bu yenilənməni backend-ə bildir (Database-LOG qrupuna canlı gedir).
-          // Səssizdir — uğursuz olsa belə istifadəçini narahat etmir.
-          try{ reportUpdateToBackend(version); }catch(luErr){}
-          lockBody(false);
-          var o = overlayEl(); if(o) o.style.display = 'none';
-          // Səhifəni keşsiz yenidən yüklə → sessiya qorunur, əsas menyu açılır
-          var sep = window.location.pathname.indexOf('?') === -1 ? '?' : '&';
-          window.location.href = window.location.pathname + sep + 'u=' + Date.now();
-        };
-      }
-    }
-
     // Yenilənməni backend-ə bildirir — APP_UPDATES sheet-ə yazılır və
     // Database-LOG (CTECH) qrupuna canlı bildiriş göndərilir. Səssizdir.
+    // PROMISE qaytarır ki, finish() reload-dan ƏVVƏL onu gözləyə bilsin.
+    // (Əvvəl "Başla" klikində atılıb + dərhal reload edilirdi → WebView-də
+    // gedən sorğu ləğv olunur, mobil-dən Telegram bildirişi çatmırdı.)
     function reportUpdateToBackend(version){
       var api = (typeof API_URL === 'string') ? API_URL : null;
-      if(!api) return;
+      if(!api) return null;
       var payload = {
         action: 'logAppUpdate',
         version: String(version || ''),
-        message: 'Cihaz yenilənməsi təsdiqləndi (v' + version + ')'
+        message: 'Cihaz yenilənməsi təsdiqləndi (v' + version + ')',
+        device: detectDevice()
       };
       // İstifadəçi email-i sessiyadan; token-i core.js fetch wrapper-i avtomatik əlavə edir
       try{
         var s = JSON.parse(localStorage.getItem('ctech_session') || 'null');
         if(s && s.user && s.user.email) payload.userEmail = s.user.email;
       }catch(e){}
-      fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      }).catch(function(){});
+      try{
+        return fetch(api, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        }).catch(function(){});
+      }catch(fErr){
+        return null;
+      }
+    }
+
+    function finish(){
+      try{ localStorage.setItem(UPDATE_VERSION_KEY, String(version)); }catch(e){}
+
+      // Yenilənmə ARTIQ CİHAZDA TƏTBİQ OLUNUB (fayllar keşə yazılıb) — indi
+      // backend qeydiyyatı göndərilir. Vidget yalnız bundan SONRA yekunlaşır.
+      setProgress(100, '');
+      showStage('Yenilənmə yekunlaşdırılır...', 'Yenilənmə qeydə alınır, zəhmət olmasa gözləyin.', '', false, true, false);
+
+      var settled = false;
+      function showDone(){
+        if(settled) return;
+        settled = true;
+        showStage('Yenilənmə tamamlandı', 'Tətbiq yeniləndi. Yeni versiya ilə davam edin.', 'Başla', true, false, false);
+        var btn = document.getElementById('updBtn');
+        if(btn){
+          btn.onclick = function(){
+            lockBody(false);
+            var o = overlayEl(); if(o) o.style.display = 'none';
+            // Səhifəni keşsiz yenidən yüklə → sessiya qorunur, əsas menyu açılır.
+            // URL-dəki `u=` parametri yüklənən kimi (bu faylın başında) təmizlənir.
+            var sep = window.location.pathname.indexOf('?') === -1 ? '?' : '&';
+            window.location.href = window.location.pathname + sep + 'u=' + Date.now();
+          };
+        }
+      }
+
+      var rep = null;
+      try{ rep = reportUpdateToBackend(version); }catch(repErr){}
+      if(rep && typeof rep.then === 'function'){
+        rep.then(showDone, showDone);
+      } else {
+        showDone();
+      }
+      // Təhlükəsizlik: şəbəkə yavaş/bağlı olsa belə vidget ilişib qalmasın.
+      // 8s — GAS ilk çağırışları (cold start) bəzən 2-6s çəkir.
+      setTimeout(showDone, 8000);
     }
 
     function onBytes(url, recv, total){
-      var info = fileInfo[url] || (fileInfo[url] = { total: 0, loaded: 0 });
-      if(!info.total && total > 0){ info.total = total; totalBytes += total; }
-      if(recv > info.loaded){
-        loadedBytes += recv - info.loaded;
-        info.loaded = recv;
+      if(url !== currentUrl){
+        // Yeni fayl başladı — hazırkı fayl göstəricilərini sıfırla
+        currentUrl = url;
+        currentTotal = 0;
+        currentLoaded = 0;
       }
-      setProgress(overallPct(), url.split('/').pop().split('?')[0]);
+      if(!currentTotal && total > 0) currentTotal = total;
+      if(recv > currentLoaded) currentLoaded = recv;
+      setProgress(overallPct(), fileLabel(url));
     }
 
     // index.html-in YENİ versiyasını çək → asset siyahısını çıxar → hamısını yüklə
@@ -224,9 +301,7 @@
           streamFetch(url, function(recv, total){ onBytes(url, recv, total); })
             .then(function(){
               filesDone++;
-              var info = fileInfo[url];
-              if(info && !info.total){ info.total = info.loaded; totalBytes += info.loaded; }
-              setProgress(overallPct(), url.split('/').pop().split('?')[0]);
+              setProgress(overallPct(), fileLabel(url));
               next();
             })
             .catch(fail);
