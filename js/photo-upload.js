@@ -1,8 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-// PHOTO-UPLOAD.JS — Servis Fotoları (v4.13)
+// PHOTO-UPLOAD.JS — Servis Fotoları (v4.14)
 // Bus/TVM servis forma view-larında foto seçimi:
 //   • canvas sıxışdırma (maksimum 1280px, JPEG keyfiyyət 0.7)
-//   • seçilən fotolar base64 olaraq submit payload-a qoşulur
+//   • fotolar submit payload-dan AYRI, OK-dan sonra enqueueTicketPhotos
+//     action-ı ilə arxa planda göndərilir (submit sürətli qalır)
 //   • hər fotonun üzərində X işarəsi ilə silmə
 // Ticket detail view (Real-Time Report + Davam edən servis):
 //   • "Servis Fotoları" bölməsi — thumbnail grid, klik → lightbox
@@ -157,6 +158,65 @@ function photoError(which, msg){
 }
 
 // ═══════════════════════════════════════════════════════════════
+// v4.14 — ASİNXRON FOTO GÖNDƏRİLMƏSİ
+// Submit OK qayıtdıqdan SONRA fotolar ayrıca enqueueTicketPhotos
+// action-ı ilə göndərilir. Bu sorğu UI-ni BLOCK ETMİR — ticket dərhal
+// hazır görünür, fotolar arxa planda PHOTO_QUEUE-ya yazılır, trigger
+// Drive-a yükləyir. Uğursuz olarsa sakitcə cəhd olunur — ticket artıq
+// yazıldığı üçün heç nə itmir.
+function enqueuePhotosAfterSubmit(ticketId, device, photos){
+  if(!ticketId || !photos || !photos.length) return;
+  try{
+    fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'enqueueTicketPhotos', ticketId: ticketId, device: device, photos: photos })
+    }).catch(function(){}); // arxa plan — xəta olarsa ticket artıq yazılıb, heç nə itmir
+  }catch(e){}
+}
+
+// ── Detail view-da AVTOMATİK TƏKRAR YÜKLƏMƏ ──
+// Foto trigger-i ~60 saniyəyə Drive-a yüklədiyi üçün, view dərhal açılanda
+// "Foto yoxdur" görünə bilər. Bu helper boş nəticəni bir neçə dəfə təkrar
+// çəkir ki, yükləmə bitən kimi fotolar ekranda görünsün.
+function _pollTicketPhotos(gridId, ticketId, device, canDel, attempt){
+  var grid = document.getElementById(gridId);
+  if(!grid) return;
+  var maxAttempts = 5; // ~20 saniyəlik pəncərə — trigger ~60s-ə yükləyir, amma
+  // burada əsas məqsəd yeni göndərilmiş ticketdə (fotolar hələ Drive-da deyil)
+  // avtomatik görünmədir; fotosuz köhnə ticketdə uzun fırlanma olmasın.
+  if(attempt > maxAttempts){
+    grid.innerHTML = '<div class="svc-photo-empty">Foto yoxdur</div>';
+    return;
+  }
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'getTicketPhotos', ticketId: ticketId, device: device })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(!document.getElementById(gridId)) return;
+    if(d.status === 'OK' && d.photos && d.photos.length){
+      grid.innerHTML = d.photos.map(function(ph, i){
+        var tidJs = JSON.stringify(String(ticketId));
+        return '<div class="svc-photo-tile svc-photo-view">' +
+          '<img class="svc-photo-thumb" src="' + ph.thumb + '" alt="Foto ' + (i + 1) + '" onclick="openPhotoLightbox(\'' + ph.full + '\')">' +
+          (canDel ? '<button type="button" class="svc-photo-x" onclick="deleteTicketPhoto(' + tidJs + ',\'' + device + '\',\'' + ph.fileId + '\',this)" aria-label="Sil">&times;</button>' : '') +
+          '</div>';
+      }).join('');
+    } else {
+      // Hələ boş — bir az gözləyib təkrar cəhd et (yükləmə davam edir)
+      grid.innerHTML = '<div class="rpt-loading"><div class="spinner" style="width:26px;height:26px;border-width:3px;"></div><span>Fotolar yüklənir...</span></div>';
+      setTimeout(function(){ _pollTicketPhotos(gridId, ticketId, device, canDel, attempt + 1); }, 4000);
+    }
+  })
+  .catch(function(){
+    setTimeout(function(){ _pollTicketPhotos(gridId, ticketId, device, canDel, attempt + 1); }, 4000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
 // TICKET DETAIL VIEW — "Servis Fotoları" bölməsi
 // ═══════════════════════════════════════════════════════════════
 
@@ -188,31 +248,10 @@ function appendPhotoSectionToDetail(ticketId, device, status, containerId){
     '</div></div>';
   container.insertAdjacentHTML('beforeend', html);
 
-  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'getTicketPhotos', ticketId: ticketId, device: device })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    var grid = document.getElementById(containerId + 'PhotoGrid');
-    if(!grid) return;
-    if(d.status !== 'OK' || !d.photos || !d.photos.length){
-      grid.innerHTML = '<div class="svc-photo-empty">Foto yoxdur</div>';
-      return;
-    }
-    grid.innerHTML = d.photos.map(function(ph, i){
-      var tidJs = JSON.stringify(String(ticketId));
-      return '<div class="svc-photo-tile svc-photo-view">' +
-        '<img class="svc-photo-thumb" src="' + ph.thumb + '" alt="Foto ' + (i + 1) + '" onclick="openPhotoLightbox(\'' + ph.full + '\')">' +
-        (canDel ? '<button type="button" class="svc-photo-x" onclick="deleteTicketPhoto(' + tidJs + ',\'' + device + '\',\'' + ph.fileId + '\',this)" aria-label="Sil">&times;</button>' : '') +
-        '</div>';
-    }).join('');
-  })
-  .catch(function(){
-    var grid = document.getElementById(containerId + 'PhotoGrid');
-    if(grid) grid.innerHTML = '<div class="svc-photo-empty">Fotolar yüklənə bilmədi</div>';
-  });
+  // v4.14: Fotolar avtomatik təkrar yükləmə ilə çəkilir — trigger ~60 saniyəyə
+  // Drive-a yüklədiyi üçün boş nəticə "Foto yoxdur" kimi göstərilməz, yükləmə
+  // bitən kimi grid-ə düşər.
+  _pollTicketPhotos(containerId + 'PhotoGrid', ticketId, device, canDel, 1);
 }
 
 function deleteTicketPhoto(ticketId, device, fileId, btnEl){

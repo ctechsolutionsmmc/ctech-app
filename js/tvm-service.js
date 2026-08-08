@@ -30,9 +30,11 @@ function submitTvmService(){
     team_leader: bsSelected.tvm_leader,
     old_sn: document.getElementById('tvm_old_sn') ? document.getElementById('tvm_old_sn').value.trim() : '',
     new_sn: document.getElementById('tvm_new_sn') ? document.getElementById('tvm_new_sn').value.trim() : '',
-    note: document.getElementById('tvm_note').value.trim(),
-    photos: (typeof getPhotosForSubmit==='function') ? getPhotosForSubmit('tvm') : []
+    note: document.getElementById('tvm_note').value.trim()
   };
+  // v4.14: fotolar payload-da YOXDUR — submit yüngül qalır. OK qayıtdıqdan sonra
+  // enqueuePhotosAfterSubmit ilə ayrıca, arxa planda göndərilir.
+  var photosToEnqueue = (typeof getPhotosForSubmit==='function') ? getPhotosForSubmit('tvm') : [];
 
   var ov = document.getElementById('tvmLoadingOverlay');
   var sp = document.getElementById('tvmSpinner');
@@ -61,6 +63,10 @@ function submitTvmService(){
     ic.classList.add('show');
     if(result.status === 'OK'){
       tx.textContent = tvmEditMode ? ('✅ Yadda saxlanıldı! ' + result.ticketId) : ('✅ Göndərildi! ' + result.ticketId);
+      // v4.14: fotoları OK-dan sonra arxa planda göndər — UI bloklanmır
+      if(result.ticketId && photosToEnqueue.length){
+        if(typeof enqueuePhotosAfterSubmit==='function') enqueuePhotosAfterSubmit(result.ticketId,'TVM',photosToEnqueue);
+      }
     } else {
       tx.textContent = '❌ Xəta: ' + (result.message || '');
     }

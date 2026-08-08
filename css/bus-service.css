@@ -1569,10 +1569,11 @@ body.dark-mode .bk-dqn-chip-x { background:#3E6FCB; color:#E8EEF5; }
   position:relative;
   border-radius:14px;
   overflow:hidden;
-  border:1px solid #DCE6F5;
+  border:2px solid #4E93FA;
   background:#F4F8FD;
   aspect-ratio:1/1;
   min-height:96px;
+  box-shadow:0 3px 10px rgba(47,111,237,.14);
 }
 .svc-photo-tile .svc-photo-thumb{
   width:100%; height:100%; object-fit:cover; display:block;
@@ -1589,15 +1590,19 @@ body.dark-mode .bk-dqn-chip-x { background:#3E6FCB; color:#E8EEF5; }
 }
 .svc-photo-x:hover{ background:#E5484D; transform:scale(1.08); }
 .svc-photo-x:disabled{ opacity:.5; cursor:default; transform:none; }
+/* v4.14: Foto əlavə et — parlaq göy qradiyent (əvvəlki solğun hal tam dəyişdi) */
 .svc-photo-add{
-  border:1.5px dashed #B9CBEA; background:#F8FAFE;
+  border:2px solid #2F6FED;
+  background:linear-gradient(150deg,#3D7CF5 0%,#2F6FED 60%,#2563EB 100%);
   border-radius:14px; aspect-ratio:1/1; min-height:96px;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:6px; color:#2F6FED; font-size:12px; font-weight:700;
+  gap:7px; color:#FFFFFF; font-size:12.5px; font-weight:700;
   font-family:'Inter',sans-serif; cursor:pointer;
-  transition:border-color .15s, background .15s;
+  box-shadow:0 6px 16px rgba(47,111,237,.35);
+  transition:transform .12s, box-shadow .15s, filter .15s;
 }
-.svc-photo-add:hover{ border-color:#2F6FED; background:#EEF4FE; }
+.svc-photo-add:hover{ filter:brightness(1.08); box-shadow:0 10px 22px rgba(47,111,237,.45); transform:translateY(-1px); }
+.svc-photo-add:active{ transform:scale(.96); }
 .svc-photo-error{
   margin-top:8px; font-size:12.5px; font-weight:700; color:#E5484D;
 }
@@ -1636,9 +1641,8 @@ body.dark-mode .bk-dqn-chip-x { background:#3E6FCB; color:#E8EEF5; }
 }
 .photo-lightbox-close:hover{ background:rgba(255,255,255,.28); }
 
-body.dark-mode .svc-photo-tile{ background:#16212E; border-color:#3E5578; }
-body.dark-mode .svc-photo-add{ background:#141F30; border-color:#3E5578; color:#8FB4EA; }
-body.dark-mode .svc-photo-add:hover{ border-color:#4E93FA; background:#1C2A3D; }
+body.dark-mode .svc-photo-tile{ background:#16212E; border-color:#3E6FCB; }
+body.dark-mode .svc-photo-add{ background:linear-gradient(150deg,#2F5BBF 0%,#2F6FED 60%,#3D7CF5 100%); border-color:#4E93FA; color:#FFFFFF; }
 
 /* ===== DARK MODE — BUS SERVICE & BULK ===== */
 body.dark-mode #busServiceView { background:#0F1826; }

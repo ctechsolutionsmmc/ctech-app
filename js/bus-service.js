@@ -432,9 +432,11 @@ function submitBusService(){
     technician_1:bsSelected.tech1,
     technician_2:bsSelected.tech2,
     team_leader:bsSelected.leader,
-    note:document.getElementById('bs_note').value,
-    photos:(typeof getPhotosForSubmit==='function')?getPhotosForSubmit('bus'):[]
+    note:document.getElementById('bs_note').value
   };
+  // v4.14: fotolar payload-da YOXDUR — submit yüngül qalır. OK qayıtdıqdan sonra
+  // enqueuePhotosAfterSubmit ilə ayrıca, arxa planda göndərilir.
+  var photosToEnqueue=(typeof getPhotosForSubmit==='function')?getPhotosForSubmit('bus'):[];
   var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
   var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');
   ov.style.display='flex'; ov.classList.add('open'); sp.style.display='block'; ic.style.display='none';
@@ -450,6 +452,10 @@ function submitBusService(){
     sp.style.display='none'; ic.style.display='flex';
     if(result.status==='OK'){ tx.textContent=bsLeaderCloseMode?('Təsdiqləndi və bağlandı! '+result.ticketId):(bsEditMode?('Yadda saxlanıldı! '+result.ticketId):('Göndərildi! '+result.ticketId)); }
     else { tx.textContent='Xəta baş verdi'; }
+    // v4.14: fotoları OK-dan sonra arxa planda göndər — UI bloklanmır
+    if(result.status==='OK' && result.ticketId && photosToEnqueue.length){
+      if(typeof enqueuePhotosAfterSubmit==='function') enqueuePhotosAfterSubmit(result.ticketId,'BUS',photosToEnqueue);
+    }
     setTimeout(function(){ ov.classList.remove('open'); ov.style.display='none'; if(result.status==='OK'){ bsFormDirty=false; if(!bsEditMode)clearBsDraft(); var wasEdit=bsEditMode; if(typeof invalidateOngoingCache==='function') invalidateOngoingCache(); bsGoBack(); if(wasEdit)loadReportData(); } },1800);
   }).catch(function(){ sp.style.display='none'; tx.textContent='Şəbəkə xətası'; setTimeout(function(){ov.classList.remove('open');ov.style.display='none';},1500); });
 }
