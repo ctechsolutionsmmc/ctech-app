@@ -268,15 +268,15 @@ function flushPendingPhotos(){
 }
 
 // ── Detail view-da AVTOMATİK TƏKRAR YÜKLƏMƏ ──
-// Foto trigger-i ~60 saniyəyə Drive-a yüklədiyi üçün, view dərhal açılanda
-// "Foto yoxdur" görünə bilər. Bu helper boş nəticəni bir neçə dəfə təkrar
-// çəkir ki, yükləmə bitən kimi fotolar ekranda görünsün.
+// v4.16+: enqueue action fotoları DƏRHAL inline işlədiyi üçün (~2-5 saniyə)
+// Drive-da tez görünür; 60s trigger yalnız uğursuzluqda ehtiyatdır. Bu helper
+// boş nəticəni bir neçə dəfə təkrar çəkir ki, yükləmə bitən kimi fotolar görünsün.
+// v4.17: backend getTicketPhotos Drive-dan birbaşa skan etdiyi üçün (foto Drive-da
+// olduğu müddətcə) ilk cəhddə tapılır — uzun fırlanma/"Foto yoxdur" yox olur.
 function _pollTicketPhotos(gridId, ticketId, device, canDel, attempt){
   var grid = document.getElementById(gridId);
   if(!grid) return;
-  var maxAttempts = 5; // ~20 saniyəlik pəncərə — trigger ~60s-ə yükləyir, amma
-  // burada əsas məqsəd yeni göndərilmiş ticketdə (fotolar hələ Drive-da deyil)
-  // avtomatik görünmədir; fotosuz köhnə ticketdə uzun fırlanma olmasın.
+  var maxAttempts = 5; // ~20 saniyəlik pəncərə — inline ~2-5s olduğu üçün yetərlidir;
   if(attempt > maxAttempts){
     // Foto tapılmadı — bu ticket üçün yarımçıq göndərmə varsa təkrar cəhd (öz-özünə sağalma)
     if(typeof flushPendingPhotos === 'function') flushPendingPhotos();
