@@ -1,9 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-// PHOTO-UPLOAD.JS — Servis Fotoları (v4.14)
+// PHOTO-UPLOAD.JS — Servis Fotoları (v4.16)
 // Bus/TVM servis forma view-larında foto seçimi:
-//   • canvas sıxışdırma (maksimum 1280px, JPEG keyfiyyət 0.7)
+//   • canvas sıxışdırma (maksimum 1024px, WebP 0.6 / JPEG fallback) — kiçik + sürətli
 //   • fotolar submit payload-dan AYRI, OK-dan sonra enqueueTicketPhotos
-//     action-ı ilə arxa planda göndərilir (submit sürətli qalır)
+//     action-ı ilə göndərilir (submit sürətli qalır)
+//   • İTLİK QORUMASI: fotolar göndərmədən ƏVVƏL localStorage-da saxlanır;
+//     app bağlansa / internet kəsilsə belə növbəti açılışda avtomatik təkrar göndərilir
+//     (idempotent batch — dublikat yaranmır)
 //   • hər fotonun üzərində X işarəsi ilə silmə
 // Ticket detail view (Real-Time Report + Davam edən servis):
 //   • "Servis Fotoları" bölməsi — thumbnail grid, klik → lightbox
@@ -13,8 +16,9 @@
 
 var PHOTO_STATE = { bus: [], tvm: [] };
 var PHOTO_MAX = { bus: 4, tvm: 3 };
-var PHOTO_COMPRESS_MAX = 1280;    // px — ən uzun tərəf
-var PHOTO_COMPRESS_QUALITY = 0.7; // JPEG keyfiyyət
+var PHOTO_COMPRESS_MAX = 1024;    // px — ən uzun tərəf (cihaz ekranındakı yazı üçün yetərli)
+var PHOTO_COMPRESS_QUALITY = 0.6; // sıxışdırma keyfiyyəti (WebP/JPEG)
+var PHOTO_USE_WEBP = true;        // WebP dəstəklənirsə istifadə et (~30-40% kiçik → sürətli)
 
 // ── Görünürlük qaydaları ──
 // Desktop: bütün rollar üçün görünür. Mobil: yalnız texnik.
@@ -91,7 +95,10 @@ function onPhotoInputChange(which, inputEl){
   inputEl.value = '';
 }
 
-// Canvas sıxışdırma: max 1280px, JPEG 0.7 → base64 data-URL
+// Canvas sıxışdırma (v4.16): max 1024px, WebP 0.6 → base64 data-URL.
+// Məqsəd: cihazın servis fotosu + ekrandakı yazıların oxunması — Drive-da yüksək
+// keyfiyyətə ehtiyac YOXDUR. WebP kiçik olduğu üçün enqueue + Drive yükləmə sürətlənir.
+// WebP dəstəklənmirsə avtomatik JPEG-ə düşür.
 function compressImage(file, callback){
   if(!file || !file.type || file.type.indexOf('image/') !== 0){
     callback(null);
@@ -112,7 +119,15 @@ function compressImage(file, callback){
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, cw, ch);
       ctx.drawImage(img, 0, 0, cw, ch);
-      callback(canvas.toDataURL('image/jpeg', PHOTO_COMPRESS_QUALITY));
+      var out = null;
+      if(PHOTO_USE_WEBP){
+        try{
+          var wp = canvas.toDataURL('image/webp', PHOTO_COMPRESS_QUALITY);
+          if(wp && wp.indexOf('data:image/webp') === 0) out = wp;
+        }catch(we){}
+      }
+      if(!out) out = canvas.toDataURL('image/jpeg', PHOTO_COMPRESS_QUALITY);
+      callback(out);
     }catch(e){
       callback(null);
     }finally{
@@ -158,21 +173,98 @@ function photoError(which, msg){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v4.14 — ASİNXRON FOTO GÖNDƏRİLMƏSİ
-// Submit OK qayıtdıqdan SONRA fotolar ayrıca enqueueTicketPhotos
-// action-ı ilə göndərilir. Bu sorğu UI-ni BLOCK ETMİR — ticket dərhal
-// hazır görünür, fotolar arxa planda PHOTO_QUEUE-ya yazılır, trigger
-// Drive-a yükləyir. Uğursuz olarsa sakitcə cəhd olunur — ticket artıq
-// yazıldığı üçün heç nə itmir.
+// v4.16 — İTLİK QORUMASI + ASİNXRON GÖNDƏRMƏ
+// Submit OK qayıtdıqdan sonra fotolar ayrıca enqueueTicketPhotos action-ı ilə
+// göndərilir. FOTOLAR GÖNDƏRMƏDƏN ƏVVƏL localStorage-da saxlanır — app bağlansa,
+// internet kəsilsə belə itmir: növbəti açılışda flushPendingPhotos() təkrar göndərir.
+// batchId hər göndərmədə sabitdir → backend təkrar cəhddə DUBLİKAT yazmır.
+// v4.16: HƏR çağırışda təzə hesablanır (keş saxlanmır) — başqa istifadəçi
+// daxil olanda əvvəlki istifadəçinin gözləyən fotolarına toxunulmasın.
+function pendingPhotoKey(){
+  var u = (currentUser && currentUser.email) ? currentUser.email.replace(/[^a-z0-9@._-]/gi,'').toLowerCase() : 'anon';
+  return 'ctech_pending_photos_' + u;
+}
+function getPendingPhotos(){
+  try{ var raw = localStorage.getItem(pendingPhotoKey()); return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+}
+function savePendingPhotos(list){
+  // v4.16: Quota aşılarsa ən köhnə giriş atılaraq yenidən cəhd olunur (səssiz itki olmaz)
+  for(var attempt = 0; attempt < 3 && list.length > 0; attempt++){
+    try{
+      localStorage.setItem(pendingPhotoKey(), JSON.stringify(list));
+      return true;
+    }catch(e){
+      list = list.slice(1); // ən köhnə girişi at → yenidən cəhd
+    }
+  }
+  return false;
+}
+function addPendingPhoto(entry){
+  var l = getPendingPhotos();
+  l.push(entry);
+  if(l.length > 5) l = l.slice(-5); // maksimum 5 gözləyən qrup — ən köhnəsi atılır
+  savePendingPhotos(l);
+}
+function removePendingPhoto(batchId){
+  savePendingPhotos(getPendingPhotos().filter(function(e){ return e.batchId !== batchId; }));
+}
+function removePendingPhotosForTicket(ticketId, device){
+  savePendingPhotos(getPendingPhotos().filter(function(e){
+    return !(e.ticketId === String(ticketId) && e.device === String(device));
+  }));
+}
+function makeBatchId(){
+  return 'b' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 1e6).toString(36);
+}
+
 function enqueuePhotosAfterSubmit(ticketId, device, photos){
   if(!ticketId || !photos || !photos.length) return;
+  var batchId = makeBatchId();
+  // 1) ƏVVƏLCƏ lokal saxla — app bağlansa/İnternet kəsilsə belə itmir
+  addPendingPhoto({ batchId: batchId, ticketId: String(ticketId), device: String(device), photos: photos, ts: Date.now() });
+  // 2) Arxa planda göndər
+  _sendEnqueue(batchId, String(ticketId), String(device), photos);
+}
+
+function _sendEnqueue(batchId, ticketId, device, photos){
   try{
     fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'enqueueTicketPhotos', ticketId: ticketId, device: device, photos: photos })
-    }).catch(function(){}); // arxa plan — xəta olarsa ticket artıq yazılıb, heç nə itmir
+      body: JSON.stringify({ action: 'enqueueTicketPhotos', ticketId: ticketId, device: device, photos: photos, batchId: batchId })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.status === 'OK' && d.batchId === batchId) removePendingPhoto(batchId);
+    })
+    .catch(function(){ /* şəbəkə kəsildi — növbəti açılışda flushPendingPhotos təkrar edəcək */ });
   }catch(e){}
+}
+
+// App açılışında (login/sessiya bərpası) çağırılır: yarımçıq qalmış foto
+// göndərmələrini təkrar edir. Ticket-də artıq foto varsa giriş təmizlənir.
+function flushPendingPhotos(){
+  var list = getPendingPhotos();
+  if(!list.length) return;
+  list.forEach(function(entry){
+    if(!entry || !entry.ticketId || !entry.photos || !entry.photos.length) return;
+    fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getTicketPhotos', ticketId: entry.ticketId, device: entry.device })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      // v4.16: Yalnız BÜTÜN fotolar yüklənibsə təmizlə. Qismən yüklənibsə
+      // giriş saxlanır — qalanlar növbə/trigger vasitəsilə öz-özünə tamamlanır.
+      if(d && d.status === 'OK' && d.photos && d.photos.length >= (entry.photos ? entry.photos.length : 0)){
+        removePendingPhoto(entry.batchId); // artıq yüklənib — təmizlə
+        return;
+      }
+      _sendEnqueue(entry.batchId, entry.ticketId, entry.device, entry.photos);
+    })
+    .catch(function(){ /* şəbəkə yoxdur — növbəti açılışda yenə cəhd */ });
+  });
 }
 
 // ── Detail view-da AVTOMATİK TƏKRAR YÜKLƏMƏ ──
@@ -186,6 +278,8 @@ function _pollTicketPhotos(gridId, ticketId, device, canDel, attempt){
   // burada əsas məqsəd yeni göndərilmiş ticketdə (fotolar hələ Drive-da deyil)
   // avtomatik görünmədir; fotosuz köhnə ticketdə uzun fırlanma olmasın.
   if(attempt > maxAttempts){
+    // Foto tapılmadı — bu ticket üçün yarımçıq göndərmə varsa təkrar cəhd (öz-özünə sağalma)
+    if(typeof flushPendingPhotos === 'function') flushPendingPhotos();
     grid.innerHTML = '<div class="svc-photo-empty">Foto yoxdur</div>';
     return;
   }
@@ -198,6 +292,8 @@ function _pollTicketPhotos(gridId, ticketId, device, canDel, attempt){
   .then(function(d){
     if(!document.getElementById(gridId)) return;
     if(d.status === 'OK' && d.photos && d.photos.length){
+      // Fotolar gəldi — bu ticket üçün gözləyən göndərmə varsa təmizlə
+      if(typeof removePendingPhotosForTicket === 'function') removePendingPhotosForTicket(ticketId, device);
       grid.innerHTML = d.photos.map(function(ph, i){
         var tidJs = JSON.stringify(String(ticketId));
         return '<div class="svc-photo-tile svc-photo-view">' +

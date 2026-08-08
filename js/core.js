@@ -236,6 +236,8 @@ function showDashboard(){
   // 5-6 GAS sorğusu atılırdı, backend növbəyə düşüb login + dashboard göstərilməsini ləngidirdi.
   setTimeout(function(){ if(typeof preloadNotifications==='function') preloadNotifications(); }, 1500);
   setTimeout(function(){ if(typeof preloadValidatorSNList==='function') preloadValidatorSNList(); }, 3000);
+  // v4.16: yarımçıq qalmış foto göndərmələrini təkrar et (app bağlanıb / İnternet kəsilibsə)
+  setTimeout(function(){ if(typeof flushPendingPhotos==='function') flushPendingPhotos(); }, 400);
   // Desktop bildiriş paneli (müstəqil komponent — desktop-notif.js) —
   // yalnız masaüstü genişlikdə, həm də öz fallback start-ı var.
   if(typeof dskNotifStart==='function') dskNotifStart();
