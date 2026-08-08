@@ -7,36 +7,66 @@
 // göstərilir və "Başla" düyməsi tətbiqi yeni kodla yenidən işə salır.
 // Qeyd: APK qabıqdır — dəyişən tətbiqin məzmunudur (serverdəki kod).
 //
-// v4.5 düzəlişləri:
-//  1) Reload sonrası URL-də qalan keş-busting `?u=<rəqəm>` parametri dərhal
-//     təmizlənir (adres çubuğunda rəqəmlər qalmır).
-//  2) Progress REAL-dır: content-length məlum deyilsə bar ilk chunk-a görə
-//     99%-ə SICRAMIR — ölçüsü naməlum fayllar fayl-vahidi ilə addımlanır.
-//  3) "Yenilənmə tamamlandı" yalnız bütün fayllar endirilib yenilənmə
-//     backend-ə QEYDƏ ALINDIQDAN SONRA göstərilir (arxa plan işi bitməmiş
-//     vidget yekunlaşmır).
-//  4) Cihaz növü (Mobil / Kompüter) Telegram bildirişinə əlavə olunur və
-//     backend-ə göndərilir.
+// v4.6 — Yenilənmə bildirişi (Telegram) RELOAD-DAN SONRA göndərilir:
+//   Əvvəlki versiyalar "Başla" klikində fetch-i atıb DƏRHAL səhifəni yenidən
+//   yükləyirdi → WebView-də gedən sorğu ləğv olunur, mobil-dən Telegram
+//   bildirişi çatmırdı (desktop-da təsadüfən çatırdı). İndi:
+//     • finish() cihazda tətbiq bitən kimi "Yenilənmə tamamlandı" göstərir və
+//       "Başla" reload-ində ?u=<vaxt> parametri + gözləyən-qeyd bayrağı qoyur.
+//     • Səhifə reload olunanda (DOMContentLoaded — bütün scriptlər hazır)
+//       qeydiyyat göndərilir: sorğu heç bir naviqasiya ilə ləğv OLUNMUR,
+//       token bitmiş olsa belə (raw fetch) mütləq çatır.
+//   Digər düzəlişlər: URL-dən ?u= təmizlənir; progress realdır (per-fayl);
+//   cihaz növü (Mobil/Kompüter) qeydiyyata əlavə olunur.
 // ═══════════════════════════════════════════════════════════════
 
 (function(){
   'use strict';
 
-  // ── Reload sonrası URL-dən keş-busting `u=` parametrini təmizlə ──
-  // Update bitən kimi səhifə `?u=<timestamp>` ilə yenidən yüklənir (keşi
-  // sıfırlamaq üçün). Parametrin işi o reload-la bitir — adresdə qalmamalıdır.
+  var UPDATE_VERSION_KEY = 'app_version';
+  var VERSION_URL = 'version.json';
+  var OVERLAY_ID = 'appUpdateOverlay';
+  var PENDING_REPORT_KEY = 'ctech_pending_update_report';
+
+  var busy = false;
+  var _reportInFlight = false;
+
+  // ── Reload sonrası (u= ilə gələn səhifə): qeydiyyatı göndər + URL-i təmizlə ──
   try{
     if(location.search && /(^|[?&])u=\d+(&|$)/.test(location.search)){
+      // Səhifə TAM yüklənəndən sonra (bütün defer scriptlər + DOMContentLoaded)
+      // göndərilir — API_URL və core.js-in orijinal fetch-i hazır olur.
+      // Bu sorğu heç bir reload/naviqasiya ilə LƏĞV OLUNMUR.
+      document.addEventListener('DOMContentLoaded', flushPendingReport);
+
+      // Adres çubuğundan keş-busting parametrini sil (işi o reload-la bitdi)
       var _cleanUrl = location.pathname + location.hash;
       history.replaceState({ route: (location.hash || '').replace('#', '') || 'dashboard' }, '', _cleanUrl);
     }
   }catch(uErr){}
 
-  var UPDATE_VERSION_KEY = 'app_version';
-  var VERSION_URL = 'version.json';
-  var OVERLAY_ID = 'appUpdateOverlay';
+  function clearPendingReport(){
+    try{ localStorage.removeItem(PENDING_REPORT_KEY); }catch(e){}
+  }
 
-  var busy = false;
+  // Gözləyən qeydiyyat varsa göndər. UĞURSUZ olarsa bayraq qalır → növbəti
+  // açılışda (checkForAppUpdate) avtomatik TƏKRAR cəhd edilir — bildiriş itməz.
+  function flushPendingReport(){
+    if(_reportInFlight) return;
+    var ver = '';
+    try{ ver = localStorage.getItem(PENDING_REPORT_KEY) || ''; }catch(e){}
+    if(!ver) return;
+    _reportInFlight = true;
+    var p = null;
+    try{ p = reportUpdateToBackend(ver); }catch(repErr){}
+    if(p && typeof p.then === 'function'){
+      p.then(function(){ _reportInFlight = false; clearPendingReport(); },
+             function(){ _reportInFlight = false; }); // uğursuz → bayraq qalır, təkrar
+    } else {
+      _reportInFlight = false;
+      clearPendingReport();
+    }
+  }
 
   // ── Cihaz təyini: mobil vs masaüstü (Telegram bildirişi üçün) ──
   function detectDevice(){
@@ -49,6 +79,43 @@
       return 'Mobil cihaz 📱';
     }
     return 'Kompüter/Brauzer 💻';
+  }
+
+  // ── Yenilənməni backend-ə bildirir (APP_UPDATES + Database-LOG Telegram) ──
+  // IIFE səviyyəsindədir ki, həm reload-time qeydiyyat, həm (gələcəkdə) başqa
+  // nöqtələr çağıra bilsin. Token olmadan da işləyir (backend legacy yolu) —
+  // mobil WebView-də sessiya tokeni bitmiş olsa belə bildiriş MÜTLƏQ çatsın.
+  function reportUpdateToBackend(version){
+    var api = (typeof API_URL === 'string') ? API_URL : null;
+    if(!api) return null;
+    var payload = {
+      action: 'logAppUpdate',
+      version: String(version || ''),
+      message: 'Cihaz yenilənməsi təsdiqləndi (v' + version + ')',
+      device: detectDevice()
+    };
+    // İstifadəçi email-i sessiyadan
+    try{
+      var s = JSON.parse(localStorage.getItem('ctech_session') || 'null');
+      if(s && s.user && s.user.email) payload.userEmail = s.user.email;
+    }catch(e){}
+    // core.js-in bükülməmiş ORİJİNAL fetch-i (mövcuddursa) — token-ə etibar etmə
+    var rawFetch = (typeof window._coreFetch === 'function') ? window._coreFetch : window.fetch.bind(window);
+    try{
+      return rawFetch(api, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).then(function(res){
+        // HTTP xətası (4xx/5xx) da UĞURSUZ sayılır → reject edirik ki, gözləyən
+        // bayraq qalsın və növbəti açılışda bildiriş TƏKRAR göndərilsin.
+        // (Əvvəl .catch(function(){}) hər şeyi udurdu → retry heç işləmirdi.)
+        if(!res || !res.ok) throw new Error('HTTP ' + (res && res.status));
+        return res;
+      });
+    }catch(fErr){
+      return null;
+    }
   }
 
   // ── Versiya müqayisəsi: "4.1" vs "4.0.3" → 1 / 0 / -1 ──
@@ -77,8 +144,7 @@
   }
 
   // ── Faylı stream ilə yüklə, progress callback-i REAL baytla çağır ──
-  // ƏSAS DÜZƏLİŞ: content-length məlum deyilsə `total` 0 ötürülür — ilk
-  // chunk ölçüsü ümumi ölçü kimi UYDURULMUR (əvvəl bar dərhal ~99%-ə atılırdı).
+  // content-length məlum deyilsə `total` 0 ötürülür — bar fayl-vahidi ilə addımlanır.
   function streamFetch(url, onBytes){
     // cache:'reload' → real şəbəkə yüklənməsi (progress real baytdır) və
     // fayl brauzer keşinə yazılır ki, "Başla" reload-ində dərhal açılsın.
@@ -87,7 +153,6 @@
       var total = parseInt(res.headers.get('content-length') || '0', 10) || 0;
       if(!res.body || !res.body.getReader){
         // WebView / köhnə brauzer: stream yoxdur — bütöv blob yüklənir.
-        // Ölçü məlumdursa onu ötür, yoxsa 0 (fayl bitəndə 1 vahid sayılır).
         return res.blob().then(function(blob){ onBytes(blob.size, total); });
       }
       var reader = res.body.getReader();
@@ -168,22 +233,19 @@
   }
 
   // ── Əsas yenilənmə axını ──
-  // Progress modeli (v4.5): məlum content-length → baytla REAL; ölçüsü
-  // naməlum fayl → 1 vahid (fayl bitəndə addımlanır). Heç nə uydurulmur.
+  // Progress per-fayl modeli: ümumi % = (bitmiş fayllar + hazırkı faylın daxilindəki
+  // real irəliləyiş) / fayl sayı. MONOTON — geriyə düşmür, heç nə uydurulmur.
   function runUpdate(version){
     var urls = [];
-    var filesDone = 0;            // bitmiş fayl sayı
-    var currentUrl = '';          // hazırda yüklənən fayl
-    var currentTotal = 0;         // hazırkı faylın məlum ölçüsü (0 = naməlum)
-    var currentLoaded = 0;        // hazırkı fayldan yüklənən bayt
+    var filesDone = 0;
+    var currentUrl = '';
+    var currentTotal = 0;
+    var currentLoaded = 0;
     var failStage = false;
 
     showStage('Yenilənmə yüklənir...', 'Fayllar yüklənir, zəhmət olmasa gözləyin.', '', false, true, true);
     setProgress(0, 'Hazırlanır...');
 
-    // Progress per-fayl modeli (v4.5): ümumi % = (bitmiş fayllar + hazırkı
-    // faylın daxilindəki real irəliləyiş) / fayl sayı. MONOTON — geriyə düşmür
-    // (əvvəlki modeldə yeni böyük faylın ölçüsü əlavə olanda bar geriyə atılırdı).
     function overallPct(){
       var n = urls.length;
       if(n <= 0) return 0;
@@ -203,77 +265,30 @@
       if(btn) btn.onclick = function(){ failStage = false; runUpdate(version); };
     }
 
-    // Yenilənməni backend-ə bildirir — APP_UPDATES sheet-ə yazılır və
-    // Database-LOG (CTECH) qrupuna canlı bildiriş göndərilir. Səssizdir.
-    // PROMISE qaytarır ki, finish() reload-dan ƏVVƏL onu gözləyə bilsin.
-    // (Əvvəl "Başla" klikində atılıb + dərhal reload edilirdi → WebView-də
-    // gedən sorğu ləğv olunur, mobil-dən Telegram bildirişi çatmırdı.)
-    function reportUpdateToBackend(version){
-      var api = (typeof API_URL === 'string') ? API_URL : null;
-      if(!api) return null;
-      var payload = {
-        action: 'logAppUpdate',
-        version: String(version || ''),
-        message: 'Cihaz yenilənməsi təsdiqləndi (v' + version + ')',
-        device: detectDevice()
-      };
-      // İstifadəçi email-i sessiyadan; token-i core.js fetch wrapper-i avtomatik əlavə edir
-      try{
-        var s = JSON.parse(localStorage.getItem('ctech_session') || 'null');
-        if(s && s.user && s.user.email) payload.userEmail = s.user.email;
-      }catch(e){}
-      try{
-        return fetch(api, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        }).catch(function(){});
-      }catch(fErr){
-        return null;
-      }
-    }
-
     function finish(){
+      // Yenilənmə ARTIQ CİHAZDA TƏTBİQ OLUNUB (fayllar keşə yazıldı).
       try{ localStorage.setItem(UPDATE_VERSION_KEY, String(version)); }catch(e){}
+      // Backend qeydiyyatı üçün "gözləyən" bayraq — reload-dan SONRA göndəriləcək
+      // (bu səhifədə göndərsək, "Başla" reload-i WebView-də sorğunu ləğv edə bilər).
+      try{ localStorage.setItem(PENDING_REPORT_KEY, String(version)); }catch(e){}
 
-      // Yenilənmə ARTIQ CİHAZDA TƏTBİQ OLUNUB (fayllar keşə yazılıb) — indi
-      // backend qeydiyyatı göndərilir. Vidget yalnız bundan SONRA yekunlaşır.
       setProgress(100, '');
-      showStage('Yenilənmə yekunlaşdırılır...', 'Yenilənmə qeydə alınır, zəhmət olmasa gözləyin.', '', false, true, false);
-
-      var settled = false;
-      function showDone(){
-        if(settled) return;
-        settled = true;
-        showStage('Yenilənmə tamamlandı', 'Tətbiq yeniləndi. Yeni versiya ilə davam edin.', 'Başla', true, false, false);
-        var btn = document.getElementById('updBtn');
-        if(btn){
-          btn.onclick = function(){
-            lockBody(false);
-            var o = overlayEl(); if(o) o.style.display = 'none';
-            // Səhifəni keşsiz yenidən yüklə → sessiya qorunur, əsas menyu açılır.
-            // URL-dəki `u=` parametri yüklənən kimi (bu faylın başında) təmizlənir.
-            var sep = window.location.pathname.indexOf('?') === -1 ? '?' : '&';
-            window.location.href = window.location.pathname + sep + 'u=' + Date.now();
-          };
-        }
+      showStage('Yenilənmə tamamlandı', 'Tətbiq yeniləndi. Yeni versiya ilə davam edin.', 'Başla', true, false, false);
+      var btn = document.getElementById('updBtn');
+      if(btn){
+        btn.onclick = function(){
+          lockBody(false);
+          var o = overlayEl(); if(o) o.style.display = 'none';
+          // Səhifəni keşsiz yenidən yüklə → sessiya qorunur, əsas menyu açılır.
+          // ?u= parametri yüklənən kimi (bu faylın başında) qeydiyyatı göndərib təmizlənir.
+          var sep = window.location.pathname.indexOf('?') === -1 ? '?' : '&';
+          window.location.href = window.location.pathname + sep + 'u=' + Date.now();
+        };
       }
-
-      var rep = null;
-      try{ rep = reportUpdateToBackend(version); }catch(repErr){}
-      if(rep && typeof rep.then === 'function'){
-        rep.then(showDone, showDone);
-      } else {
-        showDone();
-      }
-      // Təhlükəsizlik: şəbəkə yavaş/bağlı olsa belə vidget ilişib qalmasın.
-      // 8s — GAS ilk çağırışları (cold start) bəzən 2-6s çəkir.
-      setTimeout(showDone, 8000);
     }
 
     function onBytes(url, recv, total){
       if(url !== currentUrl){
-        // Yeni fayl başladı — hazırkı fayl göstəricilərini sıfırla
         currentUrl = url;
         currentTotal = 0;
         currentLoaded = 0;
@@ -313,6 +328,8 @@
 
   // ── Giriş: versiyanı yoxla ──
   window.checkForAppUpdate = function(){
+    // Əvvəlki yenilənmənin bildirişi çatmayıbsa (uğursuzluq) — bu açılışda təkrar cəhd
+    flushPendingReport();
     if(busy) return;
     busy = true;
     fetch(VERSION_URL + '?t=' + Date.now(), { cache: 'no-store' })

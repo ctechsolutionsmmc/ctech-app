@@ -70,6 +70,8 @@ function submitTvmService(){
       if(result.status === 'OK'){
         var wasEdit = tvmEditMode;
         var backTarget = tvmReturnTarget;
+        // Servis dəyişdi → davam edən servis keşini sil (təzə çəkilsin)
+        if(typeof invalidateOngoingCache === 'function') invalidateOngoingCache();
         closeTvmService();
         if(wasEdit){
           // Haradan açılıbsa həmin bölməni yenilə: davam edən servis və ya report

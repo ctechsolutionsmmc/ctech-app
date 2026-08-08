@@ -298,6 +298,8 @@ function submitBusRequest(){
     sp.style.display='none'; ic.style.display='flex';
     if(d.status==='OK'){
       tx.textContent='Göndərildi! '+d.ticketId;
+      // Yeni müraciət davam edən servislərə düşür → keşi sil
+      if(typeof invalidateOngoingCache==='function') invalidateOngoingCache();
       setTimeout(function(){ ov.classList.remove('open'); ov.style.display='none'; brFormDirty=false; closeBusRequest(); }, 1800);
     } else {
       tx.textContent='Xəta baş verdi';

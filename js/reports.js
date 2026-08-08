@@ -66,6 +66,38 @@ function openBusReport(forceOpenOnly){
 var ongAllRows=[], ongColumns=[], ongFiltered=[], ongShownCount=20, ongPageSize=20, ongAutoRefresh=null, ongDateInterval=null;
 var ongServiceTypeFilter='all';
 
+// ── Davam edən servis məlumatı üçün SESSİYA KEŞİ (8 saat) ──
+// Hər açılışda/2 dəqiqədə backend yüklənməsin — sessiya ərzində 8 saat saxlanır,
+// 8 saatdan sonra yenidən çəkilir. Servis tamamlananda (yazma aksiyası)
+// invalidateOngoingCache() keşi SİLİR → texnik öz bitirdiyi servisi artıq görmür.
+var ONG_CACHE_TTL = 8*60*60*1000; // 8 saat
+var ONG_BUS_KEY = 'ctech_ong_bus_v1';
+var ONG_TVM_KEY = 'ctech_ong_tvm_v1';
+// Keş açarı İSTİFADƏÇİYƏ görədir — eyni tab-da çıxıb başqa hesabla girəndə
+// əvvəlki istifadəçinin keşlənmiş servisləri GÖRÜNMƏSİN (məxfilik/tazəlik).
+function ongUserKey(base){
+  var u = (currentUser && currentUser.email) ? currentUser.email.replace(/[^a-z0-9@._-]/gi,'').toLowerCase() : 'anon';
+  return base + '_' + u;
+}
+function ongCacheGet(key){
+  try{
+    var raw = sessionStorage.getItem(ongUserKey(key));
+    if(!raw) return null;
+    var o = JSON.parse(raw);
+    if(!o || !o.ts || (Date.now() - o.ts) > ONG_CACHE_TTL) return null;
+    return o.data;
+  }catch(e){ return null; }
+}
+function ongCacheSet(key, data){
+  try{ sessionStorage.setItem(ongUserKey(key), JSON.stringify({ ts: Date.now(), data: data })); }catch(e){}
+}
+function invalidateOngoingCache(){
+  try{
+    sessionStorage.removeItem(ongUserKey(ONG_BUS_KEY));
+    sessionStorage.removeItem(ongUserKey(ONG_TVM_KEY));
+  }catch(e){}
+}
+
 function openBusOngoing(){
   closeMenu();
   document.getElementById('dashboardView').style.display='none';
@@ -82,8 +114,8 @@ function openBusOngoing(){
   if(ongDateInterval) clearInterval(ongDateInterval);
   ongDateInterval=setInterval(updateOngDate,1000);
   loadOngoingData();
-  if(ongAutoRefresh) clearInterval(ongAutoRefresh);
-  ongAutoRefresh=setInterval(loadOngoingData,120000);
+  // v4.6: 2 dəqiqəlik avtomatik təzələmə GÖTÜRÜLDÜ — məlumat 8 saatlıq sessiya
+  // keşində saxlanır (keş bitdikdə və ya servis tamamlananda yenidən çəkilir).
 }
 function closeBusOngoing(){
   if(ongAutoRefresh){ clearInterval(ongAutoRefresh); ongAutoRefresh=null; }
@@ -105,6 +137,14 @@ function updateOngDate(){
 }
 
 function loadOngoingData(){
+  // 8 saatlıq sessiya keşi — yenidən çəkmə (servis tamamlananda keş silinir)
+  var cached = ongCacheGet(ONG_BUS_KEY);
+  if(cached){
+    ongAllRows = (cached.rows || cached) || [];
+    ongColumns = (cached.columns || []) || [];
+    applyOngoingFilters();
+    return;
+  }
   document.getElementById('ongTableBody').innerHTML='<tr><td colspan="7"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:0})})
   .then(function(r){ return r.json(); })
@@ -118,6 +158,7 @@ function loadOngoingData(){
       return st==='Təhkim Edildi' || st==='Texnik Tamamladı';
     }).sort(rptCompareDesc);
     ongColumns=d.columns||[];
+    ongCacheSet(ONG_BUS_KEY, { rows: ongAllRows, columns: ongColumns });
     applyOngoingFilters();
   }).catch(function(e){
     document.getElementById('ongTableBody').innerHTML='<tr><td colspan="7"><div class="rpt-empty">Şəbəkə xətası: '+e.message+'</div></td></tr>';
@@ -129,6 +170,13 @@ function applyOngoingFilters(){
   var q=(document.getElementById('ongGlobalSearch').value||'').toLowerCase().trim();
   ongShownCount=ongPageSize;
   ongFiltered=ongAllRows.filter(function(row){
+    // v4.6: Texnik yalnız ÖZÜNƏ təhkim olunan, hələ TAMAMLANMAMIŞ ("Təhkim Edildi")
+    // servisləri görür. Özü tamamladığı ("Texnik Tamamladı" — lider təsdiqi gözləyir)
+    // servisi artıq GÖRMÜR — bitən servis onun üçün yox olur.
+    if(getAccessLevel(currentUser.role)==='technician'){
+      if(!rptIsAssignedToMe(row)) return false;
+      if((row['Status']||'').trim()==='Texnik Tamamladı') return false;
+    }
     if(ongServiceTypeFilter!=='all'){
       var t=(row['Xidmət Növü']||'').toLowerCase();
       if(ongServiceTypeFilter==='individual' && t.indexOf('fərdi')===-1) return false;
@@ -168,12 +216,15 @@ function renderOngoingTable(){
   var visible=ongFiltered.slice(0,ongShownCount);
   var _apprLevel = getAccessLevel(currentUser.role);
   var canApprove = (_apprLevel!=='technician' && _apprLevel!=='callcenter');
+  var isTech = (_apprLevel==='technician');
   var html='';
   visible.forEach(function(row){
     var ticketId=escapeHtml(row['Ticket ID']||'');
     var safeId=(row['Ticket ID']||'').replace(/'/g,'');
     var status=(row['Status']||'').trim();
     var canComplete = canApprove; // Leader/Admin — istənilən aktiv statusda tamamlayıb bağlaya bilir
+    // v4.6: Texnik özünə təhkim olunan "Təhkim Edildi" servisini buradan TAMAMLAYA bilir
+    var techCanComplete = isTech && status==='Təhkim Edildi';
     html+='<tr>'
       +'<td class="rpt-td-id">'+ticketId+'</td>'
       +'<td>'+escapeHtml(row['Tarix']||'')+'</td>'
@@ -183,6 +234,7 @@ function renderOngoingTable(){
       +'<td class="col-status">'+ongStatusBadge(status)+'</td>'
       +'<td class="col-act"><div class="rpt-row-actions">'
       +'<button class="rpt-icon-btn" onclick="openBusDetail(\''+safeId+'\')" aria-label="Baxış" title="Baxış"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>'
+      +(techCanComplete?'<button class="rpt-icon-btn" style="color:#188A4B;border-color:#BFE8D2;" onclick="openTechComplete(\''+safeId+'\',\'ongoing\')" aria-label="Servisi tamamla" title="Servisi tamamla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>':'')
       +(canComplete?'<button class="rpt-icon-btn" style="color:#188A4B;border-color:#BFE8D2;" onclick="openLeaderComplete(\''+safeId+'\')" aria-label="Təsdiqlə və Bağla" title="Təsdiqlə və Bağla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>':'')
       +'</div></td></tr>';
   });
@@ -203,6 +255,8 @@ function ongApproveClose(ticketId){
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.status!=='OK'){ alert(d.message||'Xəta baş verdi'); return; }
+    // Servis bağlandı → keşi sil, növbəti açılış təzə çəksin
+    if(typeof invalidateOngoingCache==='function') invalidateOngoingCache();
     loadOngoingData();
   })
   .catch(function(e){ alert('Şəbəkə xətası: '+e.message); });
@@ -706,8 +760,8 @@ function openTvmOngoing(){
   if(tvmOngDateInterval) clearInterval(tvmOngDateInterval);
   tvmOngDateInterval=setInterval(updateTvmOngDate,1000);
   loadTvmOngoingData();
-  if(tvmOngAutoRefresh) clearInterval(tvmOngAutoRefresh);
-  tvmOngAutoRefresh=setInterval(loadTvmOngoingData,120000);
+  // v4.6: 2 dəqiqəlik avtomatik təzələmə GÖTÜRÜLDÜ — məlumat 8 saatlıq sessiya
+  // keşində saxlanır (keş bitdikdə və ya servis tamamlananda yenidən çəkilir).
 }
 function closeTvmOngoing(){
   if(tvmOngAutoRefresh){ clearInterval(tvmOngAutoRefresh); tvmOngAutoRefresh=null; }
@@ -729,6 +783,14 @@ function updateTvmOngDate(){
 }
 function loadTvmOngoingData(){
   var body=document.getElementById('tvmOngTableBody');
+  // 8 saatlıq sessiya keşi — yenidən çəkmə (servis tamamlananda keş silinir)
+  var cached = ongCacheGet(ONG_TVM_KEY);
+  if(cached){
+    tvmOngAllRows = (cached.rows || cached) || [];
+    tvmRptColumns = (cached.columns || []) || tvmRptColumns;
+    applyTvmOngFilters();
+    return;
+  }
   body.innerHTML='<tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData', daysBack:0})})
   .then(function(r){ return r.json(); })
@@ -742,6 +804,7 @@ function loadTvmOngoingData(){
     tvmOngAllRows=(d.rows||[]).filter(function(r){
       return String(r['Status']||'').trim()==='Qiymətləndirilir';
     }).sort(tvmRptCompareDesc);
+    ongCacheSet(ONG_TVM_KEY, { rows: tvmOngAllRows, columns: tvmRptColumns });
     applyTvmOngFilters();
   }).catch(function(e){
     body.innerHTML='<tr><td colspan="6"><div class="rpt-empty">Şəbəkə xətası: '+e.message+'</div></td></tr>';

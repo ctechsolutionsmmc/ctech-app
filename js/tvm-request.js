@@ -281,6 +281,8 @@ function submitTvmRequest(){
     if(ic) ic.style.display='flex';
     if(d.status==='OK'){
       if(tx) tx.textContent='Göndərildi! '+d.ticketId;
+      // Yeni müraciət TVM davam edən servislərə düşür → keşi sil
+      if(typeof invalidateOngoingCache==='function') invalidateOngoingCache();
       setTimeout(function(){
         if(ov){ ov.style.display='none'; }
         trFormDirty=false;

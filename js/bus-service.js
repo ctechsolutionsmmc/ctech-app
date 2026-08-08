@@ -440,11 +440,11 @@ function submitBusService(){
     sp.style.display='none'; ic.style.display='flex';
     if(result.status==='OK'){ tx.textContent=bsLeaderCloseMode?('Təsdiqləndi və bağlandı! '+result.ticketId):(bsEditMode?('Yadda saxlanıldı! '+result.ticketId):('Göndərildi! '+result.ticketId)); }
     else { tx.textContent='Xəta baş verdi'; }
-    setTimeout(function(){ ov.classList.remove('open'); ov.style.display='none'; if(result.status==='OK'){ bsFormDirty=false; if(!bsEditMode)clearBsDraft(); var wasEdit=bsEditMode; bsGoBack(); if(wasEdit)loadReportData(); } },1800);
+    setTimeout(function(){ ov.classList.remove('open'); ov.style.display='none'; if(result.status==='OK'){ bsFormDirty=false; if(!bsEditMode)clearBsDraft(); var wasEdit=bsEditMode; if(typeof invalidateOngoingCache==='function') invalidateOngoingCache(); bsGoBack(); if(wasEdit)loadReportData(); } },1800);
   }).catch(function(){ sp.style.display='none'; tx.textContent='Şəbəkə xətası'; setTimeout(function(){ov.classList.remove('open');ov.style.display='none';},1500); });
 }
 
-function openTechComplete(ticketId){
+function openTechComplete(ticketId, returnTarget){
   var ov=document.getElementById('busOpenOverlay'); ov.style.display='flex';
   // HƏMİŞƏ təzə form məlumatı çək — admin dəyişiklikləri köhnə bsFormData-da görünməz.
   var ensureFormData=
@@ -455,11 +455,12 @@ function openTechComplete(ticketId){
   }).then(function(d){
     ov.style.display='none';
     if(d.status!=='OK'){ alert(d.message||'Ticket yüklənə bilmədi'); return; }
-    bsEditMode=true; bsEditTicketId=ticketId; bsReturnTarget='report';
+    bsEditMode=true; bsEditTicketId=ticketId; bsReturnTarget=returnTarget || 'report';
     resetBusFormFields();
     bsCompletionMode=true;
     document.getElementById('dashboardView').style.display='none';
     document.getElementById('busReportView').style.display='none';
+    document.getElementById('busOngoingView').style.display='none';
     document.getElementById('busServiceView').style.display='block';
     document.getElementById('busServiceView').scrollTop=0;
     document.getElementById('bsTicketBadge').innerHTML='<span style="display:inline-flex;align-items:center;background:#D97706;border-radius:10px;padding:6px 16px;font-family:IBM Plex Mono,monospace;font-weight:700;font-size:14px;color:#FFFFFF;letter-spacing:1px;">SERVİSİ TAMAMLA: '+escapeHtml(d.ticketId)+'</span>';

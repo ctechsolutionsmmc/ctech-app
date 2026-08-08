@@ -31,17 +31,17 @@
 <meta name="apple-mobile-web-app-title" content="CTECH Service">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
-<link rel="stylesheet" href="css/base.css?v=4.5">
-<link rel="stylesheet" href="css/login.css?v=4.5">
-<link rel="stylesheet" href="css/dashboard.css?v=4.5">
-<link rel="stylesheet" href="css/ctd.css?v=4.5">
-<link rel="stylesheet" href="css/desktop-notif.css?v=4.5">
-<link rel="stylesheet" href="css/bus-service.css?v=4.5">
-<link rel="stylesheet" href="css/reports.css?v=4.5">
-<link rel="stylesheet" href="css/admin.css?v=4.5">
-<link rel="stylesheet" href="css/collectives.css?v=4.5">
-<link rel="stylesheet" href="css/notif.css?v=4.5">
-<link rel="stylesheet" href="css/update.css?v=4.5">
+<link rel="stylesheet" href="css/base.css?v=4.6">
+<link rel="stylesheet" href="css/login.css?v=4.6">
+<link rel="stylesheet" href="css/dashboard.css?v=4.6">
+<link rel="stylesheet" href="css/ctd.css?v=4.6">
+<link rel="stylesheet" href="css/desktop-notif.css?v=4.6">
+<link rel="stylesheet" href="css/bus-service.css?v=4.6">
+<link rel="stylesheet" href="css/reports.css?v=4.6">
+<link rel="stylesheet" href="css/admin.css?v=4.6">
+<link rel="stylesheet" href="css/collectives.css?v=4.6">
+<link rel="stylesheet" href="css/notif.css?v=4.6">
+<link rel="stylesheet" href="css/update.css?v=4.6">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>
   (function(){
@@ -481,21 +481,21 @@
 
     <div id="reportsSection">
       <div class="dash-divider">
-        <div class="dash-badge">HESABATLAR</div>
+        <div class="dash-badge">DAVAM EDƏN SERVİSLƏR</div>
         <div class="dash-connector"></div>
       </div>
       <div class="secondary-row">
-        <a class="card-small" href="#bus-report" onclick="openBusReport();return false;">
+        <a class="card-small" href="#bus-ongoing" onclick="openBusOngoing();return false;">
           <div class="card-icon-small icon-bus">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
           </div>
-          <div><div class="card-title-small">BUS Real-Time Report</div><div class="card-sub-small">Canlı siyahı və Excel ixracı</div></div>
+          <div><div class="card-title-small">BUS Davam edən servis</div><div class="card-sub-small">Açıq servislər</div></div>
         </a>
-        <a class="card-small" href="#tvm-report" onclick="openTvmReport();return false;">
+        <a class="card-small" href="#tvm-ongoing" onclick="openTvmOngoing();return false;">
           <div class="card-icon-small icon-tvm">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
           </div>
-          <div><div class="card-title-small">TVM Real-Time Report</div><div class="card-sub-small">Canlı siyahı və Excel ixracı</div></div>
+          <div><div class="card-title-small">TVM Davam edən servis</div><div class="card-sub-small">Açıq servislər</div></div>
         </a>
       </div>
     </div>
@@ -2917,7 +2917,7 @@
 
 <!-- Bütün JS-lər defer ilə yüklənir: paralel endirilir, HTML parse-i BLOCK etmir.
      İcra sırası fayl sırası ilə qorunur (app-update → core → ... → router). -->
-<script defer src="js/app-update.js?v=4.5"></script>
+<script defer src="js/app-update.js?v=4.6"></script>
 <script defer src="js/core.js"></script>
 <script defer src="js/bus-request.js"></script>
 <script defer src="js/admin.js"></script>
@@ -2925,7 +2925,7 @@
 <script defer src="js/reports.js"></script>
 <script defer src="js/tvm-request.js"></script>
 <script defer src="js/tvm-service.js"></script>
-<script defer src="js/desktop-notif.js?v=4.5"></script>
+<script defer src="js/desktop-notif.js?v=4.6"></script>
 <script defer src="js/router.js"></script>
 <div id="tvmServiceView" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#EEF4FC;z-index:41;overflow-y:auto;-webkit-overflow-scrolling:touch;">
 
