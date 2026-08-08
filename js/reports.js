@@ -563,7 +563,9 @@ function loadTvmReportData(){
       document.getElementById('tvmRptTableBody').innerHTML='<tr><td colspan="5"><div class="rpt-empty">Xəta: '+(d.message||'məlumat gəlmədi')+'</div></td></tr>';
       return;
     }
-    tvmRptAllRows=(d.rows||[]).slice().sort(tvmRptCompareDesc);
+    // v4.15: TVM Real-Time Report yalnız Bağlandı — 'Qiymətləndirilir' yalnız
+    // Davam edən servis bölməsində görünür (backend də eyni qaydanı tətbiq edir).
+    tvmRptAllRows=(d.rows||[]).filter(function(row){ return (row['Status']||'').trim()==='Bağlandı'; }).slice().sort(tvmRptCompareDesc);
     tvmRptColumns=d.columns||[];
     var hiddenCount = (d.totalCount||0) - tvmRptAllRows.length;
     var hintEl = document.getElementById('tvmRptOldHint');
