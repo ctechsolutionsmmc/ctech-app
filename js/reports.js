@@ -146,7 +146,8 @@ function loadOngoingData(){
     return;
   }
   document.getElementById('ongTableBody').innerHTML='<tr><td colspan="7"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:0})})
+  // v4.7: ongoing:true → backend yalnız AÇIQ ticketləri qaytarır (tam tarixçə deyil)
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:0, ongoing:true})})
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.status!=='OK'){
@@ -792,7 +793,8 @@ function loadTvmOngoingData(){
     return;
   }
   body.innerHTML='<tr><td colspan="6"><div class="rpt-loading"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div><span>Yüklənir...</span></div></td></tr>';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData', daysBack:0})})
+  // v4.7: ongoing:true → backend yalnız 'Qiymətləndirilir' statuslu ticketləri qaytarır
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData', daysBack:0, ongoing:true})})
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.status!=='OK'){
