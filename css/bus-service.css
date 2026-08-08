@@ -1631,6 +1631,22 @@ body.dark-mode .bk-dqn-chip-x { background:#3E6FCB; color:#E8EEF5; }
   border-radius:12px;
   box-shadow:0 30px 80px rgba(0,0,0,.5);
 }
+/* v4.18: Yüklənmə zamanı spinner — qara/boş qutucuq görünməsin */
+.photo-lightbox-spinner{
+  position:absolute; inset:0;
+  display:none; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.photo-lightbox-spinner .spinner{
+  width:44px; height:44px; border-width:4px;
+}
+.photo-lightbox-msg{
+  position:absolute; left:50%; bottom:40px;
+  transform:translateX(-50%);
+  color:#fff; background:rgba(200,40,40,.85);
+  padding:10px 18px; border-radius:10px;
+  font-size:14px; display:none;
+}
 .photo-lightbox-close{
   position:absolute; top:18px; right:20px;
   width:40px; height:40px; border-radius:50%; border:none;

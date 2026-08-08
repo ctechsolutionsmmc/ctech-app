@@ -240,7 +240,9 @@ function showDashboard(){
   setTimeout(function(){ if(typeof flushPendingPhotos==='function') flushPendingPhotos(); }, 400);
   // Desktop bildiriş paneli (müstəqil komponent — desktop-notif.js) —
   // yalnız masaüstü genişlikdə, həm də öz fallback start-ı var.
-  if(typeof dskNotifStart==='function') dskNotifStart();
+  // v4.18: Refresh-də eyni anda 4-5 GAS sorğusu atılmasın — bildirişlər gecikdirilir;
+  // onlar üçün 2 saniyə sonra başlayır (əsas səhifə render-i bloklanmır).
+  setTimeout(function(){ if(typeof dskNotifStart==='function') dskNotifStart(); }, 2000);
   if(!notifPollingStarted){
     notifPollingStarted = true;
     setInterval(function(){

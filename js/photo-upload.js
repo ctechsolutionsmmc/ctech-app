@@ -382,25 +382,58 @@ function deleteTicketPhoto(ticketId, device, fileId, btnEl){
 }
 
 // ── Lightbox (tam ölçüdə baxış) ──
+// v4.18: Qara ekran problemi həll olundu:
+//   • Şəkil yüklənənə qədər SPINNER göstərilir (boş/qara qutucuq görünmür)
+//   • Fallback zənciri: w1600 → w800 → uc?export=view — Drive böyük thumbnail-i
+//     gecikdirsə/yayımlamasa belə şəkil həmişə açılır (kiçik thumbnail həmişə gəlir)
+//   • Hər üç cəhd uğursuz olarsa aydın mesaj göstərilir (qara ekran YOX)
 function openPhotoLightbox(url){
   var lb = document.getElementById('photoLightbox');
   if(!lb){
     lb = document.createElement('div');
     lb.id = 'photoLightbox';
     lb.className = 'photo-lightbox';
-    lb.innerHTML = '<button type="button" class="photo-lightbox-close" onclick="closePhotoLightbox()" aria-label="Bağla">&times;</button><img class="photo-lightbox-img" alt="">';
+    lb.innerHTML = '<div class="photo-lightbox-spinner"><div class="spinner"></div></div>' +
+      '<button type="button" class="photo-lightbox-close" onclick="closePhotoLightbox()" aria-label="Bağla">&times;</button>' +
+      '<img class="photo-lightbox-img" alt="">' +
+      '<div class="photo-lightbox-msg"></div>';
     document.body.appendChild(lb);
   }
   var img = lb.querySelector('img');
-  // v4.17: Drive thumbnail servisi bəzən böyük ölçüdə (w1920) gec/gəlməz ola bilər —
-  // fallback: kiçik thumbnail-ə düş. Həmçinin boş/qırıq şəkil ağ fonda qalmasın.
+  var sp = lb.querySelector('.photo-lightbox-spinner');
+  var msgEl = lb.querySelector('.photo-lightbox-msg');
+  if(!img || !sp || !msgEl) return;
+
+  // URL-dən file ID çıxar → fallback üçün alternativ URL-lər qur
+  var id = '';
+  var m = String(url || '').match(/[?&]id=([^&]+)/);
+  if(m) id = decodeURIComponent(m[1]);
+  var attempts = [String(url || '')];
+  if(id){
+    attempts.push('https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w800');
+    attempts.push('https://drive.google.com/uc?export=view&id=' + encodeURIComponent(id));
+  }
+
+  img.style.display = '';
+  img.style.visibility = 'visible';
+  msgEl.textContent = '';
+  msgEl.style.display = 'none';
+  sp.style.display = 'flex';
+
+  img.onload = function(){ sp.style.display = 'none'; };
   img.onerror = function(){
-    var s = String(url || '');
-    var fb = s.replace(/sz=w\d+/, 'sz=w800');
-    if(fb !== s){ this.onerror = null; this.src = fb; }
-    else { this.onerror = null; this.alt = 'Şəkil göstərilə bilmədi'; }
+    var next = attempts.shift();
+    if(next && next !== this.src){
+      this.src = next;
+    } else {
+      sp.style.display = 'none';
+      img.style.visibility = 'hidden';
+      msgEl.textContent = 'Şəkil yüklənə bilmədi';
+      msgEl.style.display = 'block';
+    }
   };
-  img.src = url;
+
+  img.src = attempts.shift();
   lb.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
