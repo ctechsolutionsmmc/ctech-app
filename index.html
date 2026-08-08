@@ -31,17 +31,17 @@
 <meta name="apple-mobile-web-app-title" content="CTECH Service">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
-<link rel="stylesheet" href="css/base.css?v=4.10">
-<link rel="stylesheet" href="css/login.css?v=4.10">
-<link rel="stylesheet" href="css/dashboard.css?v=4.10">
-<link rel="stylesheet" href="css/ctd.css?v=4.10">
-<link rel="stylesheet" href="css/desktop-notif.css?v=4.10">
-<link rel="stylesheet" href="css/bus-service.css?v=4.10">
-<link rel="stylesheet" href="css/reports.css?v=4.10">
-<link rel="stylesheet" href="css/admin.css?v=4.10">
-<link rel="stylesheet" href="css/collectives.css?v=4.10">
-<link rel="stylesheet" href="css/notif.css?v=4.10">
-<link rel="stylesheet" href="css/update.css?v=4.10">
+<link rel="stylesheet" href="css/base.css?v=4.11">
+<link rel="stylesheet" href="css/login.css?v=4.11">
+<link rel="stylesheet" href="css/dashboard.css?v=4.11">
+<link rel="stylesheet" href="css/ctd.css?v=4.11">
+<link rel="stylesheet" href="css/desktop-notif.css?v=4.11">
+<link rel="stylesheet" href="css/bus-service.css?v=4.11">
+<link rel="stylesheet" href="css/reports.css?v=4.11">
+<link rel="stylesheet" href="css/admin.css?v=4.11">
+<link rel="stylesheet" href="css/collectives.css?v=4.11">
+<link rel="stylesheet" href="css/notif.css?v=4.11">
+<link rel="stylesheet" href="css/update.css?v=4.11">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>
   (function(){
@@ -49,6 +49,24 @@
     if(!meta){ meta = document.createElement('meta'); meta.name="viewport"; document.head.appendChild(meta); }
     meta.setAttribute("content","width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");
   })();
+</script>
+
+<!-- Banner şəkillərinin ERKƏN preload-u (v4.11): login ekranı görünərkən yüklənir,
+     daxil olan kimi bütün bannerlər keşdən ANİ açılır — guest hero-nun
+     "gec yüklənir" problemi də daxil. Cihaz növünə görə yalnız lazım olanlar çəkilir. -->
+<script>
+(function(){
+  try{
+    var isDesk = window.innerWidth >= 901;
+    var urls = isDesk
+      ? ['dash-hero.webp','guest-hero-bg.webp','dash-tvm-banner.webp','service_dashboards_bunner.webp']
+      : ['banner.webp'];
+    urls.push('about-bg.webp');
+    urls.forEach(function(u){
+      try{ var im = new Image(); im.src = u; }catch(e){}
+    });
+  }catch(e){}
+})();
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2920,7 +2938,7 @@
 
 <!-- Bütün JS-lər defer ilə yüklənir: paralel endirilir, HTML parse-i BLOCK etmir.
      İcra sırası fayl sırası ilə qorunur (app-update → core → ... → router). -->
-<script defer src="js/app-update.js?v=4.10"></script>
+<script defer src="js/app-update.js?v=4.11"></script>
 <script defer src="js/core.js"></script>
 <script defer src="js/bus-request.js"></script>
 <script defer src="js/admin.js"></script>
@@ -2928,7 +2946,7 @@
 <script defer src="js/reports.js"></script>
 <script defer src="js/tvm-request.js"></script>
 <script defer src="js/tvm-service.js"></script>
-<script defer src="js/desktop-notif.js?v=4.10"></script>
+<script defer src="js/desktop-notif.js?v=4.11"></script>
 <script defer src="js/router.js"></script>
 <div id="tvmServiceView" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#EEF4FC;z-index:41;overflow-y:auto;-webkit-overflow-scrolling:touch;">
 
