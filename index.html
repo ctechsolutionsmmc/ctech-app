@@ -31,17 +31,17 @@
 <meta name="apple-mobile-web-app-title" content="CTECH Service">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
-<link rel="stylesheet" href="css/base.css?v=4.11">
-<link rel="stylesheet" href="css/login.css?v=4.11">
-<link rel="stylesheet" href="css/dashboard.css?v=4.11">
-<link rel="stylesheet" href="css/ctd.css?v=4.11">
-<link rel="stylesheet" href="css/desktop-notif.css?v=4.11">
-<link rel="stylesheet" href="css/bus-service.css?v=4.11">
-<link rel="stylesheet" href="css/reports.css?v=4.11">
-<link rel="stylesheet" href="css/admin.css?v=4.11">
-<link rel="stylesheet" href="css/collectives.css?v=4.11">
-<link rel="stylesheet" href="css/notif.css?v=4.11">
-<link rel="stylesheet" href="css/update.css?v=4.11">
+<link rel="stylesheet" href="css/base.css?v=4.12">
+<link rel="stylesheet" href="css/login.css?v=4.12">
+<link rel="stylesheet" href="css/dashboard.css?v=4.12">
+<link rel="stylesheet" href="css/ctd.css?v=4.12">
+<link rel="stylesheet" href="css/desktop-notif.css?v=4.12">
+<link rel="stylesheet" href="css/bus-service.css?v=4.12">
+<link rel="stylesheet" href="css/reports.css?v=4.12">
+<link rel="stylesheet" href="css/admin.css?v=4.12">
+<link rel="stylesheet" href="css/collectives.css?v=4.12">
+<link rel="stylesheet" href="css/notif.css?v=4.12">
+<link rel="stylesheet" href="css/update.css?v=4.12">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>
   (function(){
@@ -59,7 +59,7 @@
   try{
     var isDesk = window.innerWidth >= 901;
     var urls = isDesk
-      ? ['dash-hero.webp','guest-hero-bg.webp','dash-tvm-banner.webp','service_dashboards_bunner.webp']
+      ? ['guest-hero-bg.webp','dash-tvm-banner.webp','service_dashboards_bunner.webp']
       : ['banner.webp'];
     urls.push('about-bg.webp');
     urls.forEach(function(u){
@@ -115,8 +115,7 @@
         </label>
       </div>
     </div>
-    <div class="footer-note">© 2026 Ctech Solutions MMC. Bütün hüquqlar qorunur.</div>
-    <div class="app-version" id="appVerLogin"></div>
+    <div class="footer-note"><span class="app-version" id="appVerLogin"></span>© 2026 Ctech Solutions MMC. Bütün hüquqlar qorunur.</div>
   </div>
 </div>
 
@@ -455,8 +454,7 @@
     </div>
   </div>
 
-  <footer class="ctd-footer" id="ctdFooter">© 2026 CTECH SOLUTIONS MMC. Bütün hüquqlar qorunur.</footer>
-  <div class="app-version app-ver-desk" id="appVerDashDesk"></div>
+  <footer class="ctd-footer" id="ctdFooter"><span class="app-version" id="appVerDashDesk"></span>© 2026 CTECH SOLUTIONS MMC. Bütün hüquqlar qorunur.</footer>
 
 
   <div class="container" id="dashboardContainer">
@@ -524,8 +522,7 @@
       <img class="banner-img" src="banner.webp" alt="İctimai nəqliyyat">
     </div>
   </div>
-  <div class="footer-note-dash">© 2026 Ctech Solutions MMC</div>
-  <div class="app-version app-ver-mob" id="appVerDashMob"></div>
+  <div class="footer-note-dash"><span class="app-version" id="appVerDashMob"></span>© 2026 Ctech Solutions MMC</div>
 </div>
 
 <!-- ===== COLLECTIVES VIEW ===== -->
@@ -2938,7 +2935,7 @@
 
 <!-- Bütün JS-lər defer ilə yüklənir: paralel endirilir, HTML parse-i BLOCK etmir.
      İcra sırası fayl sırası ilə qorunur (app-update → core → ... → router). -->
-<script defer src="js/app-update.js?v=4.11"></script>
+<script defer src="js/app-update.js?v=4.12"></script>
 <script defer src="js/core.js"></script>
 <script defer src="js/bus-request.js"></script>
 <script defer src="js/admin.js"></script>
@@ -2946,7 +2943,7 @@
 <script defer src="js/reports.js"></script>
 <script defer src="js/tvm-request.js"></script>
 <script defer src="js/tvm-service.js"></script>
-<script defer src="js/desktop-notif.js?v=4.11"></script>
+<script defer src="js/desktop-notif.js?v=4.12"></script>
 <script defer src="js/router.js"></script>
 <div id="tvmServiceView" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#EEF4FC;z-index:41;overflow-y:auto;-webkit-overflow-scrolling:touch;">
 

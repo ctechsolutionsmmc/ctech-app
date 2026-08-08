@@ -299,15 +299,13 @@
      Guest hero (.ctd-hero.guest-hero) tünd görünüşündə qalır.
      Yalnız vizual xüsusiyyətlər: rəng, fon, haşiyə, kölgə, mətn rəngi.
      ═══════════════════════════════════════════════════════════════ */
-  /* v4.10: Banner şəkli daxil olmuş istifadəçilər üçün də GÖRÜNÜR —
-     əvvəl light tema onu gizlədirdi (desktop əsas menyuda "banner açılmır").
-     Şəkil yüngül scrim ilə, ağ mətn oxunaqlı qalır; topbar və aşağı
-     bölmələr light dizaynda qalır. */
-  .ctd-hero:not(.guest-hero){ background:#0d2035; }
-  .ctd-hero:not(.guest-hero) .ctd-hero-bg{ display:block; }
-  .ctd-hero:not(.guest-hero) .ctd-hero-blur{ display:block; }
-  .ctd-hero:not(.guest-hero) .ctd-hero-scrim{ background:linear-gradient(100deg, rgba(10,26,46,0.88) 0%, rgba(10,26,46,0.7) 32%, rgba(15,42,71,0.38) 58%, rgba(15,42,71,0.16) 100%); }
-  .ctd-hero:not(.guest-hero) .ctd-hero-fade{ background:linear-gradient(to bottom, rgba(217,228,237,0) 0%, rgba(217,228,237,0.14) 55%, rgba(217,228,237,0.55) 80%, #D9E3F0 100%); }
+  /* v4.12: Üst hero banner şəkli qaytadan GİZLİ — əsas menyuda yalnız
+     aşağıdakı banner (ctd-banner2) görünür, hero light fonda qalır. */
+  .ctd-hero:not(.guest-hero){ background:#D9E3F0; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-bg{ display:none; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-blur{ display:none; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-scrim{ background:transparent; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-fade{ background:#D9E3F0; }
 
   .ctd-hero:not(.guest-hero) .ctd-topbar{
     background:rgba(255,255,255,0.95);
@@ -336,9 +334,9 @@
   .ctd-hero:not(.guest-hero) .ctd-uname{ color:#2F6FED; }
   .ctd-hero:not(.guest-hero) .ctd-urole{ color:#5C7089; }
   .ctd-hero:not(.guest-hero) .ctd-chip-caret{ color:#12233B; }
-  .ctd-hero:not(.guest-hero) .ctd-welcome{ color:#FFFFFF; }
-  .ctd-hero:not(.guest-hero) .ctd-welcome span{ color:#9FC2FF; }
-  .ctd-hero:not(.guest-hero) .ctd-subwelcome{ color:#DCE7F7; }
+  .ctd-hero:not(.guest-hero) .ctd-welcome{ color:#12233B; }
+  .ctd-hero:not(.guest-hero) .ctd-welcome span{ color:#2F6FED; }
+  .ctd-hero:not(.guest-hero) .ctd-subwelcome{ color:#5C7089; }
 
   @media (max-width:1240px){
     .ctd-content-grid{ grid-template-columns:1fr; }

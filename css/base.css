@@ -65,16 +65,10 @@ button, .icon-btn, .card-big, .card-small, .menu-item, .dash-tab,
   }
 }
 
-/* ===== VERSİYA GÖSTƏRİCİSİ (login + əsas menyu) ===== */
+/* ===== VERSİYA GÖSTƏRİCİSİ — copyright mətninin SOLUNDA, eyni sətirdə (v4.12) ===== */
 .app-version{
-  text-align:center; font-size:11px; font-weight:600; letter-spacing:.5px;
-  color:#5C7089; padding:2px 0 10px; font-family:'Inter',sans-serif;
-  opacity:.85;
-}
-/* Dashboard: desktop versiya yalnız geniş ekranda, mobil versiya yalnız dar ekranda */
-.app-ver-desk{ display:none; }
-@media(min-width:901px){
-  .app-ver-desk{ display:block; }
-  .app-ver-mob{ display:none !important; }
+  display:inline-block; font-size:11px; font-weight:600; letter-spacing:.5px;
+  color:#5C7089; margin-right:10px; font-family:'Inter',sans-serif;
+  opacity:.85; vertical-align:middle;
 }
 body.dark-mode .app-version{ color:#8FA3BF; }
