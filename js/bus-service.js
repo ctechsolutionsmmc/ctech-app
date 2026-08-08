@@ -234,6 +234,9 @@ function resetBusFormFields(){
   document.getElementById('bs_location_note_wrap').style.display='none';
   if(typeof unlockRegistryFields==='function')unlockRegistryFields();
   closeBusRegistryDD();
+  // v4.13: seçilmiş fotoları sıfırla + bölmə görünürlüyünü təzələ
+  if(typeof clearPhotos==='function') clearPhotos('bus');
+  if(typeof updatePhotoSections==='function') updatePhotoSections();
 }
 function closeBusRegistryDD(){ var dd=document.getElementById('bs_registry_dd'); if(dd)dd.classList.remove('open'); }
 
@@ -401,6 +404,12 @@ function submitBusService(){
   if(!bsSelected.leader){alert('Qrup rəhbərini seçin');return;}
   var hasDigarSol=bsSelected.solution.some(function(s){return s.toLowerCase().indexOf('digər')!==-1;});
   if(hasDigarSol&&!document.getElementById('bs_note').value.trim()){alert('Həll üçün qeyd yazın');return;}
+  // v4.13: Mobil Bus formasında texnik üçün minimum 1 foto MƏCBURİDİR
+  if(typeof photoSectionRequired==='function' && photoSectionRequired('bus') && PHOTO_STATE.bus.length===0){
+    if(typeof photoError==='function') photoError('bus','Servis fotosu məcburidir — ən azı 1 foto əlavə edin');
+    alert('Servis fotosu məcburidir — ən azı 1 foto əlavə edin');
+    return;
+  }
   var data={
     report_date:document.getElementById('bs_date').value,
     report_time:getTimeValue(),
@@ -423,7 +432,8 @@ function submitBusService(){
     technician_1:bsSelected.tech1,
     technician_2:bsSelected.tech2,
     team_leader:bsSelected.leader,
-    note:document.getElementById('bs_note').value
+    note:document.getElementById('bs_note').value,
+    photos:(typeof getPhotosForSubmit==='function')?getPhotosForSubmit('bus'):[]
   };
   var ov=document.getElementById('bsLoadingOverlay'); var sp=document.getElementById('bsSpinner');
   var tx=document.getElementById('bsLoadingText'); var ic=document.getElementById('bsSuccessIcon');

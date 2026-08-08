@@ -30,7 +30,8 @@ function submitTvmService(){
     team_leader: bsSelected.tvm_leader,
     old_sn: document.getElementById('tvm_old_sn') ? document.getElementById('tvm_old_sn').value.trim() : '',
     new_sn: document.getElementById('tvm_new_sn') ? document.getElementById('tvm_new_sn').value.trim() : '',
-    note: document.getElementById('tvm_note').value.trim()
+    note: document.getElementById('tvm_note').value.trim(),
+    photos: (typeof getPhotosForSubmit==='function') ? getPhotosForSubmit('tvm') : []
   };
 
   var ov = document.getElementById('tvmLoadingOverlay');

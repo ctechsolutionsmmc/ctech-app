@@ -486,6 +486,10 @@ function _renderBusDetail(ticketId, row){
   });
   html+='<div class="dv-section"><div class="dv-section-title">Status</div><div class="dv-row"><span class="dv-label">Vəziyyət</span><span class="dv-value"><span class="dv-status-chip">'+escapeHtml(row['Status']||'')+'</span></span></div></div>';
   document.getElementById('dvBody').innerHTML=html;
+  // v4.13: Servis Fotoları bölməsi (admin/leader görür; texnik yalnız açıq ticketdə)
+  if(typeof appendPhotoSectionToDetail==='function'){
+    appendPhotoSectionToDetail(ticketId, 'BUS', row['Status']||'', 'dvBody');
+  }
   document.getElementById('busReportView').style.display='none';
   document.getElementById('busDetailView').style.display='flex';
 }
@@ -719,6 +723,10 @@ function _renderTvmDetail(ticketId, row){
     if(rowsHtml) html+='<div class="dv-section"><div class="dv-section-title">'+escapeHtml(sec.section)+'</div>'+rowsHtml+'</div>';
   });
   document.getElementById('tvmDvBody').innerHTML=html;
+  // v4.13: Servis Fotoları bölməsi (admin/leader görür; texnik yalnız açıq ticketdə)
+  if(typeof appendPhotoSectionToDetail==='function'){
+    appendPhotoSectionToDetail(ticketId, 'TVM', row['Status']||'', 'tvmDvBody');
+  }
   document.getElementById('tvmReportView').style.display='none';
   document.getElementById('tvmDetailView').style.display='flex';
 }
@@ -3333,6 +3341,9 @@ function resetTvmFormFields(){
   var locWrap = document.getElementById('tvm_location_wrap'); if(locWrap) locWrap.style.display = 'none';
   var svcLocWrap = document.getElementById('tvm_service_location_wrap'); if(svcLocWrap) svcLocWrap.style.display = 'none';
   closeTvmSnDD();
+  // v4.13: seçilmiş fotoları sıfırla + bölmə görünürlüyünü təzələ
+  if(typeof clearPhotos==='function') clearPhotos('tvm');
+  if(typeof updatePhotoSections==='function') updatePhotoSections();
 }
 
 function tvmFormatTime(el){ formatTimeInput(el); tvmFormDirty = true; }

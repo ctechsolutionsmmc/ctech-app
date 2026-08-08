@@ -1546,6 +1546,100 @@ body.dark-mode .bk-dqn-chip-x { background:#3E6FCB; color:#E8EEF5; }
   #bsBulkBannerWrap { display:none !important; }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   SERVİS FOTOLARI (v4.13) — forma bölməsi + detail view grid + lightbox
+   ═══════════════════════════════════════════════════════════════ */
+.svc-photo-section{
+  max-width:520px; margin:0 auto; padding:0 16px; box-sizing:border-box;
+  margin-top:22px;
+}
+@media(min-width:640px){
+  .svc-photo-section{ max-width:760px; padding:0 40px; }
+}
+.svc-photo-section .bs-label{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.svc-photo-hint{ font-size:11.5px; color:#8CA0BC; font-weight:500; }
+
+.svc-photo-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(96px,1fr));
+  gap:12px;
+  margin-top:10px;
+}
+.svc-photo-tile{
+  position:relative;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid #DCE6F5;
+  background:#F4F8FD;
+  aspect-ratio:1/1;
+  min-height:96px;
+}
+.svc-photo-tile .svc-photo-thumb{
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.svc-photo-view .svc-photo-thumb{ cursor:zoom-in; }
+.svc-photo-x{
+  position:absolute; top:6px; right:6px;
+  width:24px; height:24px; border-radius:50%; border:none;
+  background:rgba(10,20,35,.72); color:#fff;
+  font-size:15px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:transform .15s, background .15s;
+  z-index:2;
+}
+.svc-photo-x:hover{ background:#E5484D; transform:scale(1.08); }
+.svc-photo-x:disabled{ opacity:.5; cursor:default; transform:none; }
+.svc-photo-add{
+  border:1.5px dashed #B9CBEA; background:#F8FAFE;
+  border-radius:14px; aspect-ratio:1/1; min-height:96px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; color:#2F6FED; font-size:12px; font-weight:700;
+  font-family:'Inter',sans-serif; cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.svc-photo-add:hover{ border-color:#2F6FED; background:#EEF4FE; }
+.svc-photo-error{
+  margin-top:8px; font-size:12.5px; font-weight:700; color:#E5484D;
+}
+.svc-photo-empty{
+  padding:14px 0; font-size:12.5px; color:#8CA0BC; font-weight:500;
+}
+
+/* Detail view — Servis Fotoları bölməsi */
+.svc-photo-detail-section{ margin-top:6px; }
+.svc-photo-detail{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  gap:12px;
+  padding-top:4px;
+}
+
+/* Lightbox */
+.photo-lightbox{
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(8,14,24,.92);
+  display:none; align-items:center; justify-content:center;
+  padding:24px;
+}
+.photo-lightbox-img{
+  max-width:100%; max-height:100%;
+  border-radius:12px;
+  box-shadow:0 30px 80px rgba(0,0,0,.5);
+}
+.photo-lightbox-close{
+  position:absolute; top:18px; right:20px;
+  width:40px; height:40px; border-radius:50%; border:none;
+  background:rgba(255,255,255,.14); color:#fff;
+  font-size:22px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .15s;
+}
+.photo-lightbox-close:hover{ background:rgba(255,255,255,.28); }
+
+body.dark-mode .svc-photo-tile{ background:#16212E; border-color:#3E5578; }
+body.dark-mode .svc-photo-add{ background:#141F30; border-color:#3E5578; color:#8FB4EA; }
+body.dark-mode .svc-photo-add:hover{ border-color:#4E93FA; background:#1C2A3D; }
+
 /* ===== DARK MODE — BUS SERVICE & BULK ===== */
 body.dark-mode #busServiceView { background:#0F1826; }
 /* home btn artıq .bs-home-btn class ilə idarə olunur */
