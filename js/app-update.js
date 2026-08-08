@@ -53,12 +53,21 @@
   // açılışda (checkForAppUpdate) avtomatik TƏKRAR cəhd edilir — bildiriş itməz.
   function flushPendingReport(){
     if(_reportInFlight) return;
-    var ver = '';
-    try{ ver = localStorage.getItem(PENDING_REPORT_KEY) || ''; }catch(e){}
+    var ver = '', email = '';
+    try{
+      var raw = localStorage.getItem(PENDING_REPORT_KEY) || '';
+      if(raw){
+        try{
+          var parsed = JSON.parse(raw);
+          if(parsed && parsed.ver){ ver = parsed.ver; email = parsed.email || ''; }
+          else { ver = raw; } // köhnə format (sadə versiya string) — uyğunluq
+        }catch(e){ ver = raw; }
+      }
+    }catch(e){}
     if(!ver) return;
     _reportInFlight = true;
     var p = null;
-    try{ p = reportUpdateToBackend(ver); }catch(repErr){}
+    try{ p = reportUpdateToBackend(ver, email); }catch(repErr){}
     if(p && typeof p.then === 'function'){
       p.then(function(){ _reportInFlight = false; clearPendingReport(); },
              function(){ _reportInFlight = false; }); // uğursuz → bayraq qalır, təkrar
@@ -85,7 +94,7 @@
   // IIFE səviyyəsindədir ki, həm reload-time qeydiyyat, həm (gələcəkdə) başqa
   // nöqtələr çağıra bilsin. Token olmadan da işləyir (backend legacy yolu) —
   // mobil WebView-də sessiya tokeni bitmiş olsa belə bildiriş MÜTLƏQ çatsın.
-  function reportUpdateToBackend(version){
+  function reportUpdateToBackend(version, email){
     var api = (typeof API_URL === 'string') ? API_URL : null;
     if(!api) return null;
     var payload = {
@@ -94,11 +103,19 @@
       message: 'Cihaz yenilənməsi təsdiqləndi (v' + version + ')',
       device: detectDevice()
     };
-    // İstifadəçi email-i sessiyadan
-    try{
-      var s = JSON.parse(localStorage.getItem('ctech_session') || 'null');
-      if(s && s.user && s.user.email) payload.userEmail = s.user.email;
-    }catch(e){}
+    // İstifadəçi: finish()-də tutulub (reliable) + canlı sessiyadan fallback.
+    // (v4.9 — əvvəl yalnız sessiyadan oxuyurdu; oxunmayanda "İstifadəçi: -" qalırdı.)
+    var em = String(email || '').trim();
+    if(!em){
+      try{
+        var s = JSON.parse(localStorage.getItem('ctech_session') || 'null');
+        if(s){
+          if(s.user && s.user.email) em = String(s.user.email).trim();
+          else if(s.email) em = String(s.email).trim();
+        }
+      }catch(e){}
+    }
+    if(em){ payload.userEmail = em; payload.requesterEmail = em; } // requesterEmail: backend legacy yolu
     // core.js-in bükülməmiş ORİJİNAL fetch-i (mövcuddursa) — token-ə etibar etmə
     var rawFetch = (typeof window._coreFetch === 'function') ? window._coreFetch : window.fetch.bind(window);
     try{
@@ -270,7 +287,17 @@
       try{ localStorage.setItem(UPDATE_VERSION_KEY, String(version)); }catch(e){}
       // Backend qeydiyyatı üçün "gözləyən" bayraq — reload-dan SONRA göndəriləcək
       // (bu səhifədə göndərsək, "Başla" reload-i WebView-də sorğunu ləğv edə bilər).
-      try{ localStorage.setItem(PENDING_REPORT_KEY, String(version)); }catch(e){}
+      // v4.9: istifadəçi email-i BURADA tutulur — sessiya bu an təzədir (login olunub).
+      // Reload-dan sonra sessiya bitmiş/oxunmaz olsa belə bildiriş DÜZGÜN istifadəçi ilə gedir.
+      var _who = {};
+      try{
+        var _s = JSON.parse(localStorage.getItem('ctech_session') || 'null');
+        if(_s){
+          if(_s.user && _s.user.email) _who.email = String(_s.user.email).trim();
+          else if(_s.email) _who.email = String(_s.email).trim();
+        }
+      }catch(e){}
+      try{ localStorage.setItem(PENDING_REPORT_KEY, JSON.stringify({ ver: String(version), email: _who.email || '' })); }catch(e){}
 
       setProgress(100, '');
       showStage('Yenilənmə tamamlandı', 'Tətbiq yeniləndi. Yeni versiya ilə davam edin.', 'Başla', true, false, false);

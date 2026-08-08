@@ -252,6 +252,8 @@ function showDashboard(){
     }, 180000);
   }
   if(!clockStarted){ clockStarted=true; updateClock(); setInterval(updateClock,1000); }
+  // Versiya göstəricisi — hər girişdə təzələnir (login + əsas menyu)
+  if(typeof showAppVersion==='function') showAppVersion();
 }
 
 function getAccessLevel(role){ var r=(role||'').toLowerCase(); if(r.indexOf('admin')!==-1)return'admin'; if(r.indexOf('call center')!==-1||r.indexOf('callcenter')!==-1)return'callcenter'; if(r.indexOf('guest')!==-1)return'guest'; if(r.indexOf('team')!==-1||r.indexOf('leader')!==-1||r.indexOf('rəhbər')!==-1)return'leader'; return'technician'; }
@@ -469,6 +471,21 @@ function toggleTheme(){ if(window.innerWidth>=901)return; var isDark=!document.b
 // ── Köməkçi ──
 function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// ── Versiya göstəricisi (login + əsas menyu) ──
+// version.json serverdəki CƏRİ versiyadır — yenilənmə + reload-dan sonra avtomatik
+// yenilənir. Bütün .app-version elementləri (login, dashboard desktop/mobil) eyni anda dəyişir.
+function showAppVersion(){
+  fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var v = String((d && d.version) || '').trim();
+      if(!v) return;
+      var nodes = document.querySelectorAll('.app-version');
+      for(var i = 0; i < nodes.length; i++) nodes[i].textContent = 'v' + v;
+    })
+    .catch(function(){});
+}
+
 // ── Excel kitabxanası (xlsx) — yalnız "Export" düyməsi basılanda yüklənir ──
 // Əvvəllər hər səhifə açılışında <head>-də sinxron yüklənirdi (~900KB) və
 // ilk göstərilməni BLOCK edirdi. İndi lazım olanda, birdəfəlik yüklənir və
@@ -525,3 +542,5 @@ if(_savedSession && _savedSession.user && _savedSession.user.email){
   clearSession();
 }
 try{ var savedTheme=localStorage.getItem('ctech_theme'); if(savedTheme==='dark'&&window.innerWidth<901){applyTheme(true);} }catch(e){}
+// Versiya göstəricisi — login ekranında (səhifə açılanda)
+if(typeof showAppVersion==='function') showAppVersion();
