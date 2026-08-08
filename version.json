@@ -1,4 +1,3 @@
 {
-  "version": "4.3",
-  "message": "Performans yeniləməsi: səhifə/login açılışı sürətləndi (defer script-lər, süni gecikmələr silindi, backend keşləmə). Dashboard: tarix/saat loqo altına keçirildi, 'Heyət haqqında' ikon-butona çevrildi, arxa fon tündləşdirildi."
+  "version": "4.4"
 }

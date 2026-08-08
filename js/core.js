@@ -236,6 +236,9 @@ function showDashboard(){
   // 5-6 GAS sorğusu atılırdı, backend növbəyə düşüb login + dashboard göstərilməsini ləngidirdi.
   setTimeout(function(){ if(typeof preloadNotifications==='function') preloadNotifications(); }, 1500);
   setTimeout(function(){ if(typeof preloadValidatorSNList==='function') preloadValidatorSNList(); }, 3000);
+  // Desktop bildiriş paneli (müstəqil komponent — desktop-notif.js) —
+  // yalnız masaüstü genişlikdə, həm də öz fallback start-ı var.
+  if(typeof dskNotifStart==='function') dskNotifStart();
   if(!notifPollingStarted){
     notifPollingStarted = true;
     setInterval(function(){
