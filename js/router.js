@@ -179,7 +179,8 @@ function routerNavigate(route, pushToHistory){
   if(leavingHeavyView){
     var loading = document.getElementById('dashLoading');
     if(loading) loading.style.display='flex';
-    setTimeout(_doNav, 700);
+    // Əvvəlki 700ms süni gözləmə 250ms-ə endirildi — keçidlər daha cəld hiss olunur.
+    setTimeout(_doNav, 250);
   } else {
     _doNav();
   }
@@ -380,9 +381,9 @@ function initRouter(){
   _currentRoute = _getHashFromUrl();
 
   // ── Gecikmiş (stale) açılış qoruyucusu ──
-  // startBusService() daxildə 900ms gecikmə ilə openBusService()-i çağırır.
-  // Əgər bu müddətdə istifadəçi artıq başqa yerə keçibsə (məs. geri sürüşdürübsə),
-  // bu gecikmiş çağırış səssizcə formu yenidən göstərməsin.
+  // startBusService() məlumat gələn kimi openBusService()-i çağırır (6s təhlükəsizlik
+  // limiti var). Əgər bu müddətdə istifadəçi artıq başqa yerə keçibsə (məs. geri
+  // sürüşdürübsə), bu gecikmiş çağırış səssizcə formu yenidən göstərməsin.
   try{
     if(typeof openBusService === 'function'){
       var _rawOpenBusService = openBusService;

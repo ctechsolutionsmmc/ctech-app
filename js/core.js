@@ -86,7 +86,7 @@ function getAuthToken(){
 // AUTH_EXPIRED yoxlaması ağır oxuma aksiyalarında iki dəfə JSON.parse
 // etməsin deyə onlar atlanır (token bitdikdə onlar sadəcə xəta qaytarır;
 // login ekranı növbəti yazma əməliyyatında çıxır).
-var AUTH_EXPIRED_SKIP_ACTIONS = { getReportData:1, getTvmReportData:1, getDashboardData:1, getFormData:1, getTvmFormData:1, getNextTicketIds:1, getUsersData:1, getBusManagementData:1, getTvmManagementData:1, getCollectivesAdminData:1, getValidatorSNList:1, getSamCardSNList:1, getAdminListData:1, logAppUpdate:1 };
+var AUTH_EXPIRED_SKIP_ACTIONS = { getReportData:1, getTvmReportData:1, getDashboardData:1, getFormData:1, getTvmFormData:1, getNextTicketIds:1, getUsersData:1, getBusManagementData:1, getTvmManagementData:1, getCollectivesAdminData:1, getValidatorSNList:1, getSamCardSNList:1, getAdminListData:1, logAppUpdate:1, getHomeDashData:1 };
 
 // window.fetch-i bükür: hər API sorğusuna token əlavə edir və sessiya
 // bitibsə (AUTH_EXPIRED) istifadəçini login-ə yönləndirir.
@@ -160,7 +160,8 @@ function togglePassword(){
 }
 
 function showLoading(){ var ov=document.getElementById('loadingOverlay'); if(ov){ ov.style.display='flex'; ov.classList.add('open'); } document.getElementById('loadingSpinner').style.display='block'; document.getElementById('successIcon').classList.remove('show'); document.getElementById('failIcon').classList.remove('show'); document.getElementById('loadingText').innerHTML='Yoxlanılır...'; }
-function showLoadingSuccess(cb){ document.getElementById('loadingSpinner').style.display='none'; document.getElementById('successIcon').classList.add('show'); document.getElementById('loadingText').innerHTML='Uğurlu!'; setTimeout(function(){ var ov2=document.getElementById('loadingOverlay'); if(ov2){ ov2.classList.remove('open'); ov2.style.display='none'; } cb(); }, 700); }
+function showLoadingSuccess(cb){ document.getElementById('loadingSpinner').style.display='none'; document.getElementById('successIcon').classList.add('show'); document.getElementById('loadingText').innerHTML='Uğurlu!'; // Yalnız uğur ikonasının görünməsi üçün qısa pauza — dashboard-u 700ms gecikdirən köhnə süni gözləmə silindi.
+  setTimeout(function(){ var ov2=document.getElementById('loadingOverlay'); if(ov2){ ov2.classList.remove('open'); ov2.style.display='none'; } cb(); }, 200); }
 function showLoadingFail(msg){
   document.getElementById('loadingSpinner').style.display='none';
   document.getElementById('failIcon').classList.add('show');
@@ -229,9 +230,12 @@ function showDashboard(){
   }
   applyAccessLevel();
   if(typeof updateCollectivesBtnVisibility==='function') updateCollectivesBtnVisibility();
-  if(typeof preloadValidatorSNList==='function') preloadValidatorSNList();
-  if(typeof preloadNotifications==='function') preloadNotifications();
+  // Əsas statistikalar dərhal çəkilir (indi tək backend çağırışı — getHomeDashData).
   if(typeof loadHomeDashStats==='function') loadHomeDashStats();
+  // Köməkçi yükləmələr ardıcıl gecikdirmə ilə gedir — əvvəl login anında eyni anda
+  // 5-6 GAS sorğusu atılırdı, backend növbəyə düşüb login + dashboard göstərilməsini ləngidirdi.
+  setTimeout(function(){ if(typeof preloadNotifications==='function') preloadNotifications(); }, 1500);
+  setTimeout(function(){ if(typeof preloadValidatorSNList==='function') preloadValidatorSNList(); }, 3000);
   if(!notifPollingStarted){
     notifPollingStarted = true;
     setInterval(function(){
@@ -322,7 +326,7 @@ function applyAccessLevel(){
   var aboutBtnN=document.getElementById('ctdAboutBtn'); if(aboutBtnN) aboutBtnN.style.display='';
   var aboutSepN=document.getElementById('ctdAboutSep'); if(aboutSepN) aboutSepN.style.display='';
   var collBtnN=document.getElementById('ctdCollectivesBtn'); if(collBtnN) collBtnN.style.display='';
-  var subWN=document.getElementById('ctdSubwelcome'); if(subWN) subWN.textContent='Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.';
+  var subWN=document.getElementById('ctdSubwelcome'); if(subWN) subWN.textContent='Servislərin ümumi vəziyyəti aşağıda göstərilir.';
   var guestCardsN=document.getElementById('guestDashboardCards'); if(guestCardsN) guestCardsN.style.display='none';
   // Call Center sessiyasından qalan gizlətmələri sıfırla (rol dəyişəndə)
   var ccTvmModN=document.getElementById('ctdTvmServiceModule'); if(ccTvmModN) ccTvmModN.style.display='';
@@ -434,7 +438,7 @@ function signOut(){
       }
       if(typeof ROUTER_READY !== 'undefined') ROUTER_READY = true;
     }, 250);
-  }, 2000);
+  }, 650);
 }
 
 function moduleAlert(n){ alert(n+' modulu tezliklə hazır olacaq'); }

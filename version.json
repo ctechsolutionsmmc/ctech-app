@@ -1,4 +1,4 @@
 {
-  "version": "4.2",
-  "message": "TVM gündəlik/həftəlik/aylıq hesabatlar + yenilənmə-log sistemi əlavə olundu."
+  "version": "4.3",
+  "message": "Performans yeniləməsi: səhifə/login açılışı sürətləndi (defer script-lər, süni gecikmələr silindi, backend keşləmə). Dashboard: tarix/saat loqo altına keçirildi, 'Heyət haqqında' ikon-butona çevrildi, arxa fon tündləşdirildi."
 }

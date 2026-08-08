@@ -3580,23 +3580,18 @@ function loadHomeDashStats(){
     badge.style.display = 'flex';
     setTimeout(function(){ badge.style.display = 'none'; }, 2500);
   }
-  // Konfiqurasiya + BUS data + TVM data — paralel çəkilir.
+  // Performans (struktur): əvvəl dashboard 3 AYRI GAS sorğusu atırdı (getDashboardConfig +
+  // getReportData + getTvmReportData) — hər biri ayrıca backend işləmə/latency deməkdir.
+  // İndi hər şey TƏK getHomeDashData aksiyası ilə gəlir (backend keşlənmiş oxuyur).
   // Konfiqurasiya gəlməsə/boş olsa belə DEFAULT_HOME_DASH_CONFIG işlədilir —
   // kartlar həmişə data göstərir (əvvəl boş konfiqda "—" qalırdı).
-  var cfgP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getDashboardConfig', requesterEmail: currentUser?currentUser.email:''})})
-    .then(function(r){ return r.json(); })
-    .catch(function(){ return {status:'ERR'}; });
-  var busP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getReportData', daysBack:1})})
-    .then(function(r){ return r.json(); })
-    .catch(function(){ return {status:'ERR'}; });
-  var tvmP = fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getTvmReportData', daysBack:1})})
-    .then(function(r){ return r.json(); })
-    .catch(function(){ return {status:'ERR'}; });
-  Promise.all([cfgP, busP, tvmP]).then(function(res){
-    var d=res[0], bd=res[1], td=res[2];
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getHomeDashData', requesterEmail: currentUser?currentUser.email:''})})
+  .then(function(r){ return r.json(); })
+  .catch(function(){ return {status:'ERR'}; })
+  .then(function(d){
     var config=(d && d.status==='OK' && d.config && d.config.length) ? d.config : DEFAULT_HOME_DASH_CONFIG;
-    var busRows=(bd && bd.status==='OK') ? (bd.rows||[]) : [];
-    var tvmRows=(td && td.status==='OK') ? (td.rows||[]) : [];
+    var busRows=(d && d.status==='OK') ? (d.busRows||[]) : [];
+    var tvmRows=(d && d.status==='OK') ? (d.tvmRows||[]) : [];
     var todayStr=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baku',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date()).split('/').join('.');
     var cards=document.querySelectorAll('.ctd-stat-card');
     for(var i=0;i<4;i++){

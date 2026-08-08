@@ -182,10 +182,20 @@ function startBusService(){
 }
 
 function preloadBusData(callback){
-  setTimeout(callback,900);
+  // Struktur düzəliş: sabit 900ms gözləmə YOX — form məlumat GƏLƏN KİMƏ açılır.
+  // Təhlükəsizlik üçün GAS 6 saniyədən çox ləngiyərsə form yenə də açılır (dropdown-lar
+  // data gəldikcə dolur) — istifadəçi sonsuz yüklənmə ekranında qalmaz.
+  var opened = false;
+  function openNow(){
+    if(opened) return;
+    opened = true;
+    callback();
+  }
+  var safety = setTimeout(openNow, 6000);
   fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getFormData'})})
   .then(function(r){return r.json();})
   .then(function(d){
+    clearTimeout(safety);
     if(d.status==='OK'){
       bsFormData=d;
       var tid=d.nextTicketId||'BUS-00001'; bsNextTicketId=tid;
@@ -196,7 +206,8 @@ function preloadBusData(callback){
       // Yeni siyahılar gələndə dropdown-ları yenilə — admin paneldəki dəyişiklik dərhal görünsün.
       if(typeof renderAllDDs==='function') renderAllDDs();
     }
-  }).catch(function(){});
+    openNow();
+  }).catch(function(){ clearTimeout(safety); openNow(); });
 }
 
 function resetBusFormFields(){

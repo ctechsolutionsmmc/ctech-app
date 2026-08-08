@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>CTECH Service Platform</title>
 
-
 <!-- ===== SESSION FLASH ÖNLƏYİCİSİ ===== -->
 <!-- CSS yüklənməzdən əvvəl işləyir, aktiv sessiya varsa loginView-un görünməsinin qarşısını alır -->
 <script>
@@ -32,16 +31,16 @@
 <meta name="apple-mobile-web-app-title" content="CTECH Service">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.png">
-<link rel="stylesheet" href="css/base.css?v=4.2">
-<link rel="stylesheet" href="css/login.css?v=4.2">
-<link rel="stylesheet" href="css/dashboard.css?v=4.2">
-<link rel="stylesheet" href="css/ctd.css?v=4.2">
-<link rel="stylesheet" href="css/bus-service.css?v=4.2">
-<link rel="stylesheet" href="css/reports.css?v=4.2">
-<link rel="stylesheet" href="css/admin.css?v=4.2">
-<link rel="stylesheet" href="css/collectives.css?v=4.2">
-<link rel="stylesheet" href="css/notif.css?v=4.2">
-<link rel="stylesheet" href="css/update.css?v=4.2">
+<link rel="stylesheet" href="css/base.css?v=4.3">
+<link rel="stylesheet" href="css/login.css?v=4.3">
+<link rel="stylesheet" href="css/dashboard.css?v=4.3">
+<link rel="stylesheet" href="css/ctd.css?v=4.3">
+<link rel="stylesheet" href="css/bus-service.css?v=4.3">
+<link rel="stylesheet" href="css/reports.css?v=4.3">
+<link rel="stylesheet" href="css/admin.css?v=4.3">
+<link rel="stylesheet" href="css/collectives.css?v=4.3">
+<link rel="stylesheet" href="css/notif.css?v=4.3">
+<link rel="stylesheet" href="css/update.css?v=4.3">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>
   (function(){
@@ -179,14 +178,15 @@
     <div class="ctd-hero-fade"></div>
 
     <div class="ctd-topbar">
-      <div class="ctd-brand">CTECH <span class="accent">SOLUTIONS</span></div>
+      <div class="ctd-topbar-left">
+        <div class="ctd-brand">CTECH <span class="accent">SOLUTIONS</span></div>
+        <div class="ctd-clock-pill"><span class="dot"></span><span id="ctdClockText">--.--.---- · --:--</span></div>
+      </div>
       <div class="ctd-platform-title">Technical Service Platform</div>
       <div class="ctd-topbar-right">
-        <a class="ctd-nav-btn" id="ctdCollectivesBtn" href="#collectives" onclick="openCollectives();return false;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Heyət haqqında
+        <a class="ctd-nav-btn ctd-nav-icon-only" id="ctdCollectivesBtn" href="#collectives" onclick="openCollectives();return false;" title="Heyət haqqında" aria-label="Heyət haqqında">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </a>
-        <div class="ctd-clock-pill"><span class="dot"></span><span id="ctdClockText">--.--.---- · --:--</span></div>
         <div class="ctd-user-chip" id="ctdUserChip" onclick="toggleUserMenu()" role="button">
           <div class="ctd-avatar" id="ctdAvatarInitials">--</div>
           <div class="ctd-who">
@@ -234,7 +234,7 @@
     </div>
     <div class="ctd-hero-inner">
       <div class="ctd-welcome">Xoş gəlmisiniz, <span id="ctdWelcomeName">-</span></div>
-      <div class="ctd-subwelcome" id="ctdSubwelcome">Bus və TVM servislərinin ümumi vəziyyəti aşağıda göstərilir.</div>
+      <div class="ctd-subwelcome" id="ctdSubwelcome">Servislərin ümumi vəziyyəti aşağıda göstərilir.</div>
       <div id="dashStatsRefreshBadge" style="display:none;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:#9CB2CE;margin-top:6px;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:dashStatsSpin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-2.64-6.36"/></svg>
         Yenilənir...
@@ -2896,15 +2896,17 @@
   </div>
 </div>
 
-<script src="js/app-update.js?v=4.2"></script>
-<script src="js/core.js"></script>
-<script src="js/bus-request.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/bus-service.js"></script>
-<script src="js/reports.js"></script>
-<script src="js/tvm-request.js"></script>
-<script src="js/tvm-service.js"></script>
-<script src="js/router.js"></script>
+<!-- Bütün JS-lər defer ilə yüklənir: paralel endirilir, HTML parse-i BLOCK etmir.
+     İcra sırası fayl sırası ilə qorunur (app-update → core → ... → router). -->
+<script defer src="js/app-update.js?v=4.3"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/bus-request.js"></script>
+<script defer src="js/admin.js"></script>
+<script defer src="js/bus-service.js"></script>
+<script defer src="js/reports.js"></script>
+<script defer src="js/tvm-request.js"></script>
+<script defer src="js/tvm-service.js"></script>
+<script defer src="js/router.js"></script>
 <div id="tvmServiceView" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#EEF4FC;z-index:41;overflow-y:auto;-webkit-overflow-scrolling:touch;">
 
   <div class="bs-header">

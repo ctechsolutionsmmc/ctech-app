@@ -2,7 +2,7 @@
    CTECH SERVICE PLATFORM — CTD.CSS
    Desktop əsas menyu dizaynı (ctd-*) — yalnız masaüstü (≥901px)
    Hero banner, topbar, profil çipi, modul kartları, widget-lər
-   Light dizayn: açıq göy-boz fon (#EBF1FA), ağ kartlar, mavi aksentlər
+   Light dizayn: göy-boz fon (#D9E3F0), ağ kartlar, mavi aksentlər
    Qeyd: Yalnız vizual dəyişikliklər — HTML/JS dəyişmir, bütün
    .ctd-* ID/klasslar qorunur. Guest hero (.ctd-hero.guest-hero)
    toxunulmur — o, köhnə tünd görünüşündə qalır.
@@ -75,9 +75,11 @@
   .ctd-hero.guest-hero .ctd-hero-fade{ display:none; }
 
   /* ── Topbar ── */
-  .ctd-topbar{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:22px 40px; flex-wrap:wrap; gap:10px; }
-  .ctd-topbar-left{ display:flex; align-items:center; gap:16px; }
-  .ctd-brand{ display:flex; align-items:center; gap:10px; font-family:'Space Grotesk','Inter',sans-serif; font-weight:600; font-size:18px; color:#fff; }
+  .ctd-topbar{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:20px 40px; flex-wrap:wrap; gap:10px 18px; }
+  /* Sol sütun: loqo + onun altında tarix/saat — çərçivə içində, estetik məsafə ilə */
+  .ctd-topbar-left{ display:flex; flex-direction:column; align-items:flex-start; gap:9px; min-width:0; }
+  .ctd-topbar-left .ctd-clock-pill{ padding:6px 14px; font-size:12px; letter-spacing:.2px; }
+  .ctd-brand{ display:flex; align-items:center; gap:10px; font-family:'Space Grotesk','Inter',sans-serif; font-weight:600; font-size:18px; color:#fff; white-space:nowrap; }
   .ctd-brand .accent{ color:#9FC2FF; font-weight:500; }
   .ctd-topbar-right{ display:flex; align-items:center; gap:10px; }
   .ctd-nav-btn{
@@ -107,6 +109,20 @@
     height:16px;
     stroke:#2F6FED;
     flex-shrink:0;
+}
+
+/* İkon-only nav düyməsi (Heyət haqqında) — mətn yoxdur, simvol loqo */
+.ctd-nav-btn.ctd-nav-icon-only{
+    width:40px;
+    height:40px;
+    min-width:0;
+    padding:0;
+    border-radius:50%;
+    gap:0;
+}
+.ctd-nav-btn.ctd-nav-icon-only svg{
+    width:17px;
+    height:17px;
 }
   .ctd-nav-btn:hover{ background:rgba(255,255,255,0.32); }
   .ctd-nav-btn.ctd-signout{ background:rgba(220,80,80,0.28); border-color:rgba(255,150,150,0.45); }
@@ -200,7 +216,7 @@
   .ctd-stat-card:nth-child(4)::after{ background:#94A3B8; }
 
   /* ── Bus əməliyyatları bölməsi ── */
-  .ctd-content-top-wrap{ position:relative; z-index:3; background:#EBF1FA; padding-top:56px; margin-top:-160px; padding-bottom:50px; }
+  .ctd-content-top-wrap{ position:relative; z-index:3; background:#D9E3F0; padding-top:56px; margin-top:-160px; padding-bottom:50px; }
   .ctd-content-top{ padding:0 40px; }
   .ctd-content-grid{ display:grid; grid-template-columns:1.6fr 1fr; gap:18px; align-items:stretch; }
   .ctd-widget-stack{ display:flex; flex-direction:column; gap:18px; }
@@ -255,9 +271,9 @@
   /* ── 2-ci banner bölməsi (TVM) ── */
   .ctd-banner2-section{ position:relative; margin-top:0; padding:56px 40px 210px; overflow:hidden; }
   .ctd-banner2-bg{ position:absolute; inset:0; background-image:url('../dash-tvm-banner.webp'); background-size:cover; background-position:center 55%; background-repeat:no-repeat; }
-  .ctd-banner2-top-fade{ position:absolute; left:0; right:0; top:0; height:150px; background:linear-gradient(to bottom, #EBF1FA 0%, rgba(235,241,250,0) 100%); }
+  .ctd-banner2-top-fade{ position:absolute; left:0; right:0; top:0; height:150px; background:linear-gradient(to bottom, #D9E3F0 0%, rgba(217,227,240,0) 100%); }
   .ctd-banner2-scrim{ position:absolute; inset:0; background:linear-gradient(200deg, rgba(15,42,71,0.20) 0%, rgba(15,42,71,0.08) 35%, rgba(15,42,71,0.14) 100%); }
-  .ctd-banner2-fade-bottom{ position:absolute; left:0; right:0; bottom:0; height:190px; background:linear-gradient(to bottom, rgba(235,241,250,0) 0%, #EBF1FA 92%); }
+  .ctd-banner2-fade-bottom{ position:absolute; left:0; right:0; bottom:0; height:190px; background:linear-gradient(to bottom, rgba(217,227,240,0) 0%, #D9E3F0 92%); }
   .ctd-banner2-inner{ position:relative; z-index:2; display:flex; }
   .ctd-banner2-panel{ margin-left:auto; max-width:400px; width:100%; }
 
@@ -276,18 +292,18 @@
   .ctd-widget-desc{ font-size:11px; color:#5C7089; line-height:1.4; }
   .ctd-icon-btn { display:none !important; }
   #themeToggleBtn { display:none !important; }
-  .ctd-footer{ text-align:center; font-size:12px; color:#5C7089; padding:24px 0 40px; position:relative; z-index:3; background:#EBF1FA; }
+  .ctd-footer{ text-align:center; font-size:12px; color:#5C7089; padding:24px 0 40px; position:relative; z-index:3; background:#D9E3F0; }
 
   /* ═══════════════════════════════════════════════════════════════
      LIGHT THEME OVERRIDES — yalnız daxil olmuş (non-guest) istifadəçi
      Guest hero (.ctd-hero.guest-hero) tünd görünüşündə qalır.
      Yalnız vizual xüsusiyyətlər: rəng, fon, haşiyə, kölgə, mətn rəngi.
      ═══════════════════════════════════════════════════════════════ */
-  .ctd-hero:not(.guest-hero){ background:#EBF1FA; }
+  .ctd-hero:not(.guest-hero){ background:#D9E3F0; }
   .ctd-hero:not(.guest-hero) .ctd-hero-bg{ display:none; }
   .ctd-hero:not(.guest-hero) .ctd-hero-blur{ display:none; }
   .ctd-hero:not(.guest-hero) .ctd-hero-scrim{ background:transparent; }
-  .ctd-hero:not(.guest-hero) .ctd-hero-fade{ background:#EBF1FA; }
+  .ctd-hero:not(.guest-hero) .ctd-hero-fade{ background:#D9E3F0; }
 
   .ctd-hero:not(.guest-hero) .ctd-topbar{
     background:rgba(255,255,255,0.95);
@@ -327,5 +343,11 @@
     .ctd-banner2-panel{ max-width:100%; }
     .ctd-module-actions{ grid-template-columns:repeat(2,1fr); }
     .ctd-stat-row{ grid-template-columns:repeat(2,1fr); }
+  }
+
+  /* Dar ekranlarda başlıq gizlədilir ki, topbar (loqo+saat | profil) bir sətirdə,
+     çərçivə içində simmetrik qalsın */
+  @media (max-width:1150px){
+    .ctd-platform-title{ display:none; }
   }
 }

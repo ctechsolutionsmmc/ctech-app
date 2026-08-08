@@ -46,7 +46,8 @@ function openAdminPanel(){
   closeMenu();
   if(window.innerWidth < 901){ return; }
 
-  // Giriş vidjeti — digər ağır bölmələrlə eyni 700ms pattern
+  // Giriş vidjeti qısa müddət göstərilir — əvvəlki 700ms süni gözləmə 180ms-ə endirildi
+  // (panel məlumatları yüklənəndə yenə də öz yükləmə vəziyyətini göstərir).
   var loading = document.getElementById('dashLoading');
   if(loading) loading.style.display='flex';
 
@@ -65,7 +66,7 @@ function openAdminPanel(){
     loadBusManagementData();
 
     if(loading) loading.style.display='none';
-  }, 700);
+  }, 180);
 }
 
 function closeAdminPanel(){
@@ -1455,15 +1456,15 @@ function openCollectives() {
       closeCollectives();
       return;
     }
-    setTimeout(function() {
-  loader.style.display = 'none';
-  content.style.display = 'block';
-  var grid = document.getElementById('collectivesGrid');
-  var director = document.getElementById('collectivesDirector');
-  if(grid) grid.innerHTML = '';
-  if(director) director.innerHTML = '';
-  renderCollectives(d.employees, d.groupOrder, d.groupIcons);
-}, 2000);
+    // Süni 2 saniyəlik gözləmə SİLİNDİ — məlumat backend-dən gələn kimi dərhal göstərilir.
+    // (Əvvəl data hazır olsa belə 2s fırlanan yükləmə işarəsi göstərilirdi.)
+    loader.style.display = 'none';
+    content.style.display = 'block';
+    var grid = document.getElementById('collectivesGrid');
+    var director = document.getElementById('collectivesDirector');
+    if(grid) grid.innerHTML = '';
+    if(director) director.innerHTML = '';
+    renderCollectives(d.employees, d.groupOrder, d.groupIcons);
   })
   .catch(function(e) {
     alert('Şəbəkə xətası: ' + e.message);
