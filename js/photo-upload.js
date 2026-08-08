@@ -391,7 +391,16 @@ function openPhotoLightbox(url){
     lb.innerHTML = '<button type="button" class="photo-lightbox-close" onclick="closePhotoLightbox()" aria-label="Bağla">&times;</button><img class="photo-lightbox-img" alt="">';
     document.body.appendChild(lb);
   }
-  lb.querySelector('img').src = url;
+  var img = lb.querySelector('img');
+  // v4.17: Drive thumbnail servisi bəzən böyük ölçüdə (w1920) gec/gəlməz ola bilər —
+  // fallback: kiçik thumbnail-ə düş. Həmçinin boş/qırıq şəkil ağ fonda qalmasın.
+  img.onerror = function(){
+    var s = String(url || '');
+    var fb = s.replace(/sz=w\d+/, 'sz=w800');
+    if(fb !== s){ this.onerror = null; this.src = fb; }
+    else { this.onerror = null; this.alt = 'Şəkil göstərilə bilmədi'; }
+  };
+  img.src = url;
   lb.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
